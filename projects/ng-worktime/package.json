@@ -1,11 +1,26 @@
 {
   "name": "ng-worktime",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/webresto/worktime.git"
+  },
   "version": "0.0.1",
   "peerDependencies": {
-    "@angular/common": "^11.0.5",
-    "@angular/core": "^11.0.5"
+    "@angular/common": "^11.0.5"
   },
   "dependencies": {
-    "tslib": "^2.0.0"
-  }
+    "tslib": "^2.0.3"
+  },
+  "bugs": {
+    "url": "https://github.com/webresto/ng-cart/issues"
+  },
+  "homepage": "https://github.com/webresto/ng-cart#readme",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "license": "ISC",
+  "description": ""
 }

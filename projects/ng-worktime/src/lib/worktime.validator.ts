@@ -1,20 +1,40 @@
 import { formatDate } from '@angular/common';
 
+/**
+ * Базовые данные о времени работы.
+ */
 export declare interface WorkTimeBase {
+  /** время начала рабочего дня*/
   start: string;
+  /** время окончания рабочего дня*/
   stop: string;
+  /** перерыв на обед*/
   break: string;
 }
+
+/**
+ * Информация о времени работы предприятия
+ */
 export declare interface WorkTime extends WorkTimeBase {
+  /** день недели, к которому применяется это время доставки   */
   dayOfWeek: string;
+  /** ограничения по времени работы для самовывоза */
   selfService: WorkTimeBase;
 }
 
+/**
+ * Обьъект, получаемый от API и содержащий текущие данные о рабочем времени предприятия
+ */
 declare interface IRestrictionsOrder {
+  /** минимальное время доставки*/
   minDeliveryTime: string | undefined;
+  /**установлено ли на текущий момент ограничение доставки на определенное время */
   deliveryToTimeEnabled: boolean;
+  /** ограничение максимальной даты заказа в будущем (в минутах)*/
   periodPossibleForOrder: number;
+  /** временная зона предприятия */
   timezone: string | undefined;
+  /**  массив ограничений по времени работы предприятия для разных дней недели. */
   workTime: WorkTime[] | undefined;
 }
 
@@ -25,6 +45,16 @@ export class RestrictionsOrder implements IRestrictionsOrder {
   periodPossibleForOrder: number = 0;
   timezone = undefined;
   workTime = undefined;
+}
+
+/**
+ * Формат входных параметров для методов валидатора
+ * */
+declare interface ValidatorInputData {
+  /** Объект с данными о текущем рабочем времени   */
+  restriction: RestrictionsOrder;
+  /** Дата/время посетителя в формате ISO  */
+  clientDateTime: string;
 }
 
 export class WorkTimeValidator {
@@ -43,6 +73,18 @@ export class WorkTimeValidator {
     } else {
       return (+time.split(':')[0]) * 60 + (+time.split(':')[1]);
     };
+  }
+
+  static isWorkNow(data: ValidatorInputData): boolean {
+    return false;
+  }
+
+  static getPossibleDelieveryOrderDateTime(data: ValidatorInputData): string {
+    return ''
+  }
+
+  static getPossibleSelfServiceOrderDateTime(data: ValidatorInputData): string {
+    return ''
   }
 
   /*this.restriction = restictions; // сохраняем объект с ограничениями

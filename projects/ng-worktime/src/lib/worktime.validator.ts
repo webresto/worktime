@@ -25,7 +25,7 @@ export declare interface WorkTime extends WorkTimeBase {
 /**
  * Обьъект, получаемый от API и содержащий текущие данные о рабочем времени предприятия
  */
-declare interface IRestrictionsOrder {
+declare interface RestrictionsOrder {
   /** минимальное время доставки*/
   minDeliveryTime: string | undefined;
   /**установлено ли на текущий момент ограничение доставки на определенное время */
@@ -35,32 +35,17 @@ declare interface IRestrictionsOrder {
   /** временная зона предприятия */
   timezone: string | undefined;
   /**  массив ограничений по времени работы предприятия для разных дней недели. */
-  workTime: WorkTime[] | undefined;
+  workTime: WorkTime[];
 }
 
-export class RestrictionsOrder implements IRestrictionsOrder {
-  constructor() { };
-  minDeliveryTime = undefined;
-  deliveryToTimeEnabled = false;
-  periodPossibleForOrder: number = 0;
-  timezone = undefined;
-  workTime = undefined;
-}
-
-/**
- * Формат входных параметров для методов валидатора
- * */
-declare interface ValidatorInputData {
-  /** Объект с данными о текущем рабочем времени   */
-  restriction: RestrictionsOrder;
-  /** Дата/время посетителя в формате ISO  */
-  clientDateTime: string;
+function isValidRestrictionOrder(restriction: any): boolean {
+  return 'minDeliveryTime' in restriction && 'periodPossibleForOrder' in restriction && 'timezone' in restriction && 'workTime' in restriction
 }
 
 export class WorkTimeValidator {
 
   static getMaxOrderDate(restictions: RestrictionsOrder): string {
-    if (restictions && restictions instanceof RestrictionsOrder) {
+    if (restictions && isValidRestrictionOrder(restictions)) {
       return formatDate(Date.now() + restictions.periodPossibleForOrder * 60000, 'yyyy-MM-dd', 'en');
     } else {
       throw new Error(!restictions ? 'Not enough data.' : 'Data not valid');
@@ -75,42 +60,26 @@ export class WorkTimeValidator {
     };
   }
 
-  static isWorkNow(data: ValidatorInputData): boolean {
-    return false;
+  static isWorkNow(restriction: RestrictionsOrder, currentdate: Date): boolean {
+    const lokalTimeDelta = 300 + currentdate.getTimezoneOffset(); //смещение времени пользователя относительно GMT +5
+    const unSafecurrentTime = this.getTimeFromString(formatDate(currentdate, "HH:mm", "en"));
+    const currentTime = unSafecurrentTime + lokalTimeDelta > 1440 ? unSafecurrentTime + lokalTimeDelta - 1440 : unSafecurrentTime + lokalTimeDelta; //текущее время в минутах с начала дня (600 = 10:00. 1200 = 20:00)
+    // если из-за разницы поясов расчет перепрыгнул на новый день, то приводим время к правильному значению в диапазоне 24 часов
+    const currentDayWorkTime = restriction.workTime[0]; // текущее рабочее время
+    const curentDayStartTime = this.getTimeFromString(currentDayWorkTime.start); //текущее время начала рабочего дня в минутах
+    const curentDayStopTime = this.getTimeFromString(currentDayWorkTime.stop); //текущее время окончания рабочего дня в минутах
+    return currentTime < curentDayStopTime && currentTime > curentDayStartTime;
   }
 
-  static getPossibleDelieveryOrderDateTime(data: ValidatorInputData): string {
+  static getPossibleDelieveryOrderDateTime(restriction: RestrictionsOrder, currentdate: Date): string {
     return ''
   }
 
-  static getPossibleSelfServiceOrderDateTime(data: ValidatorInputData): string {
+  static getPossibleSelfServiceOrderDateTime(restriction: RestrictionsOrder, currentdate: Date): string {
     return ''
   }
 
-  /*this.restriction = restictions; // сохраняем объект с ограничениями
-       else {
-        const currentdate = new Date(); //текущая дата
-        const lokalTimeDelta = 300 + currentdate.getTimezoneOffset(); //смещение времени пользователя относительно GMT +5
-        const currentTime = this.getTimeFromString(this.ui.formatDate(currentdate, "HH:mm", "en"))+lokalTimeDelta > 1440 ?
-          this.getTimeFromString(this.ui.formatDate(currentdate, "HH:mm", "en"))+lokalTimeDelta-1440:
-          this.getTimeFromString(this.ui.formatDate(currentdate, "HH:mm", "en"))+lokalTimeDelta;
-        ; //текущее время в минутах с начала дня (600 = 10:00. 1200 = 20:00)
-        // если из-за разницы поясов расчет перепрыгнул на новый день, то приводим время к правильному значению в диапазоне 24 часов
-        const currentDayWorkTime = this.restriction.workTime[0]; // текущее рабочее время
-        const curentDayStartTime = this.getTimeFromString(currentDayWorkTime.start); //текущее время начала рабочего дня в минутах
-        const curentDayStopTime = this.getTimeFromString(currentDayWorkTime.stop); //текущее время окончания рабочего дня в минутах
-        console.log(
-          '\n//текущая дата', currentdate,
-          '\n//смещение времени пользователя относительно GMT +5', lokalTimeDelta,
-          '\n//текущее время в минутах с начала дня (600 = 10:00. 1200 = 20:00)', currentTime,
-          '\n// текущее рабочее время', currentDayWorkTime,
-          ' \n//текущее время начала рабочего дня в минутах', curentDayStartTime,
-          ' \n//текущее время окончания рабочего дня в минутах', curentDayStopTime,
-          '\ncurrentTime < curentDayStartTime', currentTime < curentDayStartTime,
-          '\ncurrentTime > curentDayStopTime', currentTime > curentDayStopTime,
-          '\n!restictions?.deliveryToTimeEnabled', !restictions?.deliveryToTimeEnabled
-        )
-
+  /*
         if (currentTime < curentDayStartTime) {
 
           (<FormGroup>this.orderForm.controls.deliveryTimeInfo).controls.deliveryType.setValue('date-time');

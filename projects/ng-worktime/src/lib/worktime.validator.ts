@@ -1,13 +1,16 @@
 import { formatDate } from '@angular/common';
 import { TimeZoneIdentifier } from './tz'
+
 /**
  * Базовые данные о времени работы.
  */
 export declare interface WorkTimeBase {
   /** время начала рабочего дня*/
   start: string;
+
   /** время окончания рабочего дня*/
   stop: string;
+
   /** перерыв на обед*/
   break: string;
 }
@@ -18,6 +21,7 @@ export declare interface WorkTimeBase {
 export declare interface WorkTime extends WorkTimeBase {
   /** день недели, к которому применяется это время доставки   */
   dayOfWeek: string;
+
   /** ограничения по времени работы для самовывоза */
   selfService: WorkTimeBase;
 }
@@ -25,99 +29,154 @@ export declare interface WorkTime extends WorkTimeBase {
 /**
  * Обьъект, получаемый от API и содержащий текущие данные о рабочем времени предприятия
  */
-declare interface RestrictionsOrder {
+export declare interface RestrictionsOrder {
   /** минимальное время доставки*/
-  minDeliveryTime: string | undefined;
+  minDeliveryTime: string;
+
   /**установлено ли на текущий момент ограничение доставки на определенное время */
   deliveryToTimeEnabled: boolean;
+
   /** ограничение максимальной даты заказа в будущем (в минутах)*/
   periodPossibleForOrder: number;
+
   /** временная зона предприятия */
-  timezone: string | undefined;
+  timezone: string;
+
   /**  массив ограничений по времени работы предприятия для разных дней недели. */
-  workTime: WorkTime[];
+  workTime: WorkTimeBase[]
 }
 
-function isValidRestrictionOrder(restriction: any): boolean {
+/**
+ * Функция валидации переланного объекта restriction на соответствие интерфейсу RestrictionsOrder
+ * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
+ */
+function isValidRestrictionOrder(restriction: any): restriction is RestrictionsOrder {
   return 'minDeliveryTime' in restriction && 'periodPossibleForOrder' in restriction && 'timezone' in restriction && 'workTime' in restriction
 }
 
+/**
+ * Функция проверяет корректность переданного объекта Date.
+ * @param value
+ */
+function isDate(value: any): value is Date {
+  return value instanceof Date && !isNaN(value.valueOf());
+}
+
+/**
+ * Класс, содержащий статические методы, необходимые для работы с ограничениями рабочего времени предприятия.
+ */
 export class WorkTimeValidator {
 
-  static getMaxOrderDate(restictions: RestrictionsOrder): string {
-    if (restictions && isValidRestrictionOrder(restictions)) {
-      return formatDate(Date.now() + restictions.periodPossibleForOrder * 60000, 'yyyy-MM-dd', 'en');
+  /**
+   * Метод возвращает максимальную возможную дату, на которую можно заказать доставку.
+   * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
+   * @return :string - Строка, представляющая максимальную доступную дату доставки в формате yyyy-MM-dd.
+   */
+  static getMaxOrderDate(restriction: RestrictionsOrder): string {
+    if (restriction && isValidRestrictionOrder(restriction)) {
+      return formatDate(Date.now() + restriction.periodPossibleForOrder * 60000, 'yyyy-MM-dd', 'en');
     } else {
-      throw new Error(!restictions ? 'Not enough data.' : 'Data not valid');
+      throw new Error(!restriction ? 'Не передан объект restrictions' : 'Передан невалидный обьект restrictions');
     };
   }
 
+  /**
+   * Метод считает, сколько минут от начала дня (00:00) прошло для переданного времени.
+   * @param time - строка в формате HH:mm - время.
+   * @return :number - кол-во минут.
+   */
   static getTimeFromString(time: string): number {
     if (!time) {
-      throw new Error('Not enough data.');
+      throw new Error('Не передана строка с преобразуемым временем в формате HH:mm');
     } else {
-      return (+time.split(':')[0]) * 60 + (+time.split(':')[1]);
+      let checkedTime = time.trim();
+      if (checkedTime.includes(' ') || checkedTime.includes('T')) {
+        checkedTime = checkedTime.split(checkedTime.includes(' ') ? ' ' : 'T')[1];
+      };
+      return (+checkedTime.split(':')[0]) * 60 + (+checkedTime.split(':')[1]);
     };
   }
 
-  static isWorkNow(restriction: RestrictionsOrder, currentdate: Date): boolean {
-    const lokalTimeDelta = 300 + currentdate.getTimezoneOffset(); //смещение времени пользователя относительно GMT +5
-    const unSafecurrentTime = this.getTimeFromString(formatDate(currentdate, "HH:mm", "en"));
-    const currentTime = unSafecurrentTime + lokalTimeDelta > 1440 ? unSafecurrentTime + lokalTimeDelta - 1440 : unSafecurrentTime + lokalTimeDelta; //текущее время в минутах с начала дня (600 = 10:00. 1200 = 20:00)
-    // если из-за разницы поясов расчет перепрыгнул на новый день, то приводим время к правильному значению в диапазоне 24 часов
-    const currentDayWorkTime = restriction.workTime[0]; // текущее рабочее время
-    const curentDayStartTime = this.getTimeFromString(currentDayWorkTime.start); //текущее время начала рабочего дня в минутах
-    const curentDayStopTime = this.getTimeFromString(currentDayWorkTime.stop); //текущее время окончания рабочего дня в минутах
-    return currentTime < curentDayStopTime && currentTime > curentDayStartTime;
-  }
-
-  static getPossibleDelieveryOrderDateTime(restriction: RestrictionsOrder, currentdate: Date): string {
-    return ''
-  }
-
-  static getPossibleSelfServiceOrderDateTime(restriction: RestrictionsOrder, currentdate: Date): string {
-    return ''
-  }
-
-  /*
-        if (currentTime < curentDayStartTime) {
-
-          (<FormGroup>this.orderForm.controls.deliveryTimeInfo).controls.deliveryType.setValue('date-time');
-          // блокируем "как можно скорее"
-          this.disableButtonVariableDelivery$.next({ fast: true, toTime: false });
-          //если при расчете времени была корректировка значения засчет "прыжка" на следующий день, обновляем значения контрола и для валидаторов актуальной датой
-          if (this.getTimeFromString(this.ui.formatDate(currentdate, "HH:mm", "en"))+lokalTimeDelta > 1440) {
-            (<FormGroup>this.orderForm.controls.deliveryTimeInfo).controls.deliveryDate.setValue(
-              this.ui.formatDate(Date.now() + 86400001, 'yyyy-MM-dd', 'en')
-            );
-            this.dateMin = this.ui.formatDate(Date.now(), 'yyyy-MM-dd', 'en');
-            this.dateMax = this.ui.formatDate(Date.now()+86400001 + restictions.periodPossibleForOrder * 60000, 'yyyy-MM-dd', 'en')
-          };
-          const time = this.getTimeFromString(currentDayWorkTime.start) + (+restictions.minDeliveryTime) + 1;
-          const hour = Math.floor(time / 60);
-          const minutes = time - (hour * 60);
-          const newTime = `${hour <= 9 ? '0' + hour : hour}:${minutes <= 9 ? '0' + minutes : minutes}`;
-          (<FormGroup>this.orderForm.controls.deliveryTimeInfo).controls.deliveryTime.setValue(newTime);
-        } else {
-          if (currentTime > curentDayStopTime) {
-            (<FormGroup>this.orderForm.controls.deliveryTimeInfo).controls.deliveryType.setValue('date-time');
-            // блокируем "как можно скорее"
-            this.disableButtonVariableDelivery$.next({ fast: true, toTime: false });
-            (<FormGroup>this.orderForm.controls.deliveryTimeInfo).controls.deliveryDate.setValue(
-              this.ui.formatDate(Date.now() + 86400001, 'yyyy-MM-dd', 'en')
-            );
-            const time = this.getTimeFromString(currentDayWorkTime.start) + (+restictions.minDeliveryTime) + 1;
-            const hour = Math.floor(time / 60);
-            const minutes = time - (hour * 60);
-            const newTime = `${hour <= 9 ? '0' + hour : hour}:${minutes <= 9 ? '0' + minutes : minutes}`;
-            (<FormGroup>this.orderForm.controls.deliveryTimeInfo).controls.deliveryTime.setValue(newTime);
-          } else {
-            if (!restictions?.deliveryToTimeEnabled) {
-              (<FormGroup>this.orderForm.controls.deliveryTimeInfo).controls.deliveryType.setValue('fast');
-              this.disableButtonVariableDelivery$.next({ fast: false, toTime: true }); // блок доставки ко времени
-            };
-          }
-        };
+  /**
+   * Метод проверяет, доступна ли возможность доставки на ближайшее время.
+   * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
+   * @param currentdate - объект Date, представляющий локальные дату и время пользователя, для которых и проверяется возможность доставки
+   * @return Обьект, содержащий информацию:
+   * {
+        isWorkNow:boolean - Возможна ли доставка в ближайшее время
+        isNewDay:boolean - Служебный параметр для внутреннего использования.
+          Представляет признак, что из-за разницы часовых поясов расчет даты "перепрыгнул" на новый день.
+        currentTime:number - Служебный параметр для внутреннего использования.
+          Представляет проверяемое методом время в минутах от 00:00 в часовом поясе предприятия.
+        curentDayStartTime:number - Служебный параметр для внутреннего использования.
+          Представляет время начала рабочего дня в минутах от 00:00 в часовом поясе предприятия.
+        curentDayStopTime:number - Служебный параметр для внутреннего использования.
+          Представляет время окончания рабочего дня в минутах от 00:00 в часовом поясе предприятия.
+      }
+   */
+  static isWorkNow(restriction: RestrictionsOrder, currentdate: Date) {
+    if (!restriction || !isValidRestrictionOrder(restriction) || !isDate(currentdate)) {
+      throw new Error(
+        !isDate(currentdate) ? 'Не передан корректный объект даты' :
+          !restriction ? 'Не передан объект restrictions'
+            : 'Передан невалидный обьект restrictions');
+    } else {
+      const companyLocalTimeZone = TimeZoneIdentifier.getTimeZoneGMTOffsetfromNameZone(restriction.timezone).split(':');
+      const companyLocalTimeZoneDelta = +companyLocalTimeZone[0] * 60 + (+(companyLocalTimeZone[1]));
+      const lokalTimeDelta = companyLocalTimeZoneDelta + currentdate.getTimezoneOffset(); //смещение времени пользователя относительно времени торговой точки
+      const currentTimeInMinutesWithLocalDelta = WorkTimeValidator.getTimeFromString(formatDate(currentdate, "HH:mm", "en")) + lokalTimeDelta;
+      const currentTime = currentTimeInMinutesWithLocalDelta > 1440 ? currentTimeInMinutesWithLocalDelta - 1440 : currentTimeInMinutesWithLocalDelta;
+      /**
+       * текущее время в минутах с начала дня (600 = 10:00. 1200 = 20:00)
+       * если из-за разницы поясов расчет перепрыгнул на новый день, то приводим время к правильному значению в диапазоне 24 часов
+       * */
+      const currentDayWorkTime = restriction.workTime[0]; // текущее рабочее время
+      const curentDayStartTime = WorkTimeValidator.getTimeFromString(currentDayWorkTime.start); //текущее время начала рабочего дня в минутах
+      const curentDayStopTime = WorkTimeValidator.getTimeFromString(currentDayWorkTime.stop); //текущее время окончания рабочего дня в минутах
+      return {
+        workNow: currentTime < curentDayStopTime && currentTime > curentDayStartTime,
+        isNewDay: currentTimeInMinutesWithLocalDelta > 1440,
+        currentTime,
+        curentDayStartTime,
+        curentDayStopTime
       };
-      */
+    };
+  }
+
+  /**
+   * Метод возвращает ближайшую возможную дату-время заказа для способа доставки "Доставка курьером".
+   * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
+   * @param currentdate - объект Date, представляющий текущие локальные дату и время пользователя
+   */
+  static getPossibleDelieveryOrderDateTime(restriction: RestrictionsOrder, currentdate: Date): string {
+    const checkTime = WorkTimeValidator.isWorkNow(restriction, currentdate);
+    if (checkTime.workNow) {
+      throw new Error('Сейчас рабочее время. Расчет не требуется.');
+    } else {
+      const currentDayWorkTime = restriction.workTime[0];
+      const time = this.getTimeFromString(currentDayWorkTime.start) + (+restriction.minDeliveryTime) + 1;
+      const hour = Math.floor(time / 60);
+      const minutes = time - (hour * 60);
+      return formatDate(
+        checkTime.isNewDay || checkTime.currentTime > checkTime.curentDayStopTime ? currentdate.getMilliseconds() + 86400001 : currentdate,
+        `yyyy-MM-dd ${hour <= 9 ? '0' + hour : hour}:${minutes <= 9 ? '0' + minutes : minutes}`,
+        'en');
+    }
+  }
+
+  /**
+   * Метод возвращает ближайшую возможную дату-время заказа для способа доставки "Самовывоз".
+   * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
+   * @param currentdate - объект Date, представляющий текущие локальные дату и время пользователя
+   */
+  static getPossibleSelfServiceOrderDateTime(restriction: RestrictionsOrder, currentdate: Date): string {
+    /**
+     * Для обеспечения иммутабельности данных создается новый обьект restrictions, идентичный полученному в параметрах, но с измененным массивом workTime.
+     * В массиве workTime обновляются ограничения времени работы с обычных на актуальные для самовывоза.
+     * */
+    const newRestriction = {
+      ...restriction, workTime: (<WorkTime[]>restriction.workTime).map(workTime => workTime.selfService)
+    };
+    return WorkTimeValidator.getPossibleDelieveryOrderDateTime(newRestriction, currentdate);
+  }
 }

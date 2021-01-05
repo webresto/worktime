@@ -3,3 +3,4 @@
  */
 
 export * from './lib/worktime.validator';
+export * from './lib/tz';

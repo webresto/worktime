@@ -1,10 +1,10 @@
 {
-  "name": "ng-worktime",
+  "name": "@webresto/ng-worktime",
   "version": "0.0.0",
   "scripts": {
-    "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
+    "build": "ng build @webresto/ng-worktime --prod",
+    "pub": "cd dist && npm publish --access=public",
+    "build:pub": "npm run build && npm run pub",
     "test": "ng test",
     "lint": "ng lint"
   },

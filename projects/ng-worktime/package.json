@@ -1,5 +1,5 @@
 {
-  "name": "ng-worktime",
+  "name": "@webresto/ng-worktime",
   "repository": {
     "type": "git",
     "url": "https://github.com/webresto/worktime.git"
@@ -12,9 +12,9 @@
     "tslib": "^2.0.3"
   },
   "bugs": {
-    "url": "https://github.com/webresto/ng-cart/issues"
+    "url": "https://github.com/webresto/ng-worktime/issues"
   },
-  "homepage": "https://github.com/webresto/ng-cart#readme",
+  "homepage": "https://github.com/webresto/ng-worktime#readme",
   "directories": {
     "lib": "lib"
   },

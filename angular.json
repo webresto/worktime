@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "ng-worktime": {
+    "@webresto/ng-worktime": {
       "projectType": "library",
       "root": "projects/ng-worktime",
       "sourceRoot": "projects/ng-worktime/src",
@@ -44,5 +44,5 @@
       }
     }
   },
-  "defaultProject": "ng-worktime"
+  "defaultProject": "@webresto/ng-worktime"
 }

@@ -20,7 +20,7 @@
       "dom"
     ],
     "paths": {
-      "ng-worktime": [
+      "@webresto/ng-worktime": [
         "dist/ng-worktime/ng-worktime",
         "dist/ng-worktime"
       ]

@@ -158,7 +158,9 @@ export class WorkTimeValidator {
       const hour = Math.floor(time / 60);
       const minutes = time - (hour * 60);
       return formatDate(
-        checkTime.isNewDay || checkTime.currentTime > checkTime.curentDayStopTime ? currentdate.getMilliseconds() + 86400001 : currentdate,
+        checkTime.isNewDay || checkTime.currentTime > checkTime.curentDayStopTime ?
+          (Date.parse(formatDate(currentdate, 'yyyy-MM-dd', 'en')) + 86400001) :
+          currentdate,
         `yyyy-MM-dd ${hour <= 9 ? '0' + hour : hour}:${minutes <= 9 ? '0' + minutes : minutes}`,
         'en');
     }

@@ -1,5 +1,5 @@
 import { formatDate } from '@angular/common';
-
+import { TimeZoneIdentifier } from './tz'
 /**
  * Базовые данные о времени работы.
  */

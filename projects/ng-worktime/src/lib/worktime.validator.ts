@@ -72,11 +72,16 @@ export class WorkTimeValidator {
    * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
    * @return :string - Строка, представляющая максимальную доступную дату доставки в формате yyyy-MM-dd.
    */
-  static getMaxOrderDate(restriction: RestrictionsOrder): string {
-    if (restriction && isValidRestrictionOrder(restriction)) {
-      return formatDate(Date.now() + restriction.periodPossibleForOrder * 60000, 'yyyy-MM-dd', 'en');
+  static getMaxOrderDate(restriction: RestrictionsOrder, currentdate: Date): string {
+    if (restriction && isValidRestrictionOrder(restriction) && isDate(currentdate)) {
+      return formatDate(currentdate.getTime() + restriction.periodPossibleForOrder * 60000, 'yyyy-MM-dd', 'en');
     } else {
-      throw new Error(!restriction ? 'Не передан объект restrictions' : 'Передан невалидный обьект restrictions');
+      throw new Error(
+        isDate(currentdate) ?
+          'Не передан корректный объект даты' :
+          !restriction ? 'Не передан объект restrictions' :
+            'Передан невалидный обьект restrictions'
+      );
     };
   }
 
@@ -130,7 +135,10 @@ export class WorkTimeValidator {
        * текущее время в минутах с начала дня (600 = 10:00. 1200 = 20:00)
        * если из-за разницы поясов расчет перепрыгнул на новый день, то приводим время к правильному значению в диапазоне 24 часов
        * */
-      const currentDayWorkTime = restriction.workTime[0]; // текущее рабочее время
+      const currentDayWorkTime = WorkTimeValidator.getCurrentWorkTime(
+        restriction,
+        currentTimeInMinutesWithLocalDelta > 1440 ? new Date(currentdate.getTime() + 86400000) : currentdate
+        ); // текущее рабочее время
       const curentDayStartTime = WorkTimeValidator.getTimeFromString(currentDayWorkTime.start); //текущее время начала рабочего дня в минутах
       const curentDayStopTime = WorkTimeValidator.getTimeFromString(currentDayWorkTime.stop); //текущее время окончания рабочего дня в минутах
       return {
@@ -153,14 +161,15 @@ export class WorkTimeValidator {
     if (checkTime.workNow) {
       throw new Error('Сейчас рабочее время. Расчет не требуется.');
     } else {
-      const currentDayWorkTime = restriction.workTime[0];
+      const currentDayWorkTime = WorkTimeValidator.getCurrentWorkTime(
+        restriction,
+        checkTime.isNewDay ? new Date(currentdate.getTime() + 86400000) : currentdate
+        );
       const time = this.getTimeFromString(currentDayWorkTime.start) + (+restriction.minDeliveryTime) + 1;
       const hour = Math.floor(time / 60);
       const minutes = time - (hour * 60);
       return formatDate(
-        checkTime.isNewDay || checkTime.currentTime > checkTime.curentDayStopTime ?
-          (Date.parse(formatDate(currentdate, 'yyyy-MM-dd', 'en')) + 86400001) :
-          currentdate,
+        checkTime.isNewDay || checkTime.currentTime > checkTime.curentDayStopTime ? (currentdate.getTime() + 86400000) : currentdate,
         `yyyy-MM-dd ${hour <= 9 ? '0' + hour : hour}:${minutes <= 9 ? '0' + minutes : minutes}`,
         'en');
     }
@@ -180,5 +189,16 @@ export class WorkTimeValidator {
       ...restriction, workTime: (<WorkTime[]>restriction.workTime).map(workTime => workTime.selfService)
     };
     return WorkTimeValidator.getPossibleDelieveryOrderDateTime(newRestriction, currentdate);
+  }
+
+  /**
+  * Метод возвращает актуальные данные о времени работы из массива всех вариантов обьекта restriction.
+  * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
+  * @param currentdate - объект Date, представляющий текущие локальные дату и время пользователя
+  */
+  static getCurrentWorkTime(restriction: RestrictionsOrder, currentdate: Date): WorkTimeBase | WorkTime {
+    return {
+      ...restriction.workTime[0]
+    }
   }
 }

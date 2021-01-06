@@ -17,7 +17,7 @@ import { WorkTimeValidator, RestrictionsOrder } from '@webresto/ng-worktime'
 const currentDate = new Date(); //текущие локальные дата/время пользователя
 const restriction:RestrictionsOrder = .... ; // объект restriction, полученный от API
 
-const maxOrderDate = WorkTimeValidator.getMaxOrderDate(restriction); //максимальная доступная дата доставки
+const maxOrderDate = WorkTimeValidator.getMaxOrderDate(restriction,currentdate); //максимальная доступная дата доставки
 if (WorkTimeValidator.isWorkNow(restriction, currentdate).workNow) {
   ... // сейчас рабочее время предприятия, доставка на ближайшее время доступна
 } else {

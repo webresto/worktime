@@ -199,7 +199,7 @@ export class WorkTimeValidator {
   static getCurrentWorkTime(restriction: RestrictionsOrder, currentdate: Date): WorkTimeBase | WorkTime {
     let i = 0;
     let result = null;
-    while (i < restriction.workTime.length && !!result) {
+    while (i < restriction.workTime.length && !result) {
       if ((<WorkTime>restriction.workTime[i]).dayOfWeek == 'all' ||
         (<WorkTime>restriction.workTime[i]).dayOfWeek.includes(
           formatDate(currentdate, 'EEEE', 'en').toLowerCase()

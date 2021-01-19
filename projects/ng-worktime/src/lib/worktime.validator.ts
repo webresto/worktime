@@ -20,7 +20,7 @@ export declare interface WorkTimeBase {
  */
 export declare interface WorkTime extends WorkTimeBase {
   /** день недели, к которому применяется это время доставки   */
-  dayOfWeek: string;
+  dayOfWeek: string | string[];
 
   /** ограничения по времени работы для самовывоза */
   selfService: WorkTimeBase;
@@ -138,7 +138,7 @@ export class WorkTimeValidator {
       const currentDayWorkTime = WorkTimeValidator.getCurrentWorkTime(
         restriction,
         currentTimeInMinutesWithLocalDelta > 1440 ? new Date(currentdate.getTime() + 86400000) : currentdate
-        ); // текущее рабочее время
+      ); // текущее рабочее время
       const curentDayStartTime = WorkTimeValidator.getTimeFromString(currentDayWorkTime.start); //текущее время начала рабочего дня в минутах
       const curentDayStopTime = WorkTimeValidator.getTimeFromString(currentDayWorkTime.stop); //текущее время окончания рабочего дня в минутах
       return {
@@ -164,7 +164,7 @@ export class WorkTimeValidator {
       const currentDayWorkTime = WorkTimeValidator.getCurrentWorkTime(
         restriction,
         checkTime.isNewDay ? new Date(currentdate.getTime() + 86400000) : currentdate
-        );
+      );
       const time = this.getTimeFromString(currentDayWorkTime.start) + (+restriction.minDeliveryTime) + 1;
       const hour = Math.floor(time / 60);
       const minutes = time - (hour * 60);
@@ -197,8 +197,21 @@ export class WorkTimeValidator {
   * @param currentdate - объект Date, представляющий текущие локальные дату и время пользователя
   */
   static getCurrentWorkTime(restriction: RestrictionsOrder, currentdate: Date): WorkTimeBase | WorkTime {
-    return {
-      ...restriction.workTime[0]
+    let i = 0;
+    let result = null;
+    while (i < restriction.workTime.length && !!result) {
+      if ((<WorkTime>restriction.workTime[i]).dayOfWeek == 'all' ||
+        (<WorkTime>restriction.workTime[i]).dayOfWeek.includes(
+          formatDate(currentdate, 'EEEE', 'en').toLowerCase()
+        )) {
+        result = restriction.workTime[i];
+      };
+      i += 1;
     }
+    if (!result) {
+      throw new Error('Нет актуального расписания работы для текущего дня');
+    } else {
+      return result;
+    };
   }
 }

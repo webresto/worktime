@@ -4,12 +4,13 @@
     "type": "git",
     "url": "https://github.com/webresto/worktime.git"
   },
-  "version": "0.0.3",
+  "version": "0.0.4",
   "peerDependencies": {
-    "@angular/common": "^11.0.5"
   },
   "dependencies": {
-    "tslib": "^2.0.3"
+    "tslib": "^2.1.0",
+    "@angular/common": "^11.0.9",
+    "@angular/core": "^11.0.9"
   },
   "bugs": {
     "url": "https://github.com/webresto/worktime/issues"

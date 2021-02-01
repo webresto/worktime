@@ -34,7 +34,7 @@ export declare interface RestrictionsOrder {
   minDeliveryTime: string;
 
   /**установлено ли на текущий момент ограничение доставки на определенное время */
-  deliveryToTimeEnabled: boolean;
+  deliveryToTimeEnabled?: boolean;
 
   /** ограничение максимальной даты заказа в будущем (в минутах)*/
   periodPossibleForOrder: number;

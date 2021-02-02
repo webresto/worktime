@@ -8,9 +8,7 @@
   "peerDependencies": {
   },
   "dependencies": {
-    "tslib": "^2.1.0",
-    "@angular/common": "^11.0.9",
-    "@angular/core": "^11.0.9"
+    "tslib": "^2.1.0"
   },
   "bugs": {
     "url": "https://github.com/webresto/worktime/issues"

@@ -1,4 +1,4 @@
-import { formatDate } from '@angular/common';
+import { formatDate } from './formatDate';
 import { TimeZoneIdentifier } from './tz'
 
 /**

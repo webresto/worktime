@@ -1,10 +1,10 @@
-import { formatDate } from './formatDate';
+import { formatDate, isDate } from './formatDate';
 import { TimeZoneIdentifier } from './tz'
 
 /**
  * Базовые данные о времени работы.
  */
-export declare interface WorkTimeBase {
+interface WorkTimeBase {
   /** время начала рабочего дня*/
   start: string;
 
@@ -18,7 +18,7 @@ export declare interface WorkTimeBase {
 /**
  * Информация о времени работы предприятия
  */
-export declare interface WorkTime extends WorkTimeBase {
+interface WorkTime extends WorkTimeBase {
   /** день недели, к которому применяется это время доставки   */
   dayOfWeek: string | string[];
 
@@ -29,7 +29,7 @@ export declare interface WorkTime extends WorkTimeBase {
 /**
  * Обьъект, получаемый от API и содержащий текущие данные о рабочем времени предприятия
  */
-export declare interface RestrictionsOrder {
+interface RestrictionsOrder {
   /** минимальное время доставки*/
   minDeliveryTime: string;
 
@@ -52,14 +52,6 @@ export declare interface RestrictionsOrder {
  */
 function isValidRestrictionOrder(restriction: any): restriction is RestrictionsOrder {
   return 'minDeliveryTime' in restriction && 'periodPossibleForOrder' in restriction && 'timezone' in restriction && 'workTime' in restriction
-}
-
-/**
- * Функция проверяет корректность переданного объекта Date.
- * @param value
- */
-function isDate(value: any): value is Date {
-  return value instanceof Date && !isNaN(value.valueOf());
 }
 
 /**

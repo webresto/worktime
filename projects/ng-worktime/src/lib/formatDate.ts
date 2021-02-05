@@ -1,37 +1,8 @@
-export const ISO8601_DATE_REGEX =
-  /^(\d{4})-?(\d\d)-?(\d\d)(?:T(\d\d)(?::?(\d\d)(?::?(\d\d)(?:\.(\d+))?)?)?(Z|([+-])(\d\d):?(\d\d))?)?$/;
-//    1        2       3         4          5          6          7          8  9     10      11
+import { FormatWidth, FormStyle, getLocaleDateFormat, getLocaleDateTimeFormat, getLocaleDayNames, getLocaleDayPeriods, getLocaleEraNames, getLocaleExtraDayPeriodRules, getLocaleExtraDayPeriods, getLocaleId, getLocaleMonthNames, getLocaleNumberSymbol, getLocaleTimeFormat, NumberSymbol, TranslationWidth } from './locale_data_api';
+
+const ISO8601_DATE_REGEX = /^(\d{4})-?(\d\d)-?(\d\d)(?:T(\d\d)(?::?(\d\d)(?::?(\d\d)(?:\.(\d+))?)?)?(Z|([+-])(\d\d):?(\d\d))?)?$/;
 const NAMED_FORMATS: { [localeId: string]: { [format: string]: string } } = {};
-const DATE_FORMATS_SPLIT =
-  /((?:[^GyYMLwWdEabBhHmsSzZO']+)|(?:'(?:[^']|'')*')|(?:G{1,5}|y{1,4}|Y{1,4}|M{1,5}|L{1,5}|w{1,2}|W{1}|d{1,2}|E{1,6}|a{1,5}|b{1,5}|B{1,5}|h{1,2}|H{1,2}|m{1,2}|s{1,2}|S{1,3}|z{1,4}|Z{1,5}|O{1,4}))([\s\S]*)/;
-
-export enum FormatWidth {
-  /**
-   * For `en-US`, 'M/d/yy, h:mm a'`
-   * (Example: `6/15/15, 9:03 AM`)
-   */
-  Short,
-  /**
-   * For `en-US`, `'MMM d, y, h:mm:ss a'`
-   * (Example: `Jun 15, 2015, 9:03:01 AM`)
-   */
-  Medium,
-  /**
-   * For `en-US`, `'MMMM d, y, h:mm:ss a z'`
-   * (Example: `June 15, 2015 at 9:03:01 AM GMT+1`)
-   */
-  Long,
-  /**
-   * For `en-US`, `'EEEE, MMMM d, y, h:mm:ss a zzzz'`
-   * (Example: `Monday, June 15, 2015 at 9:03:01 AM GMT+01:00`)
-   */
-  Full
-}
-
-export enum FormStyle {
-  Format,
-  Standalone
-}
+const DATE_FORMATS_SPLIT = /((?:[^GyYMLwWdEabBhHmsSzZO']+)|(?:'(?:[^']|'')*')|(?:G{1,5}|y{1,4}|Y{1,4}|M{1,5}|L{1,5}|w{1,2}|W{1}|d{1,2}|E{1,6}|a{1,5}|b{1,5}|B{1,5}|h{1,2}|H{1,2}|m{1,2}|s{1,2}|S{1,3}|z{1,4}|Z{1,5}|O{1,4}))([\s\S]*)/;
 
 enum TranslationType {
   DayPeriods,
@@ -47,31 +18,6 @@ enum ZoneWidth {
   Extended
 }
 
-export enum ɵLocaleDataIndex {
-  LocaleId = 0,
-  DayPeriodsFormat,
-  DayPeriodsStandalone,
-  DaysFormat,
-  DaysStandalone,
-  MonthsFormat,
-  MonthsStandalone,
-  Eras,
-  FirstDayOfWeek,
-  WeekendRange,
-  DateFormat,
-  TimeFormat,
-  DateTimeFormat,
-  NumberSymbols,
-  NumberFormats,
-  CurrencyCode,
-  CurrencySymbol,
-  CurrencyName,
-  Currencies,
-  Directionality,
-  PluralCase,
-  ExtraData
-}
-
 enum DateType {
   FullYear,
   Month,
@@ -84,94 +30,6 @@ enum DateType {
 }
 
 type DateFormatter = (date: Date, locale: string, offset: number) => string;
-
-export enum NumberSymbol {
-  /**
-   * Decimal separator.
-   * For `en-US`, the dot character.
-   * Example : 2,345`.`67
-   */
-  Decimal,
-  /**
-   * Grouping separator, typically for thousands.
-   * For `en-US`, the comma character.
-   * Example: 2`,`345.67
-   */
-  Group,
-  /**
-   * List-item separator.
-   * Example: "one, two, and three"
-   */
-  List,
-  /**
-   * Sign for percentage (out of 100).
-   * Example: 23.4%
-   */
-  PercentSign,
-  /**
-   * Sign for positive numbers.
-   * Example: +23
-   */
-  PlusSign,
-  /**
-   * Sign for negative numbers.
-   * Example: -23
-   */
-  MinusSign,
-  /**
-   * Computer notation for exponential value (n times a power of 10).
-   * Example: 1.2E3
-   */
-  Exponential,
-  /**
-   * Human-readable format of exponential.
-   * Example: 1.2x103
-   */
-  SuperscriptingExponent,
-  /**
-   * Sign for permille (out of 1000).
-   * Example: 23.4‰
-   */
-  PerMille,
-  /**
-   * Infinity, can be used with plus and minus.
-   * Example: ∞, +∞, -∞
-   */
-  Infinity,
-  /**
-   * Not a number.
-   * Example: NaN
-   */
-  NaN,
-  /**
-   * Symbol used between time units.
-   * Example: 10:52
-   */
-  TimeSeparator,
-  /**
-   * Decimal separator for currency values (fallback to `Decimal`).
-   * Example: $2,345.67
-   */
-  CurrencyDecimal,
-  /**
-   * Group separator for currency values (fallback to `Group`).
-   * Example: $2,345.67
-   */
-  CurrencyGroup
-}
-
-export const enum ɵExtraLocaleDataIndex {
-  ExtraDayPeriodFormats = 0,
-  ExtraDayPeriodStandalone,
-  ExtraDayPeriodsRules
-}
-
-export type Time = {
-  hours: number,
-  minutes: number
-};
-
-let LOCALE_DATA: {[localeId: string]: any} = {};
 
 export function formatDate(
   value: string | number | Date, format: string, locale: string, timezone?: string): string {
@@ -213,11 +71,15 @@ export function formatDate(
   return text;
 }
 
+/**
+ * Функция проверяет корректность переданного объекта Date.
+ * @param value
+ */
 export function isDate(value: any): value is Date {
   return value instanceof Date && !isNaN(value.valueOf());
 }
 
-export function toDate(value: string | number | Date): Date {
+function toDate(value: string | number | Date): Date {
   if (isDate(value)) {
     return value;
   }
@@ -592,23 +454,23 @@ function dateStrGetter(
 function dateGetter(
   name: DateType, size: number, offset: number = 0, trim = false,
   negWrap = false): DateFormatter {
-return function(date: Date, locale: string): string {
-  let part = getDatePart(name, date);
-  if (offset > 0 || part > -offset) {
-    part += offset;
-  }
-
-  if (name === DateType.Hours) {
-    if (part === 0 && offset === -12) {
-      part = 12;
+  return function (date: Date, locale: string): string {
+    let part = getDatePart(name, date);
+    if (offset > 0 || part > -offset) {
+      part += offset;
     }
-  } else if (name === DateType.FractionalSeconds) {
-    return formatFractionalSeconds(part, size);
-  }
 
-  const localeMinus = getLocaleNumberSymbol(locale, NumberSymbol.MinusSign);
-  return padNumber(part, size, localeMinus, trim, negWrap);
-};
+    if (name === DateType.Hours) {
+      if (part === 0 && offset === -12) {
+        part = 12;
+      }
+    } else if (name === DateType.FractionalSeconds) {
+      return formatFractionalSeconds(part, size);
+    }
+
+    const localeMinus = getLocaleNumberSymbol(locale, NumberSymbol.MinusSign);
+    return padNumber(part, size, localeMinus, trim, negWrap);
+  };
 }
 
 function getDateTranslation(
@@ -696,7 +558,7 @@ function convertTimezoneToLocal(date: Date, timezone: string, reverse: boolean):
   return addDateMinutes(date, reverseValue * (timezoneOffset - dateTimezoneOffset));
 }
 
-export function isoStringToDate(match: RegExpMatchArray): Date {
+function isoStringToDate(match: RegExpMatchArray): Date {
   const date = new Date(0);
   let tzHour = 0;
   let tzMin = 0;
@@ -731,86 +593,26 @@ function formatDateTime(str: string, opt_values: string[]) {
   return str;
 }
 
-export function getLocaleDateTimeFormat(locale: string, width: FormatWidth): string {
-  const data = ɵfindLocaleData(locale);
-  const dateTimeFormatData = <string[]>data[ɵLocaleDataIndex.DateTimeFormat];
-  return getLastDefinedValue(dateTimeFormatData, width);
-}
 
-function getLastDefinedValue<T>(data: T[], index: number): T {
-  for (let i = index; i > -1; i--) {
-    if (typeof data[i] !== 'undefined') {
-      return data[i];
-    }
-  }
-  throw new Error('Locale data API: locale data undefined');
-}
-
-export function ɵfindLocaleData(locale: string): any {
-  const normalizedLocale = normalizeLocale(locale);
-
-  let match = getLocaleData(normalizedLocale);
-  if (match) {
-    return match;
-  }
-
-  // let's try to find a parent locale
-  const parentLocale = normalizedLocale.split('-')[0];
-  match = getLocaleData(parentLocale);
-  if (match) {
-    return match;
-  }
-
-  if (parentLocale === 'en') {
-    return localeEn;
-  }
-
-  throw new Error(`Missing locale data for the locale "${locale}".`);
-}
-
-export function getLocaleId(locale: string): string {
-  return ɵfindLocaleData(locale)[ɵLocaleDataIndex.LocaleId];
-}
-
-export function getLocaleDateFormat(locale: string, width: FormatWidth): string {
-  const data = ɵfindLocaleData(locale);
-  return getLastDefinedValue(data[ɵLocaleDataIndex.DateFormat], width);
-}
-
-export function getLocaleTimeFormat(locale: string, width: FormatWidth): string {
-  const data = ɵfindLocaleData(locale);
-  return getLastDefinedValue(data[ɵLocaleDataIndex.TimeFormat], width);
-}
-
-export enum TranslationWidth {
-  /** 1 character for `en-US`. For example: 'S' */
-  Narrow,
-  /** 3 characters for `en-US`. For example: 'Sun' */
-  Abbreviated,
-  /** Full length for `en-US`. For example: "Sunday" */
-  Wide,
-  /** 2 characters for `en-US`, For example: "Su" */
-  Short
-}
 
 const JANUARY = 0;
 const THURSDAY = 4;
 
 function weekNumberingYearGetter(size: number, trim = false): DateFormatter {
-  return function(date: Date, locale: string) {
+  return function (date: Date, locale: string) {
     const thisThurs = getThursdayThisWeek(date);
     const weekNumberingYear = thisThurs.getFullYear();
     return padNumber(
-        weekNumberingYear, size, getLocaleNumberSymbol(locale, NumberSymbol.MinusSign), trim);
+      weekNumberingYear, size, getLocaleNumberSymbol(locale, NumberSymbol.MinusSign), trim);
   };
 }
 
 function weekGetter(size: number, monthBased = false): DateFormatter {
-  return function(date: Date, locale: string) {
+  return function (date: Date, locale: string) {
     let result;
     if (monthBased) {
       const nbDaysBefore1stDayOfMonth =
-          new Date(date.getFullYear(), date.getMonth(), 1).getDay() - 1;
+        new Date(date.getFullYear(), date.getMonth(), 1).getDay() - 1;
       const today = date.getDate();
       result = 1 + Math.floor((today + nbDaysBefore1stDayOfMonth) / 7);
     } else {
@@ -827,25 +629,25 @@ function weekGetter(size: number, monthBased = false): DateFormatter {
 }
 
 function timeZoneGetter(width: ZoneWidth): DateFormatter {
-  return function(date: Date, locale: string, offset: number) {
+  return function (date: Date, locale: string, offset: number) {
     const zone = -1 * offset;
     const minusSign = getLocaleNumberSymbol(locale, NumberSymbol.MinusSign);
     const hours = zone > 0 ? Math.floor(zone / 60) : Math.ceil(zone / 60);
     switch (width) {
       case ZoneWidth.Short:
         return ((zone >= 0) ? '+' : '') + padNumber(hours, 2, minusSign) +
-            padNumber(Math.abs(zone % 60), 2, minusSign);
+          padNumber(Math.abs(zone % 60), 2, minusSign);
       case ZoneWidth.ShortGMT:
         return 'GMT' + ((zone >= 0) ? '+' : '') + padNumber(hours, 1, minusSign);
       case ZoneWidth.Long:
         return 'GMT' + ((zone >= 0) ? '+' : '') + padNumber(hours, 2, minusSign) + ':' +
-            padNumber(Math.abs(zone % 60), 2, minusSign);
+          padNumber(Math.abs(zone % 60), 2, minusSign);
       case ZoneWidth.Extended:
         if (offset === 0) {
           return 'Z';
         } else {
           return ((zone >= 0) ? '+' : '') + padNumber(hours, 2, minusSign) + ':' +
-              padNumber(Math.abs(zone % 60), 2, minusSign);
+            padNumber(Math.abs(zone % 60), 2, minusSign);
         }
       default:
         throw new Error(`Unknown zone width "${width}"`);
@@ -855,23 +657,23 @@ function timeZoneGetter(width: ZoneWidth): DateFormatter {
 
 function padNumber(
   num: number, digits: number, minusSign = '-', trim?: boolean, negWrap?: boolean): string {
-let neg = '';
-if (num < 0 || (negWrap && num <= 0)) {
-  if (negWrap) {
-    num = -num + 1;
-  } else {
-    num = -num;
-    neg = minusSign;
+  let neg = '';
+  if (num < 0 || (negWrap && num <= 0)) {
+    if (negWrap) {
+      num = -num + 1;
+    } else {
+      num = -num;
+      neg = minusSign;
+    }
   }
-}
-let strNum = String(num);
-while (strNum.length < digits) {
-  strNum = '0' + strNum;
-}
-if (trim) {
-  strNum = strNum.substr(strNum.length - digits);
-}
-return neg + strNum;
+  let strNum = String(num);
+  while (strNum.length < digits) {
+    strNum = '0' + strNum;
+  }
+  if (trim) {
+    strNum = strNum.substr(strNum.length - digits);
+  }
+  return neg + strNum;
 }
 
 function getDatePart(part: DateType, date: Date): number {
@@ -902,151 +704,17 @@ function formatFractionalSeconds(milliseconds: number, digits: number): string {
   return strMs.substr(0, digits);
 }
 
-export function getLocaleNumberSymbol(locale: string, symbol: NumberSymbol): string {
-  const data = ɵfindLocaleData(locale);
-  const res = data[ɵLocaleDataIndex.NumberSymbols][symbol];
-  if (typeof res === 'undefined') {
-    if (symbol === NumberSymbol.CurrencyDecimal) {
-      return data[ɵLocaleDataIndex.NumberSymbols][NumberSymbol.Decimal];
-    } else if (symbol === NumberSymbol.CurrencyGroup) {
-      return data[ɵLocaleDataIndex.NumberSymbols][NumberSymbol.Group];
-    }
-  }
-  return res;
-}
-
-export function getLocaleMonthNames(
-  locale: string, formStyle: FormStyle, width: TranslationWidth): ReadonlyArray<string> {
-const data = ɵfindLocaleData(locale);
-const monthsData =
-    <string[][][]>[data[ɵLocaleDataIndex.MonthsFormat], data[ɵLocaleDataIndex.MonthsStandalone]];
-const months = getLastDefinedValue(monthsData, formStyle);
-return getLastDefinedValue(months, width);
-}
-
-export function getLocaleDayNames(
-  locale: string, formStyle: FormStyle, width: TranslationWidth): ReadonlyArray<string> {
-const data = ɵfindLocaleData(locale);
-const daysData =
-    <string[][][]>[data[ɵLocaleDataIndex.DaysFormat], data[ɵLocaleDataIndex.DaysStandalone]];
-const days = getLastDefinedValue(daysData, formStyle);
-return getLastDefinedValue(days, width);
-}
-
-export function getLocaleEraNames(
-  locale: string, width: TranslationWidth): Readonly<[string, string]> {
-const data = ɵfindLocaleData(locale);
-const erasData = <[string, string][]>data[ɵLocaleDataIndex.Eras];
-return getLastDefinedValue(erasData, width);
-}
-
-export function getLocaleDayPeriods(
-  locale: string, formStyle: FormStyle, width: TranslationWidth): Readonly<[string, string]> {
-const data = ɵfindLocaleData(locale);
-const amPmData = <[string, string][][]>[
-  data[ɵLocaleDataIndex.DayPeriodsFormat], data[ɵLocaleDataIndex.DayPeriodsStandalone]
-];
-const amPm = getLastDefinedValue(amPmData, formStyle);
-return getLastDefinedValue(amPm, width);
-}
-
-export function getLocaleExtraDayPeriods(
-  locale: string, formStyle: FormStyle, width: TranslationWidth): string[] {
-const data = ɵfindLocaleData(locale);
-checkFullData(data);
-const dayPeriodsData = <string[][][]>[
-  data[ɵLocaleDataIndex.ExtraData][ɵExtraLocaleDataIndex.ExtraDayPeriodFormats],
-  data[ɵLocaleDataIndex.ExtraData][ɵExtraLocaleDataIndex.ExtraDayPeriodStandalone]
-];
-const dayPeriods = getLastDefinedValue(dayPeriodsData, formStyle) || [];
-return getLastDefinedValue(dayPeriods, width) || [];
-}
-
-export function getLocaleExtraDayPeriodRules(locale: string): (Time|[Time, Time])[] {
-  const data = ɵfindLocaleData(locale);
-  checkFullData(data);
-  const rules = data[ɵLocaleDataIndex.ExtraData][ɵExtraLocaleDataIndex.ExtraDayPeriodsRules] || [];
-  return rules.map((rule: string|[string, string]) => {
-    if (typeof rule === 'string') {
-      return extractTime(rule);
-    }
-    return [extractTime(rule[0]), extractTime(rule[1])];
-  });
-}
-
-function checkFullData(data: any) {
-  if (!data[ɵLocaleDataIndex.ExtraData]) {
-    throw new Error(`Missing extra locale data for the locale "${
-        data[ɵLocaleDataIndex
-                 .LocaleId]}". Use "registerLocaleData" to load new data. See the "I18n guide" on angular.io to know more.`);
-  }
-}
-
-function extractTime(time: string): Time {
-  const [h, m] = time.split(':');
-  return {hours: +h, minutes: +m};
-}
-
-function normalizeLocale(locale: string): string {
-  return locale.toLowerCase().replace(/_/g, '-');
-}
 
 
-export function getLocaleData(normalizedLocale: string): any {
-  return LOCALE_DATA[normalizedLocale];
-}
 
 function getFirstThursdayOfYear(year: number) {
   const firstDayOfYear = (new Date(year, JANUARY, 1)).getDay();
   return new Date(
-      year, 0, 1 + ((firstDayOfYear <= THURSDAY) ? THURSDAY : THURSDAY + 7) - firstDayOfYear);
+    year, 0, 1 + ((firstDayOfYear <= THURSDAY) ? THURSDAY : THURSDAY + 7) - firstDayOfYear);
 }
 
 function getThursdayThisWeek(datetime: Date) {
   return new Date(
-      datetime.getFullYear(), datetime.getMonth(),
-      datetime.getDate() + (THURSDAY - datetime.getDay()));
+    datetime.getFullYear(), datetime.getMonth(),
+    datetime.getDate() + (THURSDAY - datetime.getDay()));
 }
-
-const u = undefined;
-
-function plural(n: number): number {
-  let i = Math.floor(Math.abs(n)), v = n.toString().replace(/^[^.]*\.?/, '').length;
-  if (i === 1 && v === 0) return 1;
-  return 5;
-}
-
-const localeEn = [
-  'en',
-  [['a', 'p'], ['AM', 'PM'], u],
-  [['AM', 'PM'], u, u],
-  [
-    ['S', 'M', 'T', 'W', 'T', 'F', 'S'], ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-    ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-    ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
-  ],
-  u,
-  [
-    ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'],
-    ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-    [
-      'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September',
-      'October', 'November', 'December'
-    ]
-  ],
-  u,
-  [['B', 'A'], ['BC', 'AD'], ['Before Christ', 'Anno Domini']],
-  0,
-  [6, 0],
-  ['M/d/yy', 'MMM d, y', 'MMMM d, y', 'EEEE, MMMM d, y'],
-  ['h:mm a', 'h:mm:ss a', 'h:mm:ss a z', 'h:mm:ss a zzzz'],
-  ['{1}, {0}', u, '{1} \'at\' {0}', u],
-  ['.', ',', ';', '%', '+', '-', 'E', '×', '‰', '∞', 'NaN', ':'],
-  ['#,##0.###', '#,##0%', '¤#,##0.00', '#E0'],
-  'USD',
-  '$',
-  'US Dollar',
-  {},
-  'ltr',
-  plural
-];

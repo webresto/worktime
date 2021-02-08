@@ -5,7 +5,7 @@
 
 npm i @webresto/ng-worktime
 
-## Использование
+## Пример
 Импорт
 
 ~~~ typescript
@@ -34,7 +34,7 @@ if (WorkTimeValidator.isWorkNow(restriction, currentdate).workNow) {
 }
 ~~~
 
-API
+## API
 
 Интерфейсы:
 

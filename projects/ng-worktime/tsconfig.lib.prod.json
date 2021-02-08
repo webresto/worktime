@@ -6,6 +6,6 @@
     "sourceMap": true,
   },
   "angularCompilerOptions": {
-    "enableIvy": true
+    "enableIvy": false
   }
 }

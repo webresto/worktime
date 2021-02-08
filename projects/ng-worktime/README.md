@@ -13,6 +13,7 @@ import { WorkTimeValidator } from '@webresto/ng-worktime'
 ~~~
 
 В вашем коде:
+
 ~~~ typescript
 
 const currentDate = new Date(); //текущие локальные дата/время пользователя
@@ -31,9 +32,13 @@ if (WorkTimeValidator.isWorkNow(restriction, currentdate).workNow) {
   const buffer = WorkTimeValidator.getPossibleSelfServiceOrderDateTime(restriction, currentdate);
   const [date,time] = buffer.split(' ');
 }
+~~~
 
 API
 
+Интерфейсы:
+
+~~~ typescript
 /**
  * Базовые данные о времени работы - служебный интерфейс.
  */
@@ -69,6 +74,11 @@ interface RestrictionsOrder {
     /**  массив ограничений по времени работы предприятия для разных дней недели. */
     workTime: WorkTimeBase[];
 }
+~~~
+
+Классы:
+
+~~~ typescript
 /**
  * Класс, содержащий статические методы, необходимые для работы с ограничениями рабочего времени предприятия.
  * Создавать новый объект этого класса для использования методов не требуется.
@@ -151,3 +161,5 @@ class TimeZoneIdentifier {
  */
   static getTimeZoneGMTOffsetfromNameZone(zone: string): string;
 }
+
+~~~

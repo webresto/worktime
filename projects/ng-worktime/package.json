@@ -4,10 +4,10 @@
     "type": "git",
     "url": "https://github.com/webresto/worktime.git"
   },
-  "version": "1.0.0",
+  "version": "1.0.1",
   "contributors": [
     {
-      "name": "Ivan Larchenkov",
+      "name": "axrl",
       "email": "axrl@mail.ru"
     },
     {
@@ -23,9 +23,9 @@
   "bugs": {
     "url": "https://github.com/webresto/worktime/issues"
   },
-  "homepage": "https://github.com/webresto/worktime#readme",
+  "homepage": "https://github.com/webresto/worktime/tree/main/projects/ng-worktime",
   "directories": {
-    "lib": "lib"
+    "lib": "src/lib"
   },
   "scripts": {
     "test": "ng test"

@@ -4,7 +4,17 @@
     "type": "git",
     "url": "https://github.com/webresto/worktime.git"
   },
-  "version": "0.0.8",
+  "version": "1.0.0",
+  "contributors": [
+    {
+      "name": "Ivan Larchenkov",
+      "email": "axrl@mail.ru"
+    },
+    {
+      "name": "Siziy Ivan",
+      "email": "xziy88@gmail.com"
+    }
+  ],
   "peerDependencies": {
   },
   "dependencies": {
@@ -18,8 +28,8 @@
     "lib": "lib"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "ng test"
   },
-  "license": "ISC",
+  "license": "MIT",
   "description": ""
 }

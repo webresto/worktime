@@ -20,7 +20,7 @@ function getLastDefinedValue<T>(data: T[], index: number): T {
   throw new Error('Locale data API: locale data undefined');
 }
 
-function checkFullData(data: any) {
+function checkFullData(data: any): void {
   if (!data[ɵLocaleDataIndex.ExtraData]) {
     throw new Error(`Missing extra locale data for the locale "${data[ɵLocaleDataIndex
       .LocaleId]}". Use "registerLocaleData" to load new data. See the "I18n guide" on angular.io to know more.`);
@@ -76,7 +76,7 @@ export function getLocaleTimeFormat(locale: string, width: FormatWidth): string 
 
 export function getLocaleDateTimeFormat(locale: string, width: FormatWidth): string {
   const data = ɵfindLocaleData(locale);
-  const dateTimeFormatData = <string[]>data[ɵLocaleDataIndex.DateTimeFormat];
+  const dateTimeFormatData = data[ɵLocaleDataIndex.DateTimeFormat] as string[];
   return getLastDefinedValue(dateTimeFormatData, width);
 }
 
@@ -84,7 +84,7 @@ export function getLocaleMonthNames(
   locale: string, formStyle: FormStyle, width: TranslationWidth): ReadonlyArray<string> {
   const data = ɵfindLocaleData(locale);
   const monthsData =
-    <string[][][]>[data[ɵLocaleDataIndex.MonthsFormat], data[ɵLocaleDataIndex.MonthsStandalone]];
+    [data[ɵLocaleDataIndex.MonthsFormat], data[ɵLocaleDataIndex.MonthsStandalone]] as string[][][];
   const months = getLastDefinedValue(monthsData, formStyle);
   return getLastDefinedValue(months, width);
 }
@@ -93,7 +93,7 @@ export function getLocaleDayNames(
   locale: string, formStyle: FormStyle, width: TranslationWidth): ReadonlyArray<string> {
   const data = ɵfindLocaleData(locale);
   const daysData =
-    <string[][][]>[data[ɵLocaleDataIndex.DaysFormat], data[ɵLocaleDataIndex.DaysStandalone]];
+    [data[ɵLocaleDataIndex.DaysFormat], data[ɵLocaleDataIndex.DaysStandalone]] as string[][][];
   const days = getLastDefinedValue(daysData, formStyle);
   return getLastDefinedValue(days, width);
 }
@@ -101,16 +101,16 @@ export function getLocaleDayNames(
 export function getLocaleEraNames(
   locale: string, width: TranslationWidth): Readonly<[string, string]> {
   const data = ɵfindLocaleData(locale);
-  const erasData = <[string, string][]>data[ɵLocaleDataIndex.Eras];
+  const erasData = data[ɵLocaleDataIndex.Eras] as [string, string][];
   return getLastDefinedValue(erasData, width);
 }
 
 export function getLocaleDayPeriods(
   locale: string, formStyle: FormStyle, width: TranslationWidth): Readonly<[string, string]> {
   const data = ɵfindLocaleData(locale);
-  const amPmData = <[string, string][][]>[
+  const amPmData = [
     data[ɵLocaleDataIndex.DayPeriodsFormat], data[ɵLocaleDataIndex.DayPeriodsStandalone]
-  ];
+  ] as [string, string][][];
   const amPm = getLastDefinedValue(amPmData, formStyle);
   return getLastDefinedValue(amPm, width);
 }
@@ -119,10 +119,10 @@ export function getLocaleExtraDayPeriods(
   locale: string, formStyle: FormStyle, width: TranslationWidth): string[] {
   const data = ɵfindLocaleData(locale);
   checkFullData(data);
-  const dayPeriodsData = <string[][][]>[
+  const dayPeriodsData = [
     data[ɵLocaleDataIndex.ExtraData][ɵExtraLocaleDataIndex.ExtraDayPeriodFormats],
     data[ɵLocaleDataIndex.ExtraData][ɵExtraLocaleDataIndex.ExtraDayPeriodStandalone]
-  ];
+  ] as string[][][];
   const dayPeriods = getLastDefinedValue(dayPeriodsData, formStyle) || [];
   return getLastDefinedValue(dayPeriods, width) || [];
 }

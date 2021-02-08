@@ -1,14 +1,15 @@
 # NgWorktime
+ Библиотека для работы с ограничениями рабочего времени предприятия
 
 ## Установка
 
 npm i @webresto/ng-worktime
 
 ## Использование
-Импортируйте необходимый функционал
+Импорт
 
 ~~~ typescript
-import { WorkTimeValidator, RestrictionsOrder } from '@webresto/ng-worktime'
+import { WorkTimeValidator } from '@webresto/ng-worktime'
 ~~~
 
 В вашем коде:
@@ -29,4 +30,124 @@ if (WorkTimeValidator.isWorkNow(restriction, currentdate).workNow) {
       // Для самовывоза:
   const buffer = WorkTimeValidator.getPossibleSelfServiceOrderDateTime(restriction, currentdate);
   const [date,time] = buffer.split(' ');
+}
+
+API
+
+/**
+ * Базовые данные о времени работы - служебный интерфейс.
+ */
+interface WorkTimeBase {
+    /** время начала рабочего дня*/
+    start: string;
+    /** время окончания рабочего дня*/
+    stop: string;
+    /** перерыв на обед*/
+    break: string;
+}
+/**
+ * Информация о времени работы предприятия - служебный интерфейс.
+ */
+interface WorkTime extends WorkTimeBase {
+    /** день недели, к которому применяется это время доставки   */
+    dayOfWeek: string | string[];
+    /** ограничения по времени работы для самовывоза */
+    selfService: WorkTimeBase;
+}
+/**
+ * Интерфейс объекта, получаемого от API @webresto/core и содержащего текущие данные о рабочем времени предприятия
+ */
+interface RestrictionsOrder {
+    /** минимальное время доставки*/
+    minDeliveryTime: string;
+    /**установлено ли на текущий момент ограничение доставки на определенное время */
+    deliveryToTimeEnabled?: boolean;
+    /** ограничение максимальной даты заказа в будущем (в минутах)*/
+    periodPossibleForOrder: number;
+    /** временная зона предприятия */
+    timezone: string;
+    /**  массив ограничений по времени работы предприятия для разных дней недели. */
+    workTime: WorkTimeBase[];
+}
+/**
+ * Класс, содержащий статические методы, необходимые для работы с ограничениями рабочего времени предприятия.
+ * Создавать новый объект этого класса для использования методов не требуется.
+ */
+class WorkTimeValidator {
+
+    /**
+     * Метод возвращает максимальную возможную дату, на которую можно заказать доставку.
+     * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
+     * @return :string - Строка, представляющая максимальную доступную дату доставки в формате yyyy-MM-dd.
+     */
+    static getMaxOrderDate(restriction: RestrictionsOrder, currentdate: Date): string;
+
+    /**
+     * Метод считает, сколько минут от начала дня (00:00) прошло для переданного времени.
+     * @param time - строка в формате HH:mm - время.
+     * @return :number - кол-во минут.
+     */
+    static getTimeFromString(time: string): number;
+    /**
+     * Метод проверяет, доступна ли возможность доставки на ближайшее время.
+     * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
+     * @param currentdate - объект Date, представляющий локальные дату и время пользователя, для которых и проверяется возможность доставки
+     * @return Обьект, содержащий информацию:
+     * {
+     *    isWorkNow:boolean - Возможна ли доставка в ближайшее время
+     *    isNewDay:boolean - Служебный параметр для внутреннего использования.
+     *      Представляет признак, что из-за разницы часовых поясов расчет даты "перепрыгнул" на новый день.
+     *    currentTime:number - Служебный параметр для внутреннего использования.
+     *      Представляет проверяемое методом время в минутах от 00:00 в часовом поясе предприятия.
+     *    curentDayStartTime:number - Служебный параметр для внутреннего использования.
+     *      Представляет время начала рабочего дня в минутах от 00:00 в часовом поясе предприятия.
+     *    curentDayStopTime:number - Служебный параметр для внутреннего использования.
+     *     Представляет время окончания рабочего дня в минутах от 00:00 в часовом поясе предприятия.
+        }
+     */
+    static isWorkNow(restriction: RestrictionsOrder, currentdate: Date): {
+        workNow: boolean;
+        isNewDay: boolean;
+        currentTime: number;
+        curentDayStartTime: number;
+        curentDayStopTime: number;
+    };
+
+    /**
+     * Метод возвращает ближайшую возможную дату-время заказа для способа доставки "Доставка курьером".
+     * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
+     * @param currentdate - объект Date, представляющий текущие локальные дату и время пользователя
+     */
+    static getPossibleDelieveryOrderDateTime(restriction: RestrictionsOrder, currentdate: Date): string;
+
+    /**
+     * Метод возвращает ближайшую возможную дату-время заказа для способа доставки "Самовывоз".
+     * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
+     * @param currentdate - объект Date, представляющий текущие локальные дату и время пользователя
+     */
+    static getPossibleSelfServiceOrderDateTime(restriction: RestrictionsOrder, currentdate: Date): string;
+
+    /**
+    * Метод возвращает актуальные данные о времени работы из массива всех вариантов обьекта restriction.
+    * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
+    * @param currentdate - объект Date, представляющий текущие локальные дату и время пользователя
+    */
+    static getCurrentWorkTime(restriction: RestrictionsOrder, currentdate: Date): WorkTimeBase | WorkTime;
+}
+
+/**
+ * Класс, содержащий статический метод, определяющий смещение часового пояса относительно GMT (+00:00) по переданной строке с названием таймзоны.
+ * Создавать новый объект этого класса для использования метода не требуется.
+ */
+class TimeZoneIdentifier {
+  /**
+ *  Метод определяет смещение часового пояса относительно GMT (+00:00) по переданной строке с названием таймзоны.
+ *  @param zone - Строка с названием таймзоны ( например 'America/New_York').
+ *  @return  - Строка, представляющая смещение относительно GMT.
+ *
+ *  Пример :
+ *   const offset = TimeZoneIdentifier.getTimeZoneGMTOffsetfromNameZone('Europe/Moscow');
+ *   console.log(offset) /// "+03:00"
+ */
+  static getTimeZoneGMTOffsetfromNameZone(zone: string): string;
 }

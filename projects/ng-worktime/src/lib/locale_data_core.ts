@@ -1,19 +1,20 @@
 function plural(n: number): number {
-  let i = Math.floor(Math.abs(n)), v = n.toString().replace(/^[^.]*\.?/, '').length;
-  if (i === 1 && v === 0) return 1;
+  const i = Math.floor(Math.abs(n));
+  const v = n.toString().replace(/^[^.]*\.?/, '').length;
+  if (i === 1 && v === 0) { return 1; }
   return 5;
-};
+}
 
 function normalizeLocale(locale: string): string {
   return locale.toLowerCase().replace(/_/g, '-');
-};
+}
 
 const u = undefined;
-let LOCALE_DATA: { [localeId: string]: any } = {};
+const LOCALE_DATA: { [localeId: string]: any } = {};
 
 function getLocaleData(normalizedLocale: string): any {
   return LOCALE_DATA[normalizedLocale];
-};
+}
 
 const localeEn = [
   'en',
@@ -70,7 +71,7 @@ export function ɵfindLocaleData(locale: string): any {
   }
 
   throw new Error(`Missing locale data for the locale "${locale}".`);
-};
+}
 
 export enum ɵLocaleDataIndex {
   LocaleId = 0,
@@ -95,4 +96,4 @@ export enum ɵLocaleDataIndex {
   Directionality,
   PluralCase,
   ExtraData
-};
+}

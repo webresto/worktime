@@ -1,8 +1,8 @@
 import { formatDate, isDate } from './formatDate';
-import { TimeZoneIdentifier } from './tz'
+import { TimeZoneIdentifier } from './tz';
 
 /**
- * Базовые данные о времени работы.
+ * Базовые данные о времени работы - служебный интерфейс.
  */
 interface WorkTimeBase {
   /** время начала рабочего дня*/
@@ -16,7 +16,7 @@ interface WorkTimeBase {
 }
 
 /**
- * Информация о времени работы предприятия
+ * Информация о времени работы предприятия - служебный интерфейс.
  */
 interface WorkTime extends WorkTimeBase {
   /** день недели, к которому применяется это время доставки   */
@@ -27,7 +27,7 @@ interface WorkTime extends WorkTimeBase {
 }
 
 /**
- * Обьъект, получаемый от API и содержащий текущие данные о рабочем времени предприятия
+ * Интерфейс объекта, получаемого от API @webresto/core и содержащего текущие данные о рабочем времени предприятия
  */
 interface RestrictionsOrder {
   /** минимальное время доставки*/
@@ -43,19 +43,20 @@ interface RestrictionsOrder {
   timezone: string;
 
   /**  массив ограничений по времени работы предприятия для разных дней недели. */
-  workTime: WorkTimeBase[]
+  workTime: WorkTimeBase[];
 }
 
 /**
- * Функция валидации переланного объекта restriction на соответствие интерфейсу RestrictionsOrder
+ * Функция валидации переданного объекта restriction на соответствие интерфейсу RestrictionsOrder
  * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
  */
 function isValidRestrictionOrder(restriction: any): restriction is RestrictionsOrder {
-  return 'minDeliveryTime' in restriction && 'periodPossibleForOrder' in restriction && 'timezone' in restriction && 'workTime' in restriction
+  return 'minDeliveryTime' in restriction && 'periodPossibleForOrder' in restriction && 'timezone' in restriction && 'workTime' in restriction;
 }
 
 /**
  * Класс, содержащий статические методы, необходимые для работы с ограничениями рабочего времени предприятия.
+ * Создавать новый объект этого класса для использования методов не требуется.
  */
 export class WorkTimeValidator {
 
@@ -74,7 +75,7 @@ export class WorkTimeValidator {
           !restriction ? 'Не передан объект restrictions' :
             'Передан невалидный обьект restrictions'
       );
-    };
+    }
   }
 
   /**
@@ -89,9 +90,9 @@ export class WorkTimeValidator {
       let checkedTime = time.trim();
       if (checkedTime.includes(' ') || checkedTime.includes('T')) {
         checkedTime = checkedTime.split(checkedTime.includes(' ') ? ' ' : 'T')[1];
-      };
+      }
       return (+checkedTime.split(':')[0]) * 60 + (+checkedTime.split(':')[1]);
-    };
+    }
   }
 
   /**
@@ -111,7 +112,13 @@ export class WorkTimeValidator {
           Представляет время окончания рабочего дня в минутах от 00:00 в часовом поясе предприятия.
       }
    */
-  static isWorkNow(restriction: RestrictionsOrder, currentdate: Date) {
+  static isWorkNow(restriction: RestrictionsOrder, currentdate: Date): {
+    workNow: boolean,
+    isNewDay: boolean,
+    currentTime: number,
+    curentDayStartTime: number,
+    curentDayStopTime: number
+  } {
     if (!restriction || !isValidRestrictionOrder(restriction) || !isDate(currentdate)) {
       throw new Error(
         !isDate(currentdate) ? 'Не передан корректный объект даты' :
@@ -120,8 +127,8 @@ export class WorkTimeValidator {
     } else {
       const companyLocalTimeZone = TimeZoneIdentifier.getTimeZoneGMTOffsetfromNameZone(restriction.timezone).split(':');
       const companyLocalTimeZoneDelta = +companyLocalTimeZone[0] * 60 + (+(companyLocalTimeZone[1]));
-      const lokalTimeDelta = companyLocalTimeZoneDelta + currentdate.getTimezoneOffset(); //смещение времени пользователя относительно времени торговой точки
-      const currentTimeInMinutesWithLocalDelta = WorkTimeValidator.getTimeFromString(formatDate(currentdate, "HH:mm", "en")) + lokalTimeDelta;
+      const lokalTimeDelta = companyLocalTimeZoneDelta + currentdate.getTimezoneOffset(); // смещение времени пользователя относительно времени торговой точки
+      const currentTimeInMinutesWithLocalDelta = WorkTimeValidator.getTimeFromString(formatDate(currentdate, 'HH:mm', 'en')) + lokalTimeDelta;
       const currentTime = currentTimeInMinutesWithLocalDelta > 1440 ? currentTimeInMinutesWithLocalDelta - 1440 : currentTimeInMinutesWithLocalDelta;
       /**
        * текущее время в минутах с начала дня (600 = 10:00. 1200 = 20:00)
@@ -131,8 +138,8 @@ export class WorkTimeValidator {
         restriction,
         currentTimeInMinutesWithLocalDelta > 1440 ? new Date(currentdate.getTime() + 86400000) : currentdate
       ); // текущее рабочее время
-      const curentDayStartTime = WorkTimeValidator.getTimeFromString(currentDayWorkTime.start); //текущее время начала рабочего дня в минутах
-      const curentDayStopTime = WorkTimeValidator.getTimeFromString(currentDayWorkTime.stop); //текущее время окончания рабочего дня в минутах
+      const curentDayStartTime = WorkTimeValidator.getTimeFromString(currentDayWorkTime.start); // текущее время начала рабочего дня в минутах
+      const curentDayStopTime = WorkTimeValidator.getTimeFromString(currentDayWorkTime.stop); // текущее время окончания рабочего дня в минутах
       return {
         workNow: currentTime < curentDayStopTime && currentTime > curentDayStartTime,
         isNewDay: currentTimeInMinutesWithLocalDelta > 1440,
@@ -140,7 +147,7 @@ export class WorkTimeValidator {
         curentDayStartTime,
         curentDayStopTime
       };
-    };
+    }
   }
 
   /**
@@ -178,7 +185,7 @@ export class WorkTimeValidator {
      * В массиве workTime обновляются ограничения времени работы с обычных на актуальные для самовывоза.
      * */
     const newRestriction = {
-      ...restriction, workTime: (<WorkTime[]>restriction.workTime).map(workTime => workTime.selfService)
+      ...restriction, workTime: (restriction.workTime as WorkTime[]).map(workTime => workTime.selfService)
     };
     return WorkTimeValidator.getPossibleDelieveryOrderDateTime(newRestriction, currentdate);
   }
@@ -192,18 +199,18 @@ export class WorkTimeValidator {
     let i = 0;
     let result = null;
     while (i < restriction.workTime.length && !result) {
-      if ((<WorkTime>restriction.workTime[i]).dayOfWeek == 'all' ||
-        (<WorkTime>restriction.workTime[i]).dayOfWeek.includes(
+      if ((restriction.workTime[i] as WorkTime).dayOfWeek === 'all' ||
+        (restriction.workTime[i] as WorkTime).dayOfWeek.includes(
           formatDate(currentdate, 'EEEE', 'en').toLowerCase()
         )) {
         result = restriction.workTime[i];
-      };
+      }
       i += 1;
     }
     if (!result) {
       throw new Error('Нет актуального расписания работы для текущего дня');
     } else {
       return result;
-    };
+    }
   }
 }

@@ -31,6 +31,20 @@ enum DateType {
 
 type DateFormatter = (date: Date, locale: string, offset: number) => string;
 
+/**
+ * Formats a date according to locale rules.
+ *
+ * @param value The date to format, as a Date, or a number (milliseconds since UTC epoch)
+ * or an [ISO date-time string](https://www.w3.org/TR/NOTE-datetime).
+ * @param format The date-time components to include. See `DatePipe` for details.
+ * @param locale A locale code for the locale format rules to use.
+ * @param timezone The time zone. A time zone offset from GMT (such as `'+0430'`),
+ * or a standard UTC/GMT or continental US time zone abbreviation.
+ * If not specified, uses host system settings.
+ *
+ * @returns The formatted date string.
+ *
+ */
 export function formatDate(
   value: string | number | Date, format: string, locale: string, timezone?: string): string {
   let date = toDate(value);
@@ -61,11 +75,11 @@ export function formatDate(
   }
 
   let text = '';
-  parts.forEach(value => {
-    const dateFormatter = getDateFormatter(value);
+  parts.forEach(partValue => {
+    const dateFormatter = getDateFormatter(partValue);
     text += dateFormatter ?
       dateFormatter(date, locale, dateTimezoneOffset) :
-      value === '\'\'' ? '\'' : value.replace(/(^'|'$)/g, '').replace(/''/g, '\'');
+      value === '\'\'' ? '\'' : partValue.replace(/(^'|'$)/g, '').replace(/''/g, '\'');
   });
 
   return text;
@@ -110,8 +124,8 @@ function toDate(value: string | number | Date): Date {
       return new Date(parsedNb);
     }
 
-    let match: RegExpMatchArray | null;
-    if (match = value.match(ISO8601_DATE_REGEX)) {
+    const match: RegExpMatchArray | null = value.match(ISO8601_DATE_REGEX);
+    if (match) {
       return isoStringToDate(match);
     }
   }
@@ -446,7 +460,7 @@ function getDateFormatter(format: string): DateFormatter | null {
 function dateStrGetter(
   name: TranslationType, width: TranslationWidth, form: FormStyle = FormStyle.Format,
   extended = false): DateFormatter {
-  return function (date: Date, locale: string): string {
+  return function(date: Date, locale: string): string {
     return getDateTranslation(date, locale, name, width, form, extended);
   };
 }
@@ -454,7 +468,7 @@ function dateStrGetter(
 function dateGetter(
   name: DateType, size: number, offset: number = 0, trim = false,
   negWrap = false): DateFormatter {
-  return function (date: Date, locale: string): string {
+  return function(date: Date, locale: string): string {
     let part = getDatePart(name, date);
     if (offset > 0 || part > -offset) {
       part += offset;
@@ -475,7 +489,7 @@ function dateGetter(
 
 function getDateTranslation(
   date: Date, locale: string, name: TranslationType, width: TranslationWidth, form: FormStyle,
-  extended: boolean) {
+  extended: boolean): string {
   switch (name) {
     case TranslationType.Months:
       return getLocaleMonthNames(locale, form, width)[date.getMonth()];
@@ -524,9 +538,9 @@ function getDateTranslation(
         }
       }
       // if no rules for the day periods, we use am/pm by default
-      return getLocaleDayPeriods(locale, form, <TranslationWidth>width)[currentHours < 12 ? 0 : 1];
+      return getLocaleDayPeriods(locale, form, width as TranslationWidth)[currentHours < 12 ? 0 : 1];
     case TranslationType.Eras:
-      return getLocaleEraNames(locale, <TranslationWidth>width)[date.getFullYear() <= 0 ? 0 : 1];
+      return getLocaleEraNames(locale, width as TranslationWidth)[date.getFullYear() <= 0 ? 0 : 1];
     default:
       // This default case is not needed by TypeScript compiler, as the switch is exhaustive.
       // However Closure Compiler does not understand that and reports an error in typed mode.
@@ -545,7 +559,7 @@ function timezoneToOffset(timezone: string, fallback: number): number {
   return isNaN(requestedTimezoneOffset) ? fallback : requestedTimezoneOffset;
 }
 
-function addDateMinutes(date: Date, minutes: number) {
+function addDateMinutes(date: Date, minutes: number): Date {
   date = new Date(date.getTime());
   date.setMinutes(date.getMinutes() + minutes);
   return date;
@@ -584,10 +598,10 @@ function isoStringToDate(match: RegExpMatchArray): Date {
   return date;
 }
 
-function formatDateTime(str: string, opt_values: string[]) {
-  if (opt_values) {
-    str = str.replace(/\{([^}]+)}/g, function (match, key) {
-      return (opt_values != null && key in opt_values) ? opt_values[key] : match;
+function formatDateTime(str: string, optValues: string[]): string {
+  if (optValues) {
+    str = str.replace(/\{([^}]+)}/g, function(match: string, key): string {
+      return (optValues != null && key in optValues) ? optValues[key] : match;
     });
   }
   return str;
@@ -599,7 +613,7 @@ const JANUARY = 0;
 const THURSDAY = 4;
 
 function weekNumberingYearGetter(size: number, trim = false): DateFormatter {
-  return function (date: Date, locale: string) {
+  return function(date: Date, locale: string): string {
     const thisThurs = getThursdayThisWeek(date);
     const weekNumberingYear = thisThurs.getFullYear();
     return padNumber(
@@ -608,7 +622,7 @@ function weekNumberingYearGetter(size: number, trim = false): DateFormatter {
 }
 
 function weekGetter(size: number, monthBased = false): DateFormatter {
-  return function (date: Date, locale: string) {
+  return function(date: Date, locale: string): string {
     let result;
     if (monthBased) {
       const nbDaysBefore1stDayOfMonth =
@@ -629,7 +643,7 @@ function weekGetter(size: number, monthBased = false): DateFormatter {
 }
 
 function timeZoneGetter(width: ZoneWidth): DateFormatter {
-  return function (date: Date, locale: string, offset: number) {
+  return function(date: Date, locale: string, offset: number): string {
     const zone = -1 * offset;
     const minusSign = getLocaleNumberSymbol(locale, NumberSymbol.MinusSign);
     const hours = zone > 0 ? Math.floor(zone / 60) : Math.ceil(zone / 60);
@@ -707,13 +721,13 @@ function formatFractionalSeconds(milliseconds: number, digits: number): string {
 
 
 
-function getFirstThursdayOfYear(year: number) {
+function getFirstThursdayOfYear(year: number): Date {
   const firstDayOfYear = (new Date(year, JANUARY, 1)).getDay();
   return new Date(
     year, 0, 1 + ((firstDayOfYear <= THURSDAY) ? THURSDAY : THURSDAY + 7) - firstDayOfYear);
 }
 
-function getThursdayThisWeek(datetime: Date) {
+function getThursdayThisWeek(datetime: Date): Date {
   return new Date(
     datetime.getFullYear(), datetime.getMonth(),
     datetime.getDate() + (THURSDAY - datetime.getDay()));

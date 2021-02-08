@@ -3,12 +3,13 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "../../out-tsc/lib",
-    "target": "es2015",
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": false,
+    "sourceMap": true,
     "inlineSources": true,
     "types": [],
+    "target": "es2015",
+    "module": "es2020",
     "lib": [
       "dom",
       "es2018"
@@ -16,11 +17,11 @@
   },
   "angularCompilerOptions": {
     "skipTemplateCodegen": true,
+    "preserveWhitespaces": false,
     "strictMetadataEmit": true,
     "enableResourceInlining": true
   },
   "exclude": [
     "src/test.ts",
-    "**/*.spec.ts"
   ]
 }

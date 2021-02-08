@@ -163,3 +163,10 @@ class TimeZoneIdentifier {
 }
 
 ~~~
+
+Пример, как выбрать таймзону:
+~~~typescript
+const d = new Date("2020-04-13T00:00:00.000+08:00");
+console.log(
+    d.toLocaleString('en-US', { timeZone: 'America/New_York' })
+); /// 4/12/2020, 12:00:00 PM

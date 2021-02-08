@@ -31,5 +31,5 @@
     "test": "ng test"
   },
   "license": "MIT",
-  "description": ""
+  "description": "Библиотека для работы с ограничениями рабочего времени предприятия для @webresto"
 }

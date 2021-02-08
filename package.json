@@ -33,5 +33,24 @@
     "ts-node": "~8.3.0",
     "tslint": "~6.1.0",
     "typescript": "~4.1.3"
-  }
+  },
+  "contributors": [
+    {
+      "name": "axrl",
+      "email": "axrl@mail.ru"
+    },
+    {
+      "name": "Siziy Ivan",
+      "email": "xziy88@gmail.com"
+    }
+  ],
+  "bugs": {
+    "url": "https://github.com/webresto/worktime/issues"
+  },
+  "homepage": "https://github.com/webresto/worktime/tree/main/projects/ng-worktime",
+  "directories": {
+    "lib": "projects/ng-worktime/src/lib"
+  },
+  "license": "MIT",
+  "description": "Библиотека для работы с ограничениями рабочего времени предприятия для @webresto"
 }

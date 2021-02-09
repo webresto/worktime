@@ -9,7 +9,7 @@ npm i @webresto/ng-worktime
 Импорт
 
 ~~~ typescript
-import { WorkTimeValidator } from '@webresto/ng-worktime'
+import { WorkTimeValidator,TimeZoneIdentifier } from '@webresto/ng-worktime'
 ~~~
 
 В вашем коде:

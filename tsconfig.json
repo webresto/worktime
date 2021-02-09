@@ -1,34 +1,37 @@
 {
   "compileOnSave": false,
+
+  "exclude": [
+    "node_modules", "src/test/*.spec.ts"
+  ],
+  "include": [
+    "src/**/*.ts"
+  ],
   "compilerOptions": {
+    "rootDir": "",
+    "sourceRoot": "src",
+    "declarationMap": true,
+    "inlineSources": true,
+    "types": [
+      "mocha","node"
+    ],
     "baseUrl": "./",
-    "outDir": "./dist/out-tsc",
+    "outDir": "./dist",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noImplicitReturns": true,
+    "esModuleInterop":true,
     "noFallthroughCasesInSwitch": true,
     "sourceMap": true,
-    "declaration": false,
+    "declaration": true,
     "downlevelIteration": true,
     "experimentalDecorators": true,
-    "moduleResolution": "node",
     "importHelpers": true,
     "target": "es2015",
     "module": "es2020",
     "lib": [
       "es2018",
       "dom"
-    ],
-    "paths": {
-      "@webresto/ng-worktime": [
-        "dist/ng-worktime/ng-worktime",
-        "dist/ng-worktime"
-      ]
-    }
-  },
-  "angularCompilerOptions": {
-    "strictInjectionParameters": true,
-    "strictInputAccessModifiers": true,
-    "strictTemplates": true
+    ]
   }
 }

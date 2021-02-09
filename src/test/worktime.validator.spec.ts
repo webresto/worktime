@@ -1,5 +1,6 @@
-import { WorkTimeValidator } from './worktime.validator';
-import { formatDate } from './formatDate';
+import { WorkTimeValidator } from '../lib/worktime.validator';
+import { formatDate } from '../lib/formatDate';
+import { expect } from 'chai';
 
 const caseOne = {
   workTime: [{
@@ -51,21 +52,16 @@ const dateForExpect = [
 ];
 
 describe('WorkTimeValidator', () => {
-  it('Объект создается', () => {
-    expect(
-      new WorkTimeValidator()
-    ).toBeTruthy();
-  });
 
   dateForExpect.forEach(element => {
     it(`Проверяем рабочее время в ${element.dt.toLocaleString()} - ${element.result} `, () =>
-      expect(WorkTimeValidator.isWorkNow(caseOne, element.dt).workNow).toEqual(element.result)
+      expect(WorkTimeValidator.isWorkNow(caseOne, element.dt).workNow).equal(element.result)
     );
   });
 
   dateForExpect.forEach(element => {
     it(`Проверяем рабочее время в ${element.dt.toLocaleString()} - ${element.result} `, () =>
-      expect(WorkTimeValidator.isWorkNow(caseOne, element.dt).workNow).toEqual(element.result)
+      expect(WorkTimeValidator.isWorkNow(caseOne, element.dt).workNow).equal(element.result)
     );
   });
 

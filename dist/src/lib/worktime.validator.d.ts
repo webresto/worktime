@@ -94,4 +94,3 @@ export declare class WorkTimeValidator {
     static getCurrentWorkTime(restriction: RestrictionsOrder, currentdate: Date): WorkTimeBase | WorkTime;
 }
 export {};
-//# sourceMappingURL=worktime.validator.d.ts.map

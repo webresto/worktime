@@ -23,4 +23,3 @@ export declare enum ɵLocaleDataIndex {
     PluralCase = 20,
     ExtraData = 21
 }
-//# sourceMappingURL=locale_data_core.d.ts.map

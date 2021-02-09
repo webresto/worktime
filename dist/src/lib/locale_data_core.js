@@ -90,4 +90,3 @@ export var ɵLocaleDataIndex;
     ɵLocaleDataIndex[ɵLocaleDataIndex["PluralCase"] = 20] = "PluralCase";
     ɵLocaleDataIndex[ɵLocaleDataIndex["ExtraData"] = 21] = "ExtraData";
 })(ɵLocaleDataIndex || (ɵLocaleDataIndex = {}));
-//# sourceMappingURL=locale_data_core.js.map

@@ -1,6 +1,5 @@
 {
   "compileOnSave": false,
-
   "exclude": [
     "node_modules", "src/test/*.spec.ts"
   ],
@@ -9,9 +8,8 @@
   ],
   "compilerOptions": {
     "rootDir": "",
-    "sourceRoot": "src",
-    "declarationMap": true,
-    "inlineSources": true,
+    "declarationMap": false,
+    "inlineSources": false,
     "types": [
       "mocha","node"
     ],
@@ -22,11 +20,10 @@
     "noImplicitReturns": true,
     "esModuleInterop":true,
     "noFallthroughCasesInSwitch": true,
-    "sourceMap": true,
     "declaration": true,
     "downlevelIteration": true,
     "experimentalDecorators": true,
-    "importHelpers": true,
+    "importHelpers": false,
     "target": "es2015",
     "module": "es2020",
     "lib": [

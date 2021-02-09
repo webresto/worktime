@@ -206,4 +206,3 @@ export var NumberSymbol;
      */
     NumberSymbol[NumberSymbol["CurrencyGroup"] = 13] = "CurrencyGroup";
 })(NumberSymbol || (NumberSymbol = {}));
-//# sourceMappingURL=locale_data_api.js.map

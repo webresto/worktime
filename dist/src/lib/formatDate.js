@@ -648,4 +648,3 @@ function getFirstThursdayOfYear(year) {
 function getThursdayThisWeek(datetime) {
     return new Date(datetime.getFullYear(), datetime.getMonth(), datetime.getDate() + (THURSDAY - datetime.getDay()));
 }
-//# sourceMappingURL=formatDate.js.map

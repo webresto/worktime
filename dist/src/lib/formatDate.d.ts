@@ -18,4 +18,3 @@ export declare function formatDate(value: string | number | Date, format: string
  * @param value
  */
 export declare function isDate(value: any): value is Date;
-//# sourceMappingURL=formatDate.d.ts.map

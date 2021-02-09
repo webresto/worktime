@@ -15,4 +15,3 @@ export declare class TimeZoneIdentifier {
      * */
     static getTimeZoneGMTOffsetfromNameZone(zone: string): string;
 }
-//# sourceMappingURL=tz.d.ts.map

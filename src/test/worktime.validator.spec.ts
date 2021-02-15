@@ -65,6 +65,11 @@ describe('WorkTimeValidator', () => {
     );
   });
 
+  it('Проверяем на ошибку, не передадим restriction', () =>
+    expect(() => WorkTimeValidator.isWorkNow(undefined, dateForExpect[0].dt)).to.throw('Не передан объект restriction'));
+  it('Проверяем на ошибку, не передадим дату', () =>
+    expect(() => WorkTimeValidator.isWorkNow(caseOne, undefined)).to.throw('Не передан корректный объект даты'));
+
   const cases = [{
     workTime: [{
       dayOfWeek: 'all',
@@ -173,6 +178,11 @@ describe('WorkTimeValidator', () => {
     minDeliveryTime: '60'
   },
   ];
+
+
+
+
+
 
 
 });

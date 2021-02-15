@@ -23,7 +23,7 @@ interface WorkTime extends WorkTimeBase {
   dayOfWeek: string | string[];
 
   /** ограничения по времени работы для самовывоза */
-  selfService: WorkTimeBase;
+  selfService?: WorkTimeBase;
 }
 
 /**
@@ -185,7 +185,7 @@ export class WorkTimeValidator {
      * В массиве workTime обновляются ограничения времени работы с обычных на актуальные для самовывоза.
      * */
     const newRestriction = {
-      ...restriction, workTime: (restriction.workTime as WorkTime[]).map(workTime => workTime.selfService)
+      ...restriction, workTime: (restriction.workTime as WorkTime[]).map(workTime => workTime.selfService || workTime)
     };
     return WorkTimeValidator.getPossibleDelieveryOrderDateTime(newRestriction, currentdate);
   }

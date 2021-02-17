@@ -43,7 +43,7 @@ interface RestrictionsOrder {
   timezone: string;
 
   /**  массив ограничений по времени работы предприятия для разных дней недели. */
-  workTime: WorkTimeBase[];
+  workTime: WorkTime[];
 }
 
 /**
@@ -185,7 +185,7 @@ export class WorkTimeValidator {
      * В массиве workTime обновляются ограничения времени работы с обычных на актуальные для самовывоза.
      * */
     const newRestriction = {
-      ...restriction, workTime: (<WorkTime[]>restriction.workTime).map(workTime => workTime.selfService ? ({...workTime,... workTime.selfService}) : workTime)
+      ...restriction, workTime: (<WorkTime[]>restriction.workTime).map(workTime => workTime.selfService ? ({ ...workTime, ...workTime.selfService }) : workTime)
     };
     return WorkTimeValidator.getPossibleDelieveryOrderDateTime(newRestriction, currentdate);
   }
@@ -195,14 +195,15 @@ export class WorkTimeValidator {
   * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
   * @param currentdate - объект Date, представляющий текущие локальные дату и время пользователя
   */
-  static getCurrentWorkTime(restriction: RestrictionsOrder, currentdate: Date): WorkTimeBase | WorkTime {
+  static getCurrentWorkTime(restriction: RestrictionsOrder, currentdate: Date): WorkTime {
     let i = 0;
     let result = null;
     while (i < restriction.workTime.length && !result) {
-      if ((restriction.workTime[i] as WorkTime).dayOfWeek === 'all' ||
-        (restriction.workTime[i] as WorkTime).dayOfWeek.includes(
-          formatDate(currentdate, 'EEEE', 'en').toLowerCase()
-        )) {
+      if (restriction.workTime[i].dayOfWeek === 'all' || (
+        typeof restriction.workTime[i].dayOfWeek === 'string' ?
+          (<string>restriction.workTime[i].dayOfWeek).toLowerCase() :
+          (<string[]>restriction.workTime[i].dayOfWeek).map(day => day.toLowerCase())
+      ).includes(formatDate(currentdate, 'EEEE', 'en').toLowerCase())) {
         result = restriction.workTime[i];
       }
       i += 1;

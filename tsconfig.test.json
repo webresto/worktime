@@ -1,4 +1,10 @@
 {
+  "exclude": [
+    "node_modules", "src/test/*.spec.ts"
+  ],
+  "include": [
+    "src/**/*.ts"
+  ],
   "compilerOptions": {
     /* Basic Options */
     "target":

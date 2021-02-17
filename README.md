@@ -72,7 +72,7 @@ interface RestrictionsOrder {
     /** временная зона предприятия */
     timezone: string;
     /**  массив ограничений по времени работы предприятия для разных дней недели. */
-    workTime: WorkTimeBase[];
+    workTime: WorkTime[];
 }
 ~~~
 
@@ -142,7 +142,7 @@ class WorkTimeValidator {
     * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
     * @param currentdate - объект Date, представляющий текущие локальные дату и время пользователя
     */
-    static getCurrentWorkTime(restriction: RestrictionsOrder, currentdate: Date): WorkTimeBase | WorkTime;
+    static getCurrentWorkTime(restriction: RestrictionsOrder, currentdate: Date): WorkTime;
 }
 
 /**

@@ -179,10 +179,30 @@ describe('WorkTimeValidator', () => {
   },
   ];
 
+  const dateWorkedNow = new Date('2021-02-17 11:00+0500');
+  const dateEarlyOneHour = new Date('2021-02-17 09:00+0500');
+  const dateAfterStopOneHour = new Date('2021-02-17 21:00+0500');
+  ///тесты getPossibleDelieveryOrderDateTime
+  it('Проверяем на ошибку, передадим рабочее время 11:00', () =>
+    expect(() => WorkTimeValidator.getPossibleDelieveryOrderDateTime(caseOne, dateWorkedNow)).to.throw('Сейчас рабочее время. Расчет не требуется.'));
 
+  it(`Проверяем ближайшее время для 09:00 `, () =>
+    expect(WorkTimeValidator.getPossibleDelieveryOrderDateTime(caseOne, dateEarlyOneHour)).equal('2021-02-17 11:01')
+  );
+  it(`Проверяем ближайшее время для 21:00 `, () =>
+    expect(WorkTimeValidator.getPossibleDelieveryOrderDateTime(caseOne, dateAfterStopOneHour)).equal('2021-02-18 11:01')
+  );
 
+  ///тесты getPossibleSelfServiceOrderDateTime
+    it('Проверяем на ошибку, передадим рабочее время 11:00', () =>
+    expect(() => WorkTimeValidator.getPossibleSelfServiceOrderDateTime(caseOne, dateWorkedNow)).to.throw('Сейчас рабочее время. Расчет не требуется.'));
 
-
+  it(`Проверяем ближайшее время для 09:00 `, () =>
+    expect(WorkTimeValidator.getPossibleSelfServiceOrderDateTime(caseOne, dateEarlyOneHour)).equal('2021-02-17 11:01')
+  );
+  it(`Проверяем ближайшее время для 21:00 `, () =>
+    expect(WorkTimeValidator.getPossibleSelfServiceOrderDateTime(caseOne, dateAfterStopOneHour)).equal('2021-02-18 11:01')
+  );
 
 
 });

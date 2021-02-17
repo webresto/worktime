@@ -185,7 +185,7 @@ export class WorkTimeValidator {
      * В массиве workTime обновляются ограничения времени работы с обычных на актуальные для самовывоза.
      * */
     const newRestriction = {
-      ...restriction, workTime: (restriction.workTime as WorkTime[]).map(workTime => workTime.selfService || workTime)
+      ...restriction, workTime: (<WorkTime[]>restriction.workTime).map(workTime => workTime.selfService ? ({...workTime,... workTime.selfService}) : workTime)
     };
     return WorkTimeValidator.getPossibleDelieveryOrderDateTime(newRestriction, currentdate);
   }

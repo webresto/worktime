@@ -1,0 +1,19 @@
+{
+  "name": "@webresto/ng-worktime",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/webresto/worktime.git"
+  },
+  "version": "1.0.2",
+  "bugs": {
+    "url": "https://github.com/webresto/worktime/issues"
+  },
+  "homepage": "https://github.com/webresto/worktime#readme",
+  "directories": {
+    "lib": "src/lib"
+  },
+  "license": "MIT",
+  "description": "Библиотека для работы с ограничениями рабочего времени предприятия для @webresto",
+  "main": "src/index.js",
+  "sideEffects": false
+}

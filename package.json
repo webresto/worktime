@@ -1,6 +1,5 @@
 {
   "name": "@webresto/ng-worktime",
-  "main": "index.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/webresto/worktime.git"
@@ -9,6 +8,7 @@
   "scripts": {
     "pub": "cd dist && npm publish --access=public",
     "tsc": "tsc",
+    "build": "tsc && cp ./README.md ./dist && cp ./package.json ./dist && npm run pub",
     "test": "ts-mocha --experimental-module -p ./tsconfig.test.json src/test/*.spec.ts"
   },
   "private": true,

@@ -21,7 +21,7 @@ interface WorkTime extends WorkTimeBase {
 /**
  * Интерфейс объекта, получаемого от API @webresto/core и содержащего текущие данные о рабочем времени предприятия
  */
-interface RestrictionsOrder {
+interface Restrictions {
     /** минимальное время доставки*/
     minDeliveryTime: string;
     /**установлено ли на текущий момент ограничение доставки на определенное время */
@@ -43,7 +43,7 @@ export declare class WorkTimeValidator {
      * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
      * @return :string - Строка, представляющая максимальную доступную дату доставки в формате yyyy-MM-dd.
      */
-    static getMaxOrderDate(restriction: RestrictionsOrder, currentdate: Date): string;
+    static getMaxOrderDate(restriction: Restrictions, currentdate: Date): string;
     /**
      * Метод считает, сколько минут от начала дня (00:00) прошло для переданного времени.
      * @param time - строка в формате HH:mm - время.
@@ -67,7 +67,7 @@ export declare class WorkTimeValidator {
             Представляет время окончания рабочего дня в минутах от 00:00 в часовом поясе предприятия.
         }
      */
-    static isWorkNow(restriction: RestrictionsOrder, currentdate: Date): {
+    static isWorkNow(restriction: Restrictions, currentdate: Date): {
         workNow: boolean;
         isNewDay: boolean;
         currentTime: number;
@@ -79,18 +79,18 @@ export declare class WorkTimeValidator {
      * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
      * @param currentdate - объект Date, представляющий текущие локальные дату и время пользователя
      */
-    static getPossibleDelieveryOrderDateTime(restriction: RestrictionsOrder, currentdate: Date): string;
+    static getPossibleDelieveryOrderDateTime(restriction: Restrictions, currentdate: Date): string;
     /**
      * Метод возвращает ближайшую возможную дату-время заказа для способа доставки "Самовывоз".
      * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
      * @param currentdate - объект Date, представляющий текущие локальные дату и время пользователя
      */
-    static getPossibleSelfServiceOrderDateTime(restriction: RestrictionsOrder, currentdate: Date): string;
+    static getPossibleSelfServiceOrderDateTime(restriction: Restrictions, currentdate: Date): string;
     /**
     * Метод возвращает актуальные данные о времени работы из массива всех вариантов обьекта restriction.
     * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
     * @param currentdate - объект Date, представляющий текущие локальные дату и время пользователя
     */
-    static getCurrentWorkTime(restriction: RestrictionsOrder, currentdate: Date): WorkTime;
+    static getCurrentWorkTime(restriction: Restrictions, currentdate: Date): WorkTime;
 }
 export {};

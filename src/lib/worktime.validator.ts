@@ -12,7 +12,7 @@ interface WorkTimeBase {
   stop: string;
 
   /** перерыв на обед*/
-  break: string;
+  break?: string;
 }
 
 /**
@@ -29,28 +29,40 @@ interface WorkTime extends WorkTimeBase {
 /**
  * Интерфейс объекта, получаемого от API @webresto/core и содержащего текущие данные о рабочем времени предприятия
  */
-interface RestrictionsOrder {
-  /** минимальное время доставки*/
-  minDeliveryTime: string;
-
-  /**установлено ли на текущий момент ограничение доставки на определенное время */
-  deliveryToTimeEnabled?: boolean;
-
-  /** ограничение максимальной даты заказа в будущем (в минутах)*/
-  periodPossibleForOrder: number;
-
+interface Restrictions {
   /** временная зона предприятия */
-  timezone: string;
+  timezone?: string;
 
   /**  массив ограничений по времени работы предприятия для разных дней недели. */
   workTime: WorkTime[];
 }
 
+interface RestrictionsOrder extends Restrictions{
+    /** минимальное время доставки*/
+    minDeliveryTime: string;
+
+    /**установлено ли на текущий момент ограничение доставки на определенное время */
+    deliveryToTimeEnabled: boolean;
+  
+    /** ограничение максимальной даты заказа в будущем (в минутах)*/
+    periodPossibleForOrder: number;
+}
+
+
+
 /**
- * Функция валидации переданного объекта restriction на соответствие интерфейсу RestrictionsOrder
+ * Функция валидации переданного объекта restriction на соответствие интерфейсу Restrictions
+ * @param restriction - объект, содержащий информацию о рабочем времени и временной зоне.
+ */
+function isValidRestriction(restriction: any): restriction is Restrictions {
+    return 'timezone' in restriction && 'workTime' in restriction;
+}
+
+/**
+ * Функция валидации переданного объекта restriction на соответствие минимальным данным для заказа
  * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
  */
-function isValidRestrictionOrder(restriction: any): restriction is RestrictionsOrder {
+ function isValidRestrictionOrder(restriction: RestrictionsOrder): restriction is RestrictionsOrder {
   return 'minDeliveryTime' in restriction && 'periodPossibleForOrder' in restriction && 'timezone' in restriction && 'workTime' in restriction;
 }
 
@@ -95,6 +107,8 @@ export class WorkTimeValidator {
     }
   }
 
+
+  
   /**
    * Метод проверяет, доступна ли возможность доставки на ближайшее время.
    * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
@@ -112,19 +126,28 @@ export class WorkTimeValidator {
           Представляет время окончания рабочего дня в минутах от 00:00 в часовом поясе предприятия.
       }
    */
-  static isWorkNow(restriction: RestrictionsOrder, currentdate: Date): {
+  static isWorkNow(restriction: Restrictions | RestrictionsOrder, currentdate: Date = new Date() ): {
     workNow: boolean,
     isNewDay: boolean,
     currentTime: number,
     curentDayStartTime: number,
     curentDayStopTime: number
   } {
-    if (!restriction || !isValidRestrictionOrder(restriction) || !isDate(currentdate)) {
+
+    // Если испольняется в NodeJS
+    if (typeof process !== 'undefined' && !restriction.timezone )
+      if(process.env.TZ)
+        restriction.timezone = process.env.TZ
+      else
+      restriction.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+
+    if (!restriction || !isValidRestriction(restriction)) {
       throw new Error(
         !isDate(currentdate) ? 'Не передан корректный объект даты' :
           !restriction ? 'Не передан объект restrictions'
             : 'Передан невалидный обьект restrictions');
     } else {
+      //@ts-ignore
       const companyLocalTimeZone = TimeZoneIdentifier.getTimeZoneGMTOffsetfromNameZone(restriction.timezone).split(':');
       const companyLocalTimeZoneDelta = +companyLocalTimeZone[0] * 60 + (+(companyLocalTimeZone[1]));
       const lokalTimeDelta = companyLocalTimeZoneDelta + currentdate.getTimezoneOffset(); // смещение времени пользователя относительно времени торговой точки
@@ -195,7 +218,7 @@ export class WorkTimeValidator {
   * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
   * @param currentdate - объект Date, представляющий текущие локальные дату и время пользователя
   */
-  static getCurrentWorkTime(restriction: RestrictionsOrder, currentdate: Date): WorkTime {
+  static getCurrentWorkTime(restriction: Restrictions, currentdate: Date): WorkTime {
     let i = 0;
     let result = null;
     while (i < restriction.workTime.length && !result) {

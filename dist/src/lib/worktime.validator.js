@@ -1,12 +1,24 @@
 import { formatDate, isDate } from './formatDate';
 import { TimeZoneIdentifier } from './tz';
+
 /**
- * Функция валидации переданного объекта restriction на соответствие интерфейсу RestrictionsOrder
+ * Функция валидации переданного объекта restriction на соответствие интерфейсу Restrictions
  * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
  */
-function isValidRestrictionOrder(restriction) {
+function isValidRestriction(restriction) {
+    return 'timezone' in restriction && 'workTime' in restriction;
+}
+
+
+/**
+ * Функция валидации переданного объекта restriction на соответствие интерфейсу Restrictions
+ * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
+ */
+ function isValidRestrictionOrder(restriction) {
     return 'minDeliveryTime' in restriction && 'periodPossibleForOrder' in restriction && 'timezone' in restriction && 'workTime' in restriction;
 }
+
+
 /**
  * Класс, содержащий статические методы, необходимые для работы с ограничениями рабочего времени предприятия.
  * Создавать новый объект этого класса для использования методов не требуется.
@@ -18,7 +30,7 @@ export class WorkTimeValidator {
      * @return :string - Строка, представляющая максимальную доступную дату доставки в формате yyyy-MM-dd.
      */
     static getMaxOrderDate(restriction, currentdate) {
-        if (restriction && isValidRestrictionOrder(restriction) && isDate(currentdate)) {
+        if (restriction && isValidRestriction(restriction) && isDate(currentdate)) {
             return formatDate(currentdate.getTime() + restriction.periodPossibleForOrder * 60000, 'yyyy-MM-dd', 'en');
         }
         else {
@@ -63,7 +75,7 @@ export class WorkTimeValidator {
         }
      */
     static isWorkNow(restriction, currentdate) {
-        if (!restriction || !isValidRestrictionOrder(restriction) || !isDate(currentdate)) {
+        if (!restriction || !isValidRestriction(restriction) || !isDate(currentdate)) {
             throw new Error(!isDate(currentdate) ? 'Не передан корректный объект даты' :
                 !restriction ? 'Не передан объект restrictions'
                     : 'Передан невалидный обьект restrictions');

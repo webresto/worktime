@@ -5,15 +5,50 @@
     "url": "https://github.com/webresto/worktime.git"
   },
   "version": "1.0.2",
+  "scripts": {
+    "pub": "cd dist && npm publish --access=public",
+    "tsc": "tsc",
+    "webpack": "webpack --mode production --config webpack.config.js",
+    "build": "tsc && cp ./README.md ./dist && cp ./package.json ./dist && npm run pub",
+    "test": "ts-mocha --experimental-module -p ./tsconfig.test.json src/test/*.spec.ts"
+  },
+  "private": true,
+  "devDependencies": {
+    "@types/chai": "^4.2.18",
+    "@types/mocha": "^8.2.2",
+    "@types/node": "^15.12.1",
+    "chai": "^4.3.4",
+    "clean-webpack-plugin": "^4.0.0-alpha.0",
+    "ts-loader": "^9.2.3",
+    "ts-mocha": "^8.0.0",
+    "ts-node": "~10.0.0",
+    "tsconfig-paths-webpack-plugin": "^3.5.1",
+    "typescript": "^4.3.2",
+    "webpack-cli": "^4.7.1",
+    "webpack-merge": "^5.8.0"
+  },
+  "contributors": [
+    {
+      "name": "axrl",
+      "email": "axrl@mail.ru"
+    },
+    {
+      "name": "Siziy Ivan",
+      "email": "xziy88@gmail.com"
+    }
+  ],
   "bugs": {
     "url": "https://github.com/webresto/worktime/issues"
   },
-  "homepage": "https://github.com/webresto/worktime#readme",
+  "homepage": "https://github.com/webresto/worktime/tree/main/projects/ng-worktime",
   "directories": {
-    "lib": "src/lib"
+    "lib": "projects/ng-worktime/src/lib"
   },
   "license": "MIT",
   "description": "Библиотека для работы с ограничениями рабочего времени предприятия для @webresto",
-  "main": "src/index.js",
-  "sideEffects": false
+  "dependencies": {
+    "mocha": "^8.4.0",
+    "tslib": "^2.2.0",
+    "webpack": "^5.38.1"
+  }
 }

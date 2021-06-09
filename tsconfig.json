@@ -24,10 +24,10 @@
     "downlevelIteration": true,
     "experimentalDecorators": true,
     "importHelpers": false,
-    "target": "es2015",
-    "module": "es2020",
+    "module": "commonjs",
+    "target": "ES2019",
     "lib": [
-      "es2018",
+      "es6",
       "dom"
     ]
   }

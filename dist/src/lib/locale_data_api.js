@@ -1,4 +1,7 @@
-import { ɵfindLocaleData, ɵLocaleDataIndex } from './locale_data_core';
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.NumberSymbol = exports.TranslationWidth = exports.getLocaleNumberSymbol = exports.getLocaleExtraDayPeriodRules = exports.getLocaleExtraDayPeriods = exports.getLocaleDayPeriods = exports.getLocaleEraNames = exports.getLocaleDayNames = exports.getLocaleMonthNames = exports.getLocaleDateTimeFormat = exports.getLocaleTimeFormat = exports.getLocaleDateFormat = exports.getLocaleId = exports.FormStyle = exports.FormatWidth = void 0;
+const locale_data_core_1 = require("./locale_data_core");
 function getLastDefinedValue(data, index) {
     for (let i = index; i > -1; i--) {
         if (typeof data[i] !== 'undefined') {
@@ -8,8 +11,8 @@ function getLastDefinedValue(data, index) {
     throw new Error('Locale data API: locale data undefined');
 }
 function checkFullData(data) {
-    if (!data[ɵLocaleDataIndex.ExtraData]) {
-        throw new Error(`Missing extra locale data for the locale "${data[ɵLocaleDataIndex
+    if (!data[locale_data_core_1.ɵLocaleDataIndex.ExtraData]) {
+        throw new Error(`Missing extra locale data for the locale "${data[locale_data_core_1.ɵLocaleDataIndex
             .LocaleId]}". Use "registerLocaleData" to load new data. See the "I18n guide" on angular.io to know more.`);
     }
 }
@@ -17,7 +20,7 @@ function extractTime(time) {
     const [h, m] = time.split(':');
     return { hours: +h, minutes: +m };
 }
-export var FormatWidth;
+var FormatWidth;
 (function (FormatWidth) {
     /**
      * For `en-US`, 'M/d/yy, h:mm a'`
@@ -39,67 +42,76 @@ export var FormatWidth;
      * (Example: `Monday, June 15, 2015 at 9:03:01 AM GMT+01:00`)
      */
     FormatWidth[FormatWidth["Full"] = 3] = "Full";
-})(FormatWidth || (FormatWidth = {}));
-export var FormStyle;
+})(FormatWidth = exports.FormatWidth || (exports.FormatWidth = {}));
+var FormStyle;
 (function (FormStyle) {
     FormStyle[FormStyle["Format"] = 0] = "Format";
     FormStyle[FormStyle["Standalone"] = 1] = "Standalone";
-})(FormStyle || (FormStyle = {}));
-export function getLocaleId(locale) {
-    return ɵfindLocaleData(locale)[ɵLocaleDataIndex.LocaleId];
+})(FormStyle = exports.FormStyle || (exports.FormStyle = {}));
+function getLocaleId(locale) {
+    return locale_data_core_1.ɵfindLocaleData(locale)[locale_data_core_1.ɵLocaleDataIndex.LocaleId];
 }
-export function getLocaleDateFormat(locale, width) {
-    const data = ɵfindLocaleData(locale);
-    return getLastDefinedValue(data[ɵLocaleDataIndex.DateFormat], width);
+exports.getLocaleId = getLocaleId;
+function getLocaleDateFormat(locale, width) {
+    const data = locale_data_core_1.ɵfindLocaleData(locale);
+    return getLastDefinedValue(data[locale_data_core_1.ɵLocaleDataIndex.DateFormat], width);
 }
-export function getLocaleTimeFormat(locale, width) {
-    const data = ɵfindLocaleData(locale);
-    return getLastDefinedValue(data[ɵLocaleDataIndex.TimeFormat], width);
+exports.getLocaleDateFormat = getLocaleDateFormat;
+function getLocaleTimeFormat(locale, width) {
+    const data = locale_data_core_1.ɵfindLocaleData(locale);
+    return getLastDefinedValue(data[locale_data_core_1.ɵLocaleDataIndex.TimeFormat], width);
 }
-export function getLocaleDateTimeFormat(locale, width) {
-    const data = ɵfindLocaleData(locale);
-    const dateTimeFormatData = data[ɵLocaleDataIndex.DateTimeFormat];
+exports.getLocaleTimeFormat = getLocaleTimeFormat;
+function getLocaleDateTimeFormat(locale, width) {
+    const data = locale_data_core_1.ɵfindLocaleData(locale);
+    const dateTimeFormatData = data[locale_data_core_1.ɵLocaleDataIndex.DateTimeFormat];
     return getLastDefinedValue(dateTimeFormatData, width);
 }
-export function getLocaleMonthNames(locale, formStyle, width) {
-    const data = ɵfindLocaleData(locale);
-    const monthsData = [data[ɵLocaleDataIndex.MonthsFormat], data[ɵLocaleDataIndex.MonthsStandalone]];
+exports.getLocaleDateTimeFormat = getLocaleDateTimeFormat;
+function getLocaleMonthNames(locale, formStyle, width) {
+    const data = locale_data_core_1.ɵfindLocaleData(locale);
+    const monthsData = [data[locale_data_core_1.ɵLocaleDataIndex.MonthsFormat], data[locale_data_core_1.ɵLocaleDataIndex.MonthsStandalone]];
     const months = getLastDefinedValue(monthsData, formStyle);
     return getLastDefinedValue(months, width);
 }
-export function getLocaleDayNames(locale, formStyle, width) {
-    const data = ɵfindLocaleData(locale);
-    const daysData = [data[ɵLocaleDataIndex.DaysFormat], data[ɵLocaleDataIndex.DaysStandalone]];
+exports.getLocaleMonthNames = getLocaleMonthNames;
+function getLocaleDayNames(locale, formStyle, width) {
+    const data = locale_data_core_1.ɵfindLocaleData(locale);
+    const daysData = [data[locale_data_core_1.ɵLocaleDataIndex.DaysFormat], data[locale_data_core_1.ɵLocaleDataIndex.DaysStandalone]];
     const days = getLastDefinedValue(daysData, formStyle);
     return getLastDefinedValue(days, width);
 }
-export function getLocaleEraNames(locale, width) {
-    const data = ɵfindLocaleData(locale);
-    const erasData = data[ɵLocaleDataIndex.Eras];
+exports.getLocaleDayNames = getLocaleDayNames;
+function getLocaleEraNames(locale, width) {
+    const data = locale_data_core_1.ɵfindLocaleData(locale);
+    const erasData = data[locale_data_core_1.ɵLocaleDataIndex.Eras];
     return getLastDefinedValue(erasData, width);
 }
-export function getLocaleDayPeriods(locale, formStyle, width) {
-    const data = ɵfindLocaleData(locale);
+exports.getLocaleEraNames = getLocaleEraNames;
+function getLocaleDayPeriods(locale, formStyle, width) {
+    const data = locale_data_core_1.ɵfindLocaleData(locale);
     const amPmData = [
-        data[ɵLocaleDataIndex.DayPeriodsFormat], data[ɵLocaleDataIndex.DayPeriodsStandalone]
+        data[locale_data_core_1.ɵLocaleDataIndex.DayPeriodsFormat], data[locale_data_core_1.ɵLocaleDataIndex.DayPeriodsStandalone]
     ];
     const amPm = getLastDefinedValue(amPmData, formStyle);
     return getLastDefinedValue(amPm, width);
 }
-export function getLocaleExtraDayPeriods(locale, formStyle, width) {
-    const data = ɵfindLocaleData(locale);
+exports.getLocaleDayPeriods = getLocaleDayPeriods;
+function getLocaleExtraDayPeriods(locale, formStyle, width) {
+    const data = locale_data_core_1.ɵfindLocaleData(locale);
     checkFullData(data);
     const dayPeriodsData = [
-        data[ɵLocaleDataIndex.ExtraData][0 /* ExtraDayPeriodFormats */],
-        data[ɵLocaleDataIndex.ExtraData][1 /* ExtraDayPeriodStandalone */]
+        data[locale_data_core_1.ɵLocaleDataIndex.ExtraData][0 /* ExtraDayPeriodFormats */],
+        data[locale_data_core_1.ɵLocaleDataIndex.ExtraData][1 /* ExtraDayPeriodStandalone */]
     ];
     const dayPeriods = getLastDefinedValue(dayPeriodsData, formStyle) || [];
     return getLastDefinedValue(dayPeriods, width) || [];
 }
-export function getLocaleExtraDayPeriodRules(locale) {
-    const data = ɵfindLocaleData(locale);
+exports.getLocaleExtraDayPeriods = getLocaleExtraDayPeriods;
+function getLocaleExtraDayPeriodRules(locale) {
+    const data = locale_data_core_1.ɵfindLocaleData(locale);
     checkFullData(data);
-    const rules = data[ɵLocaleDataIndex.ExtraData][2 /* ExtraDayPeriodsRules */] || [];
+    const rules = data[locale_data_core_1.ɵLocaleDataIndex.ExtraData][2 /* ExtraDayPeriodsRules */] || [];
     return rules.map((rule) => {
         if (typeof rule === 'string') {
             return extractTime(rule);
@@ -107,20 +119,22 @@ export function getLocaleExtraDayPeriodRules(locale) {
         return [extractTime(rule[0]), extractTime(rule[1])];
     });
 }
-export function getLocaleNumberSymbol(locale, symbol) {
-    const data = ɵfindLocaleData(locale);
-    const res = data[ɵLocaleDataIndex.NumberSymbols][symbol];
+exports.getLocaleExtraDayPeriodRules = getLocaleExtraDayPeriodRules;
+function getLocaleNumberSymbol(locale, symbol) {
+    const data = locale_data_core_1.ɵfindLocaleData(locale);
+    const res = data[locale_data_core_1.ɵLocaleDataIndex.NumberSymbols][symbol];
     if (typeof res === 'undefined') {
         if (symbol === NumberSymbol.CurrencyDecimal) {
-            return data[ɵLocaleDataIndex.NumberSymbols][NumberSymbol.Decimal];
+            return data[locale_data_core_1.ɵLocaleDataIndex.NumberSymbols][NumberSymbol.Decimal];
         }
         else if (symbol === NumberSymbol.CurrencyGroup) {
-            return data[ɵLocaleDataIndex.NumberSymbols][NumberSymbol.Group];
+            return data[locale_data_core_1.ɵLocaleDataIndex.NumberSymbols][NumberSymbol.Group];
         }
     }
     return res;
 }
-export var TranslationWidth;
+exports.getLocaleNumberSymbol = getLocaleNumberSymbol;
+var TranslationWidth;
 (function (TranslationWidth) {
     /** 1 character for `en-US`. For example: 'S' */
     TranslationWidth[TranslationWidth["Narrow"] = 0] = "Narrow";
@@ -130,8 +144,8 @@ export var TranslationWidth;
     TranslationWidth[TranslationWidth["Wide"] = 2] = "Wide";
     /** 2 characters for `en-US`, For example: "Su" */
     TranslationWidth[TranslationWidth["Short"] = 3] = "Short";
-})(TranslationWidth || (TranslationWidth = {}));
-export var NumberSymbol;
+})(TranslationWidth = exports.TranslationWidth || (exports.TranslationWidth = {}));
+var NumberSymbol;
 (function (NumberSymbol) {
     /**
      * Decimal separator.
@@ -205,4 +219,4 @@ export var NumberSymbol;
      * Example: $2,345.67
      */
     NumberSymbol[NumberSymbol["CurrencyGroup"] = 13] = "CurrencyGroup";
-})(NumberSymbol || (NumberSymbol = {}));
+})(NumberSymbol = exports.NumberSymbol || (exports.NumberSymbol = {}));

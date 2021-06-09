@@ -73,6 +73,11 @@ class WorkTimeValidator {
         }
      */
     static isWorkNow(restriction, currentdate = new Date()) {
+        if (!restriction.workTime) {
+            return {
+                workNow: true
+            };
+        }
         // Если испольняется в NodeJS
         if (typeof process !== 'undefined' && !restriction.timezone)
             if (process.env.TZ)

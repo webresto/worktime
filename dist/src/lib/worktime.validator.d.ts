@@ -71,10 +71,10 @@ export declare class WorkTimeValidator {
      */
     static isWorkNow(restriction: Restrictions | RestrictionsOrder, currentdate?: Date): {
         workNow: boolean;
-        isNewDay: boolean;
-        currentTime: number;
-        curentDayStartTime: number;
-        curentDayStopTime: number;
+        isNewDay?: boolean;
+        currentTime?: number;
+        curentDayStartTime?: number;
+        curentDayStopTime?: number;
     };
     /**
      * Метод возвращает ближайшую возможную дату-время заказа для способа доставки "Доставка курьером".

@@ -128,11 +128,17 @@ export class WorkTimeValidator {
    */
   static isWorkNow(restriction: Restrictions | RestrictionsOrder, currentdate: Date = new Date() ): {
     workNow: boolean,
-    isNewDay: boolean,
-    currentTime: number,
-    curentDayStartTime: number,
-    curentDayStopTime: number
+    isNewDay?: boolean,
+    currentTime?: number,
+    curentDayStartTime?: number,
+    curentDayStopTime?: number
   } {
+
+    if(!restriction.workTime) {
+      return {
+        workNow: true
+      }
+    }
 
     // Если испольняется в NodeJS
     if (typeof process !== 'undefined' && !restriction.timezone )

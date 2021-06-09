@@ -1,24 +1,19 @@
 import { formatDate, isDate } from './formatDate';
 import { TimeZoneIdentifier } from './tz';
-
 /**
  * Функция валидации переданного объекта restriction на соответствие интерфейсу Restrictions
- * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
+ * @param restriction - объект, содержащий информацию о рабочем времени и временной зоне.
  */
 function isValidRestriction(restriction) {
     return 'timezone' in restriction && 'workTime' in restriction;
 }
-
-
 /**
- * Функция валидации переданного объекта restriction на соответствие интерфейсу Restrictions
+ * Функция валидации переданного объекта restriction на соответствие минимальным данным для заказа
  * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
  */
- function isValidRestrictionOrder(restriction) {
+function isValidRestrictionOrder(restriction) {
     return 'minDeliveryTime' in restriction && 'periodPossibleForOrder' in restriction && 'timezone' in restriction && 'workTime' in restriction;
 }
-
-
 /**
  * Класс, содержащий статические методы, необходимые для работы с ограничениями рабочего времени предприятия.
  * Создавать новый объект этого класса для использования методов не требуется.
@@ -30,7 +25,7 @@ export class WorkTimeValidator {
      * @return :string - Строка, представляющая максимальную доступную дату доставки в формате yyyy-MM-dd.
      */
     static getMaxOrderDate(restriction, currentdate) {
-        if (restriction && isValidRestriction(restriction) && isDate(currentdate)) {
+        if (restriction && isValidRestrictionOrder(restriction) && isDate(currentdate)) {
             return formatDate(currentdate.getTime() + restriction.periodPossibleForOrder * 60000, 'yyyy-MM-dd', 'en');
         }
         else {
@@ -74,13 +69,20 @@ export class WorkTimeValidator {
             Представляет время окончания рабочего дня в минутах от 00:00 в часовом поясе предприятия.
         }
      */
-    static isWorkNow(restriction, currentdate) {
-        if (!restriction || !isValidRestriction(restriction) || !isDate(currentdate)) {
+    static isWorkNow(restriction, currentdate = new Date()) {
+        // Если испольняется в NodeJS
+        if (typeof process !== 'undefined' && !restriction.timezone)
+            if (process.env.TZ)
+                restriction.timezone = process.env.TZ;
+            else
+                restriction.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        if (!restriction || !isValidRestriction(restriction)) {
             throw new Error(!isDate(currentdate) ? 'Не передан корректный объект даты' :
                 !restriction ? 'Не передан объект restrictions'
                     : 'Передан невалидный обьект restrictions');
         }
         else {
+            //@ts-ignore
             const companyLocalTimeZone = TimeZoneIdentifier.getTimeZoneGMTOffsetfromNameZone(restriction.timezone).split(':');
             const companyLocalTimeZoneDelta = +companyLocalTimeZone[0] * 60 + (+(companyLocalTimeZone[1]));
             const lokalTimeDelta = companyLocalTimeZoneDelta + currentdate.getTimezoneOffset(); // смещение времени пользователя относительно времени торговой точки

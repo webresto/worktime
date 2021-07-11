@@ -1,3 +1,6 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ɵLocaleDataIndex = exports.ɵfindLocaleData = void 0;
 function plural(n) {
     const i = Math.floor(Math.abs(n));
     const v = n.toString().replace(/^[^.]*\.?/, '').length;
@@ -48,7 +51,7 @@ const localeEn = [
     'ltr',
     plural
 ];
-export function ɵfindLocaleData(locale) {
+function ɵfindLocaleData(locale) {
     const normalizedLocale = normalizeLocale(locale);
     let match = getLocaleData(normalizedLocale);
     if (match) {
@@ -65,7 +68,8 @@ export function ɵfindLocaleData(locale) {
     }
     throw new Error(`Missing locale data for the locale "${locale}".`);
 }
-export var ɵLocaleDataIndex;
+exports.ɵfindLocaleData = ɵfindLocaleData;
+var ɵLocaleDataIndex;
 (function (ɵLocaleDataIndex) {
     ɵLocaleDataIndex[ɵLocaleDataIndex["LocaleId"] = 0] = "LocaleId";
     ɵLocaleDataIndex[ɵLocaleDataIndex["DayPeriodsFormat"] = 1] = "DayPeriodsFormat";
@@ -89,4 +93,4 @@ export var ɵLocaleDataIndex;
     ɵLocaleDataIndex[ɵLocaleDataIndex["Directionality"] = 19] = "Directionality";
     ɵLocaleDataIndex[ɵLocaleDataIndex["PluralCase"] = 20] = "PluralCase";
     ɵLocaleDataIndex[ɵLocaleDataIndex["ExtraData"] = 21] = "ExtraData";
-})(ɵLocaleDataIndex || (ɵLocaleDataIndex = {}));
+})(ɵLocaleDataIndex = exports.ɵLocaleDataIndex || (exports.ɵLocaleDataIndex = {}));

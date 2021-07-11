@@ -6,7 +6,7 @@
   },
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "scripts": {
     "pub": "cd dist && npm publish --access=public",
     "tsc": "tsc",

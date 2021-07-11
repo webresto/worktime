@@ -25,9 +25,9 @@
     "experimentalDecorators": true,
     "importHelpers": false,
     "target": "es2015",
-    "module": "es2020",
+    "module": "commonjs",
     "lib": [
-      "es2018",
+      "es2015",
       "dom"
     ]
   }

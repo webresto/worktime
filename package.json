@@ -7,7 +7,13 @@
   "type": "module",
   "main": "./cjs/index.js",
   "module": "./esm/index.js",
-  "version": "1.0.6",
+  "exports": {
+    ".": {
+      "require":  "./cjs/index.js",
+      "default": "./esm/index.js"
+    }
+  },
+  "version": "1.0.7",
   "scripts": {
     "pub": "cd dist && npm publish --access=public",
     "tsc": "tsc",

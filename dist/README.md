@@ -3,13 +3,13 @@
 
 ## Установка
 
-npm i @webresto/ng-worktime
+npm i @webresto/worktime
 
 ## Пример
 Импорт
 
 ~~~ typescript
-import { WorkTimeValidator,TimeZoneIdentifier } from '@webresto/ng-worktime'
+import { WorkTimeValidator,TimeZoneIdentifier } from '@webresto/worktime'
 ~~~
 
 В вашем коде:

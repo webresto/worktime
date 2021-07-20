@@ -1,8 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.WorkTimeValidator = void 0;
-const formatDate_1 = require("./formatDate");
-const tz_1 = require("./tz");
+import { formatDate, isDate } from './formatDate';
+import { TimeZoneIdentifier } from './tz';
 /**
  * Функция валидации переданного объекта restriction на соответствие интерфейсу RestrictionsOrder
  * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
@@ -14,18 +11,18 @@ function isValidRestrictionOrder(restriction) {
  * Класс, содержащий статические методы, необходимые для работы с ограничениями рабочего времени предприятия.
  * Создавать новый объект этого класса для использования методов не требуется.
  */
-class WorkTimeValidator {
+export class WorkTimeValidator {
     /**
      * Метод возвращает максимальную возможную дату, на которую можно заказать доставку.
      * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
      * @return :string - Строка, представляющая максимальную доступную дату доставки в формате yyyy-MM-dd.
      */
     static getMaxOrderDate(restriction, currentdate) {
-        if (restriction && isValidRestrictionOrder(restriction) && formatDate_1.isDate(currentdate)) {
-            return formatDate_1.formatDate(currentdate.getTime() + restriction.periodPossibleForOrder * 60000, 'yyyy-MM-dd', 'en');
+        if (restriction && isValidRestrictionOrder(restriction) && isDate(currentdate)) {
+            return formatDate(currentdate.getTime() + restriction.periodPossibleForOrder * 60000, 'yyyy-MM-dd', 'en');
         }
         else {
-            throw new Error(formatDate_1.isDate(currentdate) ?
+            throw new Error(isDate(currentdate) ?
                 'Не передан корректный объект даты' :
                 !restriction ? 'Не передан объект restrictions' :
                     'Передан невалидный обьект restrictions');
@@ -66,16 +63,16 @@ class WorkTimeValidator {
         }
      */
     static isWorkNow(restriction, currentdate) {
-        if (!restriction || !isValidRestrictionOrder(restriction) || !formatDate_1.isDate(currentdate)) {
-            throw new Error(!formatDate_1.isDate(currentdate) ? 'Не передан корректный объект даты' :
+        if (!restriction || !isValidRestrictionOrder(restriction) || !isDate(currentdate)) {
+            throw new Error(!isDate(currentdate) ? 'Не передан корректный объект даты' :
                 !restriction ? 'Не передан объект restrictions'
                     : 'Передан невалидный обьект restrictions');
         }
         else {
-            const companyLocalTimeZone = tz_1.TimeZoneIdentifier.getTimeZoneGMTOffsetfromNameZone(restriction.timezone).split(':');
+            const companyLocalTimeZone = TimeZoneIdentifier.getTimeZoneGMTOffsetfromNameZone(restriction.timezone).split(':');
             const companyLocalTimeZoneDelta = +companyLocalTimeZone[0] * 60 + (+(companyLocalTimeZone[1]));
             const lokalTimeDelta = companyLocalTimeZoneDelta + currentdate.getTimezoneOffset(); // смещение времени пользователя относительно времени торговой точки
-            const currentTimeInMinutesWithLocalDelta = WorkTimeValidator.getTimeFromString(formatDate_1.formatDate(currentdate, 'HH:mm', 'en')) + lokalTimeDelta;
+            const currentTimeInMinutesWithLocalDelta = WorkTimeValidator.getTimeFromString(formatDate(currentdate, 'HH:mm', 'en')) + lokalTimeDelta;
             const currentTime = currentTimeInMinutesWithLocalDelta > 1440 ? currentTimeInMinutesWithLocalDelta - 1440 : currentTimeInMinutesWithLocalDelta;
             /**
              * текущее время в минутах с начала дня (600 = 10:00. 1200 = 20:00)
@@ -108,7 +105,7 @@ class WorkTimeValidator {
             const time = this.getTimeFromString(currentDayWorkTime.start) + (+restriction.minDeliveryTime) + 1;
             const hour = Math.floor(time / 60);
             const minutes = time - (hour * 60);
-            return formatDate_1.formatDate(checkTime.isNewDay || checkTime.currentTime > checkTime.curentDayStopTime ? (currentdate.getTime() + 86400000) : currentdate, `yyyy-MM-dd ${hour <= 9 ? '0' + hour : hour}:${minutes <= 9 ? '0' + minutes : minutes}`, 'en');
+            return formatDate(checkTime.isNewDay || checkTime.currentTime > checkTime.curentDayStopTime ? (currentdate.getTime() + 86400000) : currentdate, `yyyy-MM-dd ${hour <= 9 ? '0' + hour : hour}:${minutes <= 9 ? '0' + minutes : minutes}`, 'en');
         }
     }
     /**
@@ -121,7 +118,9 @@ class WorkTimeValidator {
          * Для обеспечения иммутабельности данных создается новый обьект restrictions, идентичный полученному в параметрах, но с измененным массивом workTime.
          * В массиве workTime обновляются ограничения времени работы с обычных на актуальные для самовывоза.
          * */
-        const newRestriction = Object.assign(Object.assign({}, restriction), { workTime: restriction.workTime.map(workTime => workTime.selfService ? (Object.assign(Object.assign({}, workTime), workTime.selfService)) : workTime) });
+        const newRestriction = {
+            ...restriction, workTime: restriction.workTime.map(workTime => workTime.selfService ? ({ ...workTime, ...workTime.selfService }) : workTime)
+        };
         return WorkTimeValidator.getPossibleDelieveryOrderDateTime(newRestriction, currentdate);
     }
     /**
@@ -135,7 +134,7 @@ class WorkTimeValidator {
         while (i < restriction.workTime.length && !result) {
             if (restriction.workTime[i].dayOfWeek === 'all' || (typeof restriction.workTime[i].dayOfWeek === 'string' ?
                 restriction.workTime[i].dayOfWeek.toLowerCase() :
-                restriction.workTime[i].dayOfWeek.map(day => day.toLowerCase())).includes(formatDate_1.formatDate(currentdate, 'EEEE', 'en').toLowerCase())) {
+                restriction.workTime[i].dayOfWeek.map(day => day.toLowerCase())).includes(formatDate(currentdate, 'EEEE', 'en').toLowerCase())) {
                 result = restriction.workTime[i];
             }
             i += 1;
@@ -148,4 +147,3 @@ class WorkTimeValidator {
         }
     }
 }
-exports.WorkTimeValidator = WorkTimeValidator;

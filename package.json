@@ -4,29 +4,26 @@
     "type": "git",
     "url": "https://github.com/webresto/worktime.git"
   },
-  "main": "dist/src/index.js",
-  "types": "dist/src/index.d.ts",
-  "version": "1.0.4",
+  "type": "module",
+  "main": "./cjs/index.js",
+  "module": "./esm/index.js",
+  "version": "1.0.6",
   "scripts": {
     "pub": "cd dist && npm publish --access=public",
     "tsc": "tsc",
-    "webpack": "webpack --mode production --config webpack.config.js",
-    "build": "tsc ; cp ./README.md ./dist && cp ./package.json ./dist && npm run pub",
+    "build": "rm -rf ./dist && tsc --build ./tsconfig.json && tsc --build ./tsconfig.commonjs.json && cp ./README.md ./dist && cp ./package.json ./dist",
+    "build:pub":"npm run build && npm run pub",
     "test": "ts-mocha --experimental-module -p ./tsconfig.test.json src/test/*.spec.ts"
   },
   "devDependencies": {
-    "@types/chai": "^4.2.18",
-    "@types/mocha": "^8.2.2",
-    "@types/node": "^15.12.1",
+    "@types/chai": "^4.2.21",
+    "@types/mocha": "^8.2.3",
+    "@types/node": "^15.14.2",
     "chai": "^4.3.4",
-    "clean-webpack-plugin": "^4.0.0-alpha.0",
-    "ts-loader": "^9.2.3",
+    "mocha": "^8.4.0",
     "ts-mocha": "^8.0.0",
     "ts-node": "~10.0.0",
-    "tsconfig-paths-webpack-plugin": "^3.5.1",
-    "typescript": "^4.3.2",
-    "webpack-cli": "^4.7.1",
-    "webpack-merge": "^5.8.0"
+    "typescript": "^4.3.5"
   },
   "contributors": [
     {
@@ -42,14 +39,9 @@
     "url": "https://github.com/webresto/worktime/issues"
   },
   "homepage": "https://github.com/webresto/worktime/tree/main/projects/worktime",
-  "directories": {
-    "lib": "projects/worktime/src/lib"
-  },
   "license": "MIT",
   "description": "Библиотека для работы с ограничениями рабочего времени предприятия для @webresto",
   "dependencies": {
-    "mocha": "^8.4.0",
-    "tslib": "^2.2.0",
-    "webpack": "^5.38.1"
+    "tslib": "^2.3.0"
   }
 }

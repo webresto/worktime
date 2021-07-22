@@ -7,7 +7,7 @@ interface WorkTimeBase {
     /** время окончания рабочего дня*/
     stop: string;
     /** перерыв на обед*/
-    break: string;
+    break?: string;
 }
 /**
  * Информация о времени работы предприятия - служебный интерфейс.
@@ -21,17 +21,19 @@ export interface WorkTime extends WorkTimeBase {
 /**
  * Интерфейс объекта, получаемого от API @webresto/core и содержащего текущие данные о рабочем времени предприятия
  */
-export interface RestrictionsOrder {
+interface Restrictions {
+    /** временная зона предприятия */
+    timezone?: string;
+    /**  массив ограничений по времени работы предприятия для разных дней недели. */
+    workTime: WorkTime[];
+}
+interface RestrictionsOrder extends Restrictions {
     /** минимальное время доставки*/
     minDeliveryTime: string;
     /**установлено ли на текущий момент ограничение доставки на определенное время */
-    deliveryToTimeEnabled?: boolean;
+    deliveryToTimeEnabled: boolean;
     /** ограничение максимальной даты заказа в будущем (в минутах)*/
     periodPossibleForOrder: number;
-    /** временная зона предприятия */
-    timezone: string;
-    /**  массив ограничений по времени работы предприятия для разных дней недели. */
-    workTime: WorkTime[];
 }
 /**
  * Класс, содержащий статические методы, необходимые для работы с ограничениями рабочего времени предприятия.
@@ -67,12 +69,12 @@ export declare class WorkTimeValidator {
             Представляет время окончания рабочего дня в минутах от 00:00 в часовом поясе предприятия.
         }
      */
-    static isWorkNow(restriction: RestrictionsOrder, currentdate: Date): {
+    static isWorkNow(restriction: Restrictions | RestrictionsOrder, currentdate?: Date): {
         workNow: boolean;
-        isNewDay: boolean;
-        currentTime: number;
-        curentDayStartTime: number;
-        curentDayStopTime: number;
+        isNewDay?: boolean;
+        currentTime?: number;
+        curentDayStartTime?: number;
+        curentDayStopTime?: number;
     };
     /**
      * Метод возвращает ближайшую возможную дату-время заказа для способа доставки "Доставка курьером".
@@ -91,6 +93,6 @@ export declare class WorkTimeValidator {
     * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
     * @param currentdate - объект Date, представляющий текущие локальные дату и время пользователя
     */
-    static getCurrentWorkTime(restriction: RestrictionsOrder, currentdate: Date): WorkTime;
+    static getCurrentWorkTime(restriction: Restrictions, currentdate: Date): WorkTime;
 }
 export {};

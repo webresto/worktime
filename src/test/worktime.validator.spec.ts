@@ -20,21 +20,30 @@ const caseOne = {
   minDeliveryTime: '60'
 };
 
+const caseTwo = {
+  workTime: [{
+    dayOfWeek: 'all',
+    start: '10:00',
+    stop: '20:00'
+    }
+  ]
+};
+
 const dateForExpect = [
-  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 01:00:00', 'en')), result: false },
-  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 07:00:00', 'en')), result: false },
-  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 08:01:00', 'en')), result: true },
-  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 10:00:00', 'en')), result: true },
-  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 11:00:00', 'en')), result: true },
-  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 12:00:00', 'en')), result: true },
-  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 14:00:00', 'en')), result: true },
-  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 17:00:00', 'en')), result: true },
-  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 19:00:00', 'en')), result: false },
-  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 20:00:00', 'en')), result: false },
-  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 22:00:00', 'en')), result: false },
-  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 23:59:59', 'en')), result: false },
-  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 01:00:00Z', 'en')), result: false },
-  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 11:00:00Z', 'en')), result: true },
+  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 01:00:00', 'en', '+0300')), result: false },
+  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 07:00:00', 'en', '+0300')), result: false },
+  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 08:01:00', 'en', '+0300')), result: true },
+  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 10:00:00', 'en', '+0300')), result: true },
+  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 11:00:00', 'en', '+0300')), result: true },
+  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 12:00:00', 'en', '+0300')), result: true },
+  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 14:00:00', 'en', '+0300')), result: true },
+  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 17:00:00', 'en', '+0300')), result: true },
+  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 19:00:00', 'en', '+0300')), result: false },
+  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 20:00:00', 'en', '+0300')), result: false },
+  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 22:00:00', 'en', '+0300')), result: false },
+  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 23:59:59', 'en', '+0300')), result: false },
+  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 01:00:00Z', 'en', '+0300')), result: false },
+  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 11:00:00Z', 'en', '+0300')), result: true },
   { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 01:00:00Z', 'en', '+0000')), result: false },
   { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 04:45:00Z', 'en', '+0000')), result: false },
   { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 05:45:00Z', 'en', '+0000')), result: true },
@@ -51,17 +60,41 @@ const dateForExpect = [
   { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 23:59:59Z', 'en', '+0000')), result: false }
 ];
 
+
+const dateForExpectLocal = [
+  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 01:00:00', 'en')), result: false },
+  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 07:00:00', 'en')), result: false },
+  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 08:01:00', 'en')), result: false },
+  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 10:01:00', 'en')), result: true },
+  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 11:00:00', 'en')), result: true },
+  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 12:00:00', 'en')), result: true },
+  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 14:00:00', 'en')), result: true },
+  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 17:00:00', 'en')), result: true },
+  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 19:00:00', 'en')), result: true },
+  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 19:59:00', 'en')), result: true },
+  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 20:00:00', 'en')), result: false },
+  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 22:00:00', 'en')), result: false },
+  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 23:59:59', 'en')), result: false },
+  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 01:00:00Z', 'en')), result: false },
+  { dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 11:00:00Z', 'en')), result: true }
+];
+
 describe('WorkTimeValidator', () => {
 
   dateForExpect.forEach(element => {
-    it(`Проверяем рабочее время в ${element.dt.toLocaleString()} - ${element.result} `, () =>
+    it(`Проверяем рабочее время заказа в ${element.dt.toLocaleString()} - ${element.result} `, () =>
+    {
+      console.log(element, WorkTimeValidator.isWorkNow(caseOne, element.dt));
       expect(WorkTimeValidator.isWorkNow(caseOne, element.dt).workNow).equal(element.result)
+    }
     );
   });
 
-  dateForExpect.forEach(element => {
-    it(`Проверяем рабочее время в ${element.dt.toLocaleString()} - ${element.result} `, () =>
-      expect(WorkTimeValidator.isWorkNow(caseOne, element.dt).workNow).equal(element.result)
+  dateForExpectLocal.forEach(element => {
+    it(`Проверяем "только" рабочее время в ${element.dt.toLocaleString()} - ${element.result} `, () => {
+          console.log(WorkTimeValidator.isWorkNow(caseTwo, element.dt));
+          expect(WorkTimeValidator.isWorkNow(caseTwo, element.dt).workNow).equal(element.result)
+      }
     );
   });
 

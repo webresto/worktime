@@ -1,4 +1,7 @@
-import { FormatWidth, FormStyle, getLocaleDateFormat, getLocaleDateTimeFormat, getLocaleDayNames, getLocaleDayPeriods, getLocaleEraNames, getLocaleExtraDayPeriodRules, getLocaleExtraDayPeriods, getLocaleId, getLocaleMonthNames, getLocaleNumberSymbol, getLocaleTimeFormat, NumberSymbol, TranslationWidth } from './locale_data_api';
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.isDate = exports.formatDate = void 0;
+const locale_data_api_1 = require("./locale_data_api");
 const ISO8601_DATE_REGEX = /^(\d{4})-?(\d\d)-?(\d\d)(?:T(\d\d)(?::?(\d\d)(?::?(\d\d)(?:\.(\d+))?)?)?(Z|([+-])(\d\d):?(\d\d))?)?$/;
 const NAMED_FORMATS = {};
 const DATE_FORMATS_SPLIT = /((?:[^GyYMLwWdEabBhHmsSzZO']+)|(?:'(?:[^']|'')*')|(?:G{1,5}|y{1,4}|Y{1,4}|M{1,5}|L{1,5}|w{1,2}|W{1}|d{1,2}|E{1,6}|a{1,5}|b{1,5}|B{1,5}|h{1,2}|H{1,2}|m{1,2}|s{1,2}|S{1,3}|z{1,4}|Z{1,5}|O{1,4}))([\s\S]*)/;
@@ -41,7 +44,7 @@ var DateType;
  * @returns The formatted date string.
  *
  */
-export function formatDate(value, format, locale, timezone) {
+function formatDate(value, format, locale, timezone) {
     let date = toDate(value);
     const namedFormat = getNamedFormat(locale, format);
     format = namedFormat || format;
@@ -76,13 +79,15 @@ export function formatDate(value, format, locale, timezone) {
     });
     return text;
 }
+exports.formatDate = formatDate;
 /**
  * Функция проверяет корректность переданного объекта Date.
  * @param value
  */
-export function isDate(value) {
+function isDate(value) {
     return value instanceof Date && !isNaN(value.valueOf());
 }
+exports.isDate = isDate;
 function toDate(value) {
     if (isDate(value)) {
         return value;
@@ -120,7 +125,7 @@ function toDate(value) {
     return date;
 }
 function getNamedFormat(locale, format) {
-    const localeId = getLocaleId(locale);
+    const localeId = locale_data_api_1.getLocaleId(locale);
     NAMED_FORMATS[localeId] = NAMED_FORMATS[localeId] || {};
     if (NAMED_FORMATS[localeId][format]) {
         return NAMED_FORMATS[localeId][format];
@@ -128,50 +133,50 @@ function getNamedFormat(locale, format) {
     let formatValue = '';
     switch (format) {
         case 'shortDate':
-            formatValue = getLocaleDateFormat(locale, FormatWidth.Short);
+            formatValue = locale_data_api_1.getLocaleDateFormat(locale, locale_data_api_1.FormatWidth.Short);
             break;
         case 'mediumDate':
-            formatValue = getLocaleDateFormat(locale, FormatWidth.Medium);
+            formatValue = locale_data_api_1.getLocaleDateFormat(locale, locale_data_api_1.FormatWidth.Medium);
             break;
         case 'longDate':
-            formatValue = getLocaleDateFormat(locale, FormatWidth.Long);
+            formatValue = locale_data_api_1.getLocaleDateFormat(locale, locale_data_api_1.FormatWidth.Long);
             break;
         case 'fullDate':
-            formatValue = getLocaleDateFormat(locale, FormatWidth.Full);
+            formatValue = locale_data_api_1.getLocaleDateFormat(locale, locale_data_api_1.FormatWidth.Full);
             break;
         case 'shortTime':
-            formatValue = getLocaleTimeFormat(locale, FormatWidth.Short);
+            formatValue = locale_data_api_1.getLocaleTimeFormat(locale, locale_data_api_1.FormatWidth.Short);
             break;
         case 'mediumTime':
-            formatValue = getLocaleTimeFormat(locale, FormatWidth.Medium);
+            formatValue = locale_data_api_1.getLocaleTimeFormat(locale, locale_data_api_1.FormatWidth.Medium);
             break;
         case 'longTime':
-            formatValue = getLocaleTimeFormat(locale, FormatWidth.Long);
+            formatValue = locale_data_api_1.getLocaleTimeFormat(locale, locale_data_api_1.FormatWidth.Long);
             break;
         case 'fullTime':
-            formatValue = getLocaleTimeFormat(locale, FormatWidth.Full);
+            formatValue = locale_data_api_1.getLocaleTimeFormat(locale, locale_data_api_1.FormatWidth.Full);
             break;
         case 'short':
             const shortTime = getNamedFormat(locale, 'shortTime');
             const shortDate = getNamedFormat(locale, 'shortDate');
-            formatValue = formatDateTime(getLocaleDateTimeFormat(locale, FormatWidth.Short), [shortTime, shortDate]);
+            formatValue = formatDateTime(locale_data_api_1.getLocaleDateTimeFormat(locale, locale_data_api_1.FormatWidth.Short), [shortTime, shortDate]);
             break;
         case 'medium':
             const mediumTime = getNamedFormat(locale, 'mediumTime');
             const mediumDate = getNamedFormat(locale, 'mediumDate');
-            formatValue = formatDateTime(getLocaleDateTimeFormat(locale, FormatWidth.Medium), [mediumTime, mediumDate]);
+            formatValue = formatDateTime(locale_data_api_1.getLocaleDateTimeFormat(locale, locale_data_api_1.FormatWidth.Medium), [mediumTime, mediumDate]);
             break;
         case 'long':
             const longTime = getNamedFormat(locale, 'longTime');
             const longDate = getNamedFormat(locale, 'longDate');
             formatValue =
-                formatDateTime(getLocaleDateTimeFormat(locale, FormatWidth.Long), [longTime, longDate]);
+                formatDateTime(locale_data_api_1.getLocaleDateTimeFormat(locale, locale_data_api_1.FormatWidth.Long), [longTime, longDate]);
             break;
         case 'full':
             const fullTime = getNamedFormat(locale, 'fullTime');
             const fullDate = getNamedFormat(locale, 'fullDate');
             formatValue =
-                formatDateTime(getLocaleDateTimeFormat(locale, FormatWidth.Full), [fullTime, fullDate]);
+                formatDateTime(locale_data_api_1.getLocaleDateTimeFormat(locale, locale_data_api_1.FormatWidth.Full), [fullTime, fullDate]);
             break;
     }
     if (formatValue) {
@@ -190,13 +195,13 @@ function getDateFormatter(format) {
         case 'G':
         case 'GG':
         case 'GGG':
-            formatter = dateStrGetter(TranslationType.Eras, TranslationWidth.Abbreviated);
+            formatter = dateStrGetter(TranslationType.Eras, locale_data_api_1.TranslationWidth.Abbreviated);
             break;
         case 'GGGG':
-            formatter = dateStrGetter(TranslationType.Eras, TranslationWidth.Wide);
+            formatter = dateStrGetter(TranslationType.Eras, locale_data_api_1.TranslationWidth.Wide);
             break;
         case 'GGGGG':
-            formatter = dateStrGetter(TranslationType.Eras, TranslationWidth.Narrow);
+            formatter = dateStrGetter(TranslationType.Eras, locale_data_api_1.TranslationWidth.Narrow);
             break;
         // 1 digit representation of the year, e.g. (AD 1 => 1, AD 199 => 199)
         case 'y':
@@ -243,26 +248,26 @@ function getDateFormatter(format) {
             break;
         // Month of the year (January, ...), string, format
         case 'MMM':
-            formatter = dateStrGetter(TranslationType.Months, TranslationWidth.Abbreviated);
+            formatter = dateStrGetter(TranslationType.Months, locale_data_api_1.TranslationWidth.Abbreviated);
             break;
         case 'MMMM':
-            formatter = dateStrGetter(TranslationType.Months, TranslationWidth.Wide);
+            formatter = dateStrGetter(TranslationType.Months, locale_data_api_1.TranslationWidth.Wide);
             break;
         case 'MMMMM':
-            formatter = dateStrGetter(TranslationType.Months, TranslationWidth.Narrow);
+            formatter = dateStrGetter(TranslationType.Months, locale_data_api_1.TranslationWidth.Narrow);
             break;
         // Month of the year (January, ...), string, standalone
         case 'LLL':
             formatter =
-                dateStrGetter(TranslationType.Months, TranslationWidth.Abbreviated, FormStyle.Standalone);
+                dateStrGetter(TranslationType.Months, locale_data_api_1.TranslationWidth.Abbreviated, locale_data_api_1.FormStyle.Standalone);
             break;
         case 'LLLL':
             formatter =
-                dateStrGetter(TranslationType.Months, TranslationWidth.Wide, FormStyle.Standalone);
+                dateStrGetter(TranslationType.Months, locale_data_api_1.TranslationWidth.Wide, locale_data_api_1.FormStyle.Standalone);
             break;
         case 'LLLLL':
             formatter =
-                dateStrGetter(TranslationType.Months, TranslationWidth.Narrow, FormStyle.Standalone);
+                dateStrGetter(TranslationType.Months, locale_data_api_1.TranslationWidth.Narrow, locale_data_api_1.FormStyle.Standalone);
             break;
         // Week of the year (1, ... 52)
         case 'w':
@@ -286,53 +291,53 @@ function getDateFormatter(format) {
         case 'E':
         case 'EE':
         case 'EEE':
-            formatter = dateStrGetter(TranslationType.Days, TranslationWidth.Abbreviated);
+            formatter = dateStrGetter(TranslationType.Days, locale_data_api_1.TranslationWidth.Abbreviated);
             break;
         case 'EEEE':
-            formatter = dateStrGetter(TranslationType.Days, TranslationWidth.Wide);
+            formatter = dateStrGetter(TranslationType.Days, locale_data_api_1.TranslationWidth.Wide);
             break;
         case 'EEEEE':
-            formatter = dateStrGetter(TranslationType.Days, TranslationWidth.Narrow);
+            formatter = dateStrGetter(TranslationType.Days, locale_data_api_1.TranslationWidth.Narrow);
             break;
         case 'EEEEEE':
-            formatter = dateStrGetter(TranslationType.Days, TranslationWidth.Short);
+            formatter = dateStrGetter(TranslationType.Days, locale_data_api_1.TranslationWidth.Short);
             break;
         // Generic period of the day (am-pm)
         case 'a':
         case 'aa':
         case 'aaa':
-            formatter = dateStrGetter(TranslationType.DayPeriods, TranslationWidth.Abbreviated);
+            formatter = dateStrGetter(TranslationType.DayPeriods, locale_data_api_1.TranslationWidth.Abbreviated);
             break;
         case 'aaaa':
-            formatter = dateStrGetter(TranslationType.DayPeriods, TranslationWidth.Wide);
+            formatter = dateStrGetter(TranslationType.DayPeriods, locale_data_api_1.TranslationWidth.Wide);
             break;
         case 'aaaaa':
-            formatter = dateStrGetter(TranslationType.DayPeriods, TranslationWidth.Narrow);
+            formatter = dateStrGetter(TranslationType.DayPeriods, locale_data_api_1.TranslationWidth.Narrow);
             break;
         // Extended period of the day (midnight, at night, ...), standalone
         case 'b':
         case 'bb':
         case 'bbb':
-            formatter = dateStrGetter(TranslationType.DayPeriods, TranslationWidth.Abbreviated, FormStyle.Standalone, true);
+            formatter = dateStrGetter(TranslationType.DayPeriods, locale_data_api_1.TranslationWidth.Abbreviated, locale_data_api_1.FormStyle.Standalone, true);
             break;
         case 'bbbb':
-            formatter = dateStrGetter(TranslationType.DayPeriods, TranslationWidth.Wide, FormStyle.Standalone, true);
+            formatter = dateStrGetter(TranslationType.DayPeriods, locale_data_api_1.TranslationWidth.Wide, locale_data_api_1.FormStyle.Standalone, true);
             break;
         case 'bbbbb':
-            formatter = dateStrGetter(TranslationType.DayPeriods, TranslationWidth.Narrow, FormStyle.Standalone, true);
+            formatter = dateStrGetter(TranslationType.DayPeriods, locale_data_api_1.TranslationWidth.Narrow, locale_data_api_1.FormStyle.Standalone, true);
             break;
         // Extended period of the day (midnight, night, ...), standalone
         case 'B':
         case 'BB':
         case 'BBB':
-            formatter = dateStrGetter(TranslationType.DayPeriods, TranslationWidth.Abbreviated, FormStyle.Format, true);
+            formatter = dateStrGetter(TranslationType.DayPeriods, locale_data_api_1.TranslationWidth.Abbreviated, locale_data_api_1.FormStyle.Format, true);
             break;
         case 'BBBB':
             formatter =
-                dateStrGetter(TranslationType.DayPeriods, TranslationWidth.Wide, FormStyle.Format, true);
+                dateStrGetter(TranslationType.DayPeriods, locale_data_api_1.TranslationWidth.Wide, locale_data_api_1.FormStyle.Format, true);
             break;
         case 'BBBBB':
-            formatter = dateStrGetter(TranslationType.DayPeriods, TranslationWidth.Narrow, FormStyle.Format, true);
+            formatter = dateStrGetter(TranslationType.DayPeriods, locale_data_api_1.TranslationWidth.Narrow, locale_data_api_1.FormStyle.Format, true);
             break;
         // Hour in AM/PM, (1-12)
         case 'h':
@@ -406,7 +411,7 @@ function getDateFormatter(format) {
     DATE_FORMATS[format] = formatter;
     return formatter;
 }
-function dateStrGetter(name, width, form = FormStyle.Format, extended = false) {
+function dateStrGetter(name, width, form = locale_data_api_1.FormStyle.Format, extended = false) {
     return function (date, locale) {
         return getDateTranslation(date, locale, name, width, form, extended);
     };
@@ -425,22 +430,22 @@ function dateGetter(name, size, offset = 0, trim = false, negWrap = false) {
         else if (name === DateType.FractionalSeconds) {
             return formatFractionalSeconds(part, size);
         }
-        const localeMinus = getLocaleNumberSymbol(locale, NumberSymbol.MinusSign);
+        const localeMinus = locale_data_api_1.getLocaleNumberSymbol(locale, locale_data_api_1.NumberSymbol.MinusSign);
         return padNumber(part, size, localeMinus, trim, negWrap);
     };
 }
 function getDateTranslation(date, locale, name, width, form, extended) {
     switch (name) {
         case TranslationType.Months:
-            return getLocaleMonthNames(locale, form, width)[date.getMonth()];
+            return locale_data_api_1.getLocaleMonthNames(locale, form, width)[date.getMonth()];
         case TranslationType.Days:
-            return getLocaleDayNames(locale, form, width)[date.getDay()];
+            return locale_data_api_1.getLocaleDayNames(locale, form, width)[date.getDay()];
         case TranslationType.DayPeriods:
             const currentHours = date.getHours();
             const currentMinutes = date.getMinutes();
             if (extended) {
-                const rules = getLocaleExtraDayPeriodRules(locale);
-                const dayPeriods = getLocaleExtraDayPeriods(locale, form, width);
+                const rules = locale_data_api_1.getLocaleExtraDayPeriodRules(locale);
+                const dayPeriods = locale_data_api_1.getLocaleExtraDayPeriods(locale, form, width);
                 const index = rules.findIndex(rule => {
                     if (Array.isArray(rule)) {
                         // morning, afternoon, evening, night
@@ -479,9 +484,9 @@ function getDateTranslation(date, locale, name, width, form, extended) {
                 }
             }
             // if no rules for the day periods, we use am/pm by default
-            return getLocaleDayPeriods(locale, form, width)[currentHours < 12 ? 0 : 1];
+            return locale_data_api_1.getLocaleDayPeriods(locale, form, width)[currentHours < 12 ? 0 : 1];
         case TranslationType.Eras:
-            return getLocaleEraNames(locale, width)[date.getFullYear() <= 0 ? 0 : 1];
+            return locale_data_api_1.getLocaleEraNames(locale, width)[date.getFullYear() <= 0 ? 0 : 1];
         default:
             // This default case is not needed by TypeScript compiler, as the switch is exhaustive.
             // However Closure Compiler does not understand that and reports an error in typed mode.
@@ -546,7 +551,7 @@ function weekNumberingYearGetter(size, trim = false) {
     return function (date, locale) {
         const thisThurs = getThursdayThisWeek(date);
         const weekNumberingYear = thisThurs.getFullYear();
-        return padNumber(weekNumberingYear, size, getLocaleNumberSymbol(locale, NumberSymbol.MinusSign), trim);
+        return padNumber(weekNumberingYear, size, locale_data_api_1.getLocaleNumberSymbol(locale, locale_data_api_1.NumberSymbol.MinusSign), trim);
     };
 }
 function weekGetter(size, monthBased = false) {
@@ -565,13 +570,13 @@ function weekGetter(size, monthBased = false) {
             const diff = thisThurs.getTime() - firstThurs.getTime();
             result = 1 + Math.round(diff / 6.048e8); // 6.048e8 ms per week
         }
-        return padNumber(result, size, getLocaleNumberSymbol(locale, NumberSymbol.MinusSign));
+        return padNumber(result, size, locale_data_api_1.getLocaleNumberSymbol(locale, locale_data_api_1.NumberSymbol.MinusSign));
     };
 }
 function timeZoneGetter(width) {
     return function (date, locale, offset) {
         const zone = -1 * offset;
-        const minusSign = getLocaleNumberSymbol(locale, NumberSymbol.MinusSign);
+        const minusSign = locale_data_api_1.getLocaleNumberSymbol(locale, locale_data_api_1.NumberSymbol.MinusSign);
         const hours = zone > 0 ? Math.floor(zone / 60) : Math.ceil(zone / 60);
         switch (width) {
             case ZoneWidth.Short:

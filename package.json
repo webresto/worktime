@@ -4,11 +4,11 @@
     "type": "git",
     "url": "https://github.com/webresto/worktime.git"
   },
-  "version": "1.0.8",
+  "version": "1.0.9",
   "scripts": {
     "pub": "cd dist && npm publish --access=public",
     "tsc": "tsc",
-    "build": "rm -rf ./dist/bundles ./dist/esm2015 ./dist/fesm2015 ./dist/lib && tsc --build ./tsconfig.json && tsc --build ./tsconfig.umd.json && tsc --build ./tsconfig.fesm.json && cp ./README.md ./dist && cp ./package.json ./dist",
+    "build": "ng-packagr -p ng-package.json",
     "test": "ts-mocha --experimental-module -p ./tsconfig.test.json src/test/*.spec.ts"
   },
   "devDependencies": {

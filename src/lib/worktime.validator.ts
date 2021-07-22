@@ -37,32 +37,38 @@ interface Restrictions {
   workTime: WorkTime[];
 }
 
-interface RestrictionsOrder extends Restrictions{
-    /** минимальное время доставки*/
-    minDeliveryTime: string;
+export interface RestrictionsOrder extends Restrictions {
+  /** минимальное время доставки*/
+  minDeliveryTime: string;
 
-    /**установлено ли на текущий момент ограничение доставки на определенное время */
-    deliveryToTimeEnabled: boolean;
+  /**установлено ли на текущий момент ограничение доставки на определенное время */
+  deliveryToTimeEnabled: boolean;
 
-    /** ограничение максимальной даты заказа в будущем (в минутах)*/
-    periodPossibleForOrder: number;
+  /** ограничение максимальной даты заказа в будущем (в минутах)*/
+  periodPossibleForOrder: number;
 }
 
-
+interface ValidatorResult {
+  workNow: boolean,
+  isNewDay?: boolean,
+  currentTime?: number,
+  curentDayStartTime?: number,
+  curentDayStopTime?: number
+}
 
 /**
  * Функция валидации переданного объекта restriction на соответствие интерфейсу Restrictions
  * @param restriction - объект, содержащий информацию о рабочем времени и временной зоне.
  */
 function isValidRestriction(restriction: any): restriction is Restrictions {
-    return 'timezone' in restriction && 'workTime' in restriction;
+  return 'timezone' in restriction && 'workTime' in restriction;
 }
 
 /**
  * Функция валидации переданного объекта restriction на соответствие минимальным данным для заказа
  * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
  */
- function isValidRestrictionOrder(restriction: RestrictionsOrder): restriction is RestrictionsOrder {
+function isValidRestrictionOrder(restriction: RestrictionsOrder): restriction is RestrictionsOrder {
   return 'minDeliveryTime' in restriction && 'periodPossibleForOrder' in restriction && 'timezone' in restriction && 'workTime' in restriction;
 }
 
@@ -71,7 +77,6 @@ function isValidRestriction(restriction: any): restriction is Restrictions {
  * Создавать новый объект этого класса для использования методов не требуется.
  */
 export class WorkTimeValidator {
-
   /**
    * Метод возвращает максимальную возможную дату, на которую можно заказать доставку.
    * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
@@ -126,26 +131,18 @@ export class WorkTimeValidator {
           Представляет время окончания рабочего дня в минутах от 00:00 в часовом поясе предприятия.
       }
    */
-  static isWorkNow(restriction: Restrictions | RestrictionsOrder, currentdate: Date = new Date() ): {
-    workNow: boolean,
-    isNewDay?: boolean,
-    currentTime?: number,
-    curentDayStartTime?: number,
-    curentDayStopTime?: number
-  } {
+  static isWorkNow(restriction: Restrictions | RestrictionsOrder, currentdate: Date = new Date()): ValidatorResult {
 
-    if(!restriction.workTime) {
+    if (!restriction.workTime) {
       return {
         workNow: true
       }
-    }
+    };
 
     // Если испольняется в NodeJS
-    if (typeof process !== 'undefined' && !restriction.timezone )
-      if(process.env.TZ)
-        restriction.timezone = process.env.TZ
-      else
-      restriction.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+    if (typeof process !== 'undefined' && !restriction.timezone) {
+      restriction.timezone = process.env.TZ ? process.env.TZ : Intl.DateTimeFormat().resolvedOptions().timeZone
+    };
 
     if (!restriction || !isValidRestriction(restriction)) {
       throw new Error(
@@ -153,7 +150,6 @@ export class WorkTimeValidator {
           !restriction ? 'Не передан объект restrictions'
             : 'Передан невалидный обьект restrictions');
     } else {
-      //@ts-ignore
       const companyLocalTimeZone = TimeZoneIdentifier.getTimeZoneGMTOffsetfromNameZone(restriction.timezone).split(':');
       const companyLocalTimeZoneDelta = +companyLocalTimeZone[0] * 60 + (+(companyLocalTimeZone[1]));
       const lokalTimeDelta = companyLocalTimeZoneDelta + currentdate.getTimezoneOffset(); // смещение времени пользователя относительно времени торговой точки
@@ -189,7 +185,7 @@ export class WorkTimeValidator {
     if (checkTime.workNow) {
       throw new Error('Сейчас рабочее время. Расчет не требуется.');
     } else {
-      if (checkTime.currentTime && checkTime.curentDayStopTime ) {
+      if (checkTime.currentTime && checkTime.curentDayStopTime) {
         const currentDayWorkTime = WorkTimeValidator.getCurrentWorkTime(
           restriction,
           checkTime.isNewDay ? new Date(currentdate.getTime() + 86400000) : currentdate

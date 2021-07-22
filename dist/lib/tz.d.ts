@@ -13,5 +13,5 @@ export declare class TimeZoneIdentifier {
      *console.log(offset) /// "+03:00"
      *
      * */
-    static getTimeZoneGMTOffsetfromNameZone(zone: string): string;
+    static getTimeZoneGMTOffsetfromNameZone(zone?: string): string;
 }

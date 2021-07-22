@@ -1,6 +1,10 @@
 {
   "name": "@webresto/worktime",
-  "description": "Библиотека для работы с ограничениями рабочего времени предприятия для @webresto",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/webresto/worktime.git"
+  },
+  "version": "1.0.9",
   "contributors": [
     {
       "name": "axrl",
@@ -11,31 +15,21 @@
       "email": "xziy88@gmail.com"
     }
   ],
-  "author": {
-    "name": "Axrl",
-    "email": "axrl@mail.ru"
-  },
-  "homepage": "https://github.com/webresto/worktime/tree/main/projects/worktime",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/webresto/worktime.git"
-  },
   "bugs": {
     "url": "https://github.com/webresto/worktime/issues"
   },
-  "version": "1.0.8",
-  "publishConfig": {
-    "access": "public"
-  },
+  "homepage": "https://github.com/webresto/worktime/tree/main/projects/worktime",
+  "license": "MIT",
+  "description": "Библиотека для работы с ограничениями рабочего времени предприятия для @webresto",
   "dependencies": {
     "tslib": "^2.3.0"
   },
-  "license": "MIT",
   "main": "bundles/webresto-worktime.umd.js",
   "module": "fesm2015/webresto-worktime.js",
   "es2015": "fesm2015/webresto-worktime.js",
   "esm2015": "esm2015/webresto-worktime.js",
   "fesm2015": "fesm2015/webresto-worktime.js",
   "typings": "webresto-worktime.d.ts",
+  "metadata": "webresto-worktime.metadata.json",
   "sideEffects": false
 }

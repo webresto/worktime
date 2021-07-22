@@ -27,13 +27,20 @@ interface Restrictions {
     /**  массив ограничений по времени работы предприятия для разных дней недели. */
     workTime: WorkTime[];
 }
-interface RestrictionsOrder extends Restrictions {
+export interface RestrictionsOrder extends Restrictions {
     /** минимальное время доставки*/
     minDeliveryTime: string;
     /**установлено ли на текущий момент ограничение доставки на определенное время */
     deliveryToTimeEnabled: boolean;
     /** ограничение максимальной даты заказа в будущем (в минутах)*/
     periodPossibleForOrder: number;
+}
+interface ValidatorResult {
+    workNow: boolean;
+    isNewDay?: boolean;
+    currentTime?: number;
+    curentDayStartTime?: number;
+    curentDayStopTime?: number;
 }
 /**
  * Класс, содержащий статические методы, необходимые для работы с ограничениями рабочего времени предприятия.
@@ -69,13 +76,7 @@ export declare class WorkTimeValidator {
             Представляет время окончания рабочего дня в минутах от 00:00 в часовом поясе предприятия.
         }
      */
-    static isWorkNow(restriction: Restrictions | RestrictionsOrder, currentdate?: Date): {
-        workNow: boolean;
-        isNewDay?: boolean;
-        currentTime?: number;
-        curentDayStartTime?: number;
-        curentDayStopTime?: number;
-    };
+    static isWorkNow(restriction: Restrictions | RestrictionsOrder, currentdate?: Date): ValidatorResult;
     /**
      * Метод возвращает ближайшую возможную дату-время заказа для способа доставки "Доставка курьером".
      * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.

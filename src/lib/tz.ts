@@ -13,7 +13,11 @@ export class TimeZoneIdentifier {
  *console.log(offset) /// "+03:00"
  *
  * */
-  static getTimeZoneGMTOffsetfromNameZone(zone: string): string {
+  static getTimeZoneGMTOffsetfromNameZone(zone?: string): string {
+    if (!zone) {
+      zone = process.env.TZ ? process.env.TZ : Intl.DateTimeFormat().resolvedOptions().timeZone;
+    };
+
     switch (zone) {
       case 'Etc/GMT+12': return '-12:00';
       case 'Etc/GMT+11': return '-11:00';

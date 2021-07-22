@@ -1299,6 +1299,10 @@
          *
          * */
         TimeZoneIdentifier.getTimeZoneGMTOffsetfromNameZone = function (zone) {
+            if (!zone) {
+                zone = process.env.TZ ? process.env.TZ : Intl.DateTimeFormat().resolvedOptions().timeZone;
+            }
+            ;
             switch (zone) {
                 case 'Etc/GMT+12': return '-12:00';
                 case 'Etc/GMT+11': return '-11:00';
@@ -1767,7 +1771,14 @@
     }());
 
     /**
-     * Функция валидации переданного объекта restriction на соответствие интерфейсу RestrictionsOrder
+     * Функция валидации переданного объекта restriction на соответствие интерфейсу Restrictions
+     * @param restriction - объект, содержащий информацию о рабочем времени и временной зоне.
+     */
+    function isValidRestriction(restriction) {
+        return 'timezone' in restriction && 'workTime' in restriction;
+    }
+    /**
+     * Функция валидации переданного объекта restriction на соответствие минимальным данным для заказа
      * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
      */
     function isValidRestrictionOrder(restriction) {
@@ -1831,7 +1842,19 @@
             }
          */
         WorkTimeValidator.isWorkNow = function (restriction, currentdate) {
-            if (!restriction || !isValidRestrictionOrder(restriction) || !isDate(currentdate)) {
+            if (currentdate === void 0) { currentdate = new Date(); }
+            if (!restriction.workTime) {
+                return {
+                    workNow: true
+                };
+            }
+            ;
+            // Если испольняется в NodeJS
+            if (typeof process !== 'undefined' && !restriction.timezone) {
+                restriction.timezone = process.env.TZ ? process.env.TZ : Intl.DateTimeFormat().resolvedOptions().timeZone;
+            }
+            ;
+            if (!restriction || !isValidRestriction(restriction)) {
                 throw new Error(!isDate(currentdate) ? 'Не передан корректный объект даты' :
                     !restriction ? 'Не передан объект restrictions'
                         : 'Передан невалидный обьект restrictions');
@@ -1869,11 +1892,16 @@
                 throw new Error('Сейчас рабочее время. Расчет не требуется.');
             }
             else {
-                var currentDayWorkTime = WorkTimeValidator.getCurrentWorkTime(restriction, checkTime.isNewDay ? new Date(currentdate.getTime() + 86400000) : currentdate);
-                var time = this.getTimeFromString(currentDayWorkTime.start) + (+restriction.minDeliveryTime) + 1;
-                var hour = Math.floor(time / 60);
-                var minutes = time - (hour * 60);
-                return formatDate(checkTime.isNewDay || checkTime.currentTime > checkTime.curentDayStopTime ? (currentdate.getTime() + 86400000) : currentdate, "yyyy-MM-dd " + (hour <= 9 ? '0' + hour : hour) + ":" + (minutes <= 9 ? '0' + minutes : minutes), 'en');
+                if (checkTime.currentTime && checkTime.curentDayStopTime) {
+                    var currentDayWorkTime = WorkTimeValidator.getCurrentWorkTime(restriction, checkTime.isNewDay ? new Date(currentdate.getTime() + 86400000) : currentdate);
+                    var time = this.getTimeFromString(currentDayWorkTime.start) + (+restriction.minDeliveryTime) + 1;
+                    var hour = Math.floor(time / 60);
+                    var minutes = time - (hour * 60);
+                    return formatDate(checkTime.isNewDay || checkTime.currentTime > checkTime.curentDayStopTime ? (currentdate.getTime() + 86400000) : currentdate, "yyyy-MM-dd " + (hour <= 9 ? '0' + hour : hour) + ":" + (minutes <= 9 ? '0' + minutes : minutes), 'en');
+                }
+                else {
+                    throw 'Не удалось рассчитать currentTime и curentDayStopTime.';
+                }
             }
         };
         /**
@@ -1927,3 +1955,4 @@
     Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
+//# sourceMappingURL=webresto-worktime.umd.js.map

@@ -16,7 +16,7 @@
       "node"
     ],
     "baseUrl": "./",
-    "outDir": "./dist/esm",
+    "outDir": "./ts-dist",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "moduleResolution": "node",

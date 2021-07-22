@@ -118,9 +118,7 @@ export class WorkTimeValidator {
          * Для обеспечения иммутабельности данных создается новый обьект restrictions, идентичный полученному в параметрах, но с измененным массивом workTime.
          * В массиве workTime обновляются ограничения времени работы с обычных на актуальные для самовывоза.
          * */
-        const newRestriction = {
-            ...restriction, workTime: restriction.workTime.map(workTime => workTime.selfService ? ({ ...workTime, ...workTime.selfService }) : workTime)
-        };
+        const newRestriction = Object.assign(Object.assign({}, restriction), { workTime: restriction.workTime.map(workTime => workTime.selfService ? (Object.assign(Object.assign({}, workTime), workTime.selfService)) : workTime) });
         return WorkTimeValidator.getPossibleDelieveryOrderDateTime(newRestriction, currentdate);
     }
     /**

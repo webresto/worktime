@@ -4,21 +4,11 @@
     "type": "git",
     "url": "https://github.com/webresto/worktime.git"
   },
-  "type": "module",
-  "main": "./cjs/index.js",
-  "module": "./esm/index.js",
-  "exports": {
-    ".": {
-      "require":  "./cjs/index.js",
-      "default": "./esm/index.js"
-    }
-  },
-  "version": "1.0.7",
+  "version": "1.0.8",
   "scripts": {
     "pub": "cd dist && npm publish --access=public",
     "tsc": "tsc",
-    "build": "rm -rf ./dist && tsc --build ./tsconfig.json && tsc --build ./tsconfig.commonjs.json && cp ./README.md ./dist && cp ./package.json ./dist",
-    "build:pub":"npm run build && npm run pub",
+    "build": "rm -rf ./dist/bundles ./dist/esm2015 ./dist/fesm2015 ./dist/lib && tsc --build ./tsconfig.json && tsc --build ./tsconfig.umd.json && tsc --build ./tsconfig.fesm.json && cp ./README.md ./dist && cp ./package.json ./dist",
     "test": "ts-mocha --experimental-module -p ./tsconfig.test.json src/test/*.spec.ts"
   },
   "devDependencies": {

@@ -1,36 +1,6 @@
 {
   "name": "@webresto/worktime",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/webresto/worktime.git"
-  },
-  "type": "module",
-  "main": "./cjs/index.js",
-  "module": "./esm/index.js",
-  "exports": {
-    ".": {
-      "require":  "./cjs/index.js",
-      "default": "./esm/index.js"
-    }
-  },
-  "version": "1.0.7",
-  "scripts": {
-    "pub": "cd dist && npm publish --access=public",
-    "tsc": "tsc",
-    "build": "rm -rf ./dist && tsc --build ./tsconfig.json && tsc --build ./tsconfig.commonjs.json && cp ./README.md ./dist && cp ./package.json ./dist",
-    "build:pub":"npm run build && npm run pub",
-    "test": "ts-mocha --experimental-module -p ./tsconfig.test.json src/test/*.spec.ts"
-  },
-  "devDependencies": {
-    "@types/chai": "^4.2.21",
-    "@types/mocha": "^8.2.3",
-    "@types/node": "^15.14.2",
-    "chai": "^4.3.4",
-    "mocha": "^8.4.0",
-    "ts-mocha": "^8.0.0",
-    "ts-node": "~10.0.0",
-    "typescript": "^4.3.5"
-  },
+  "description": "Библиотека для работы с ограничениями рабочего времени предприятия для @webresto",
   "contributors": [
     {
       "name": "axrl",
@@ -41,13 +11,31 @@
       "email": "xziy88@gmail.com"
     }
   ],
+  "author": {
+    "name": "Axrl",
+    "email": "axrl@mail.ru"
+  },
+  "homepage": "https://github.com/webresto/worktime/tree/main/projects/worktime",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/webresto/worktime.git"
+  },
   "bugs": {
     "url": "https://github.com/webresto/worktime/issues"
   },
-  "homepage": "https://github.com/webresto/worktime/tree/main/projects/worktime",
-  "license": "MIT",
-  "description": "Библиотека для работы с ограничениями рабочего времени предприятия для @webresto",
+  "version": "1.0.8",
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "tslib": "^2.3.0"
-  }
+  },
+  "license": "MIT",
+  "main": "bundles/webresto-worktime.umd.js",
+  "module": "fesm2015/webresto-worktime.js",
+  "es2015": "fesm2015/webresto-worktime.js",
+  "esm2015": "esm2015/webresto-worktime.js",
+  "fesm2015": "fesm2015/webresto-worktime.js",
+  "typings": "webresto-worktime.d.ts",
+  "sideEffects": false
 }

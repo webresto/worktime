@@ -133,7 +133,8 @@ export class WorkTimeValidator {
    */
   static isWorkNow(restriction: Restrictions | RestrictionsOrder, currentdate: Date = new Date()): ValidatorResult {
 
-    if (!restriction.workTime) {
+       if (!restriction.workTime || !Object.keys(restriction.workTime).length) {
+
       return {
         workNow: true
       }

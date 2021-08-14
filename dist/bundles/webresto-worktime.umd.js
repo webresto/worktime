@@ -1843,7 +1843,8 @@
          */
         WorkTimeValidator.isWorkNow = function (restriction, currentdate) {
             if (currentdate === void 0) { currentdate = new Date(); }
-            if (!restriction.workTime) {
+               if (!restriction.workTime || !Object.keys(restriction.workTime).length) {
+
                 return {
                     workNow: true
                 };

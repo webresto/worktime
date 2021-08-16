@@ -4,7 +4,7 @@
     "type": "git",
     "url": "https://github.com/webresto/worktime.git"
   },
-  "version": "1.0.9",
+  "version": "1.0.12",
   "contributors": [
     {
       "name": "axrl",
@@ -22,7 +22,7 @@
   "license": "MIT",
   "description": "Библиотека для работы с ограничениями рабочего времени предприятия для @webresto",
   "dependencies": {
-    "tslib": "^2.3.0"
+    "tslib": "^2.3.1"
   },
   "main": "bundles/webresto-worktime.umd.js",
   "module": "fesm2015/webresto-worktime.js",

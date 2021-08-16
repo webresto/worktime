@@ -239,7 +239,7 @@
                     ar[i] = from[i];
                 }
             }
-        return to.concat(ar || from);
+        return to.concat(ar || Array.prototype.slice.call(from));
     }
     function __await(v) {
         return this instanceof __await ? (this.v = v, this) : new __await(v);
@@ -1843,8 +1843,7 @@
          */
         WorkTimeValidator.isWorkNow = function (restriction, currentdate) {
             if (currentdate === void 0) { currentdate = new Date(); }
-               if (!restriction.workTime || !Object.keys(restriction.workTime).length) {
-
+            if (!restriction.workTime || !Object.keys(restriction.workTime).length) {
                 return {
                     workNow: true
                 };

@@ -4,7 +4,7 @@ import { TimeZoneIdentifier } from './tz';
 /**
  * Базовые данные о времени работы - служебный интерфейс.
  */
-interface WorkTimeBase {
+ export interface WorkTimeBase {
   /** время начала рабочего дня*/
   start: string;
 
@@ -29,7 +29,7 @@ export interface WorkTime extends WorkTimeBase {
 /**
  * Интерфейс объекта, получаемого от API @webresto/core и содержащего текущие данные о рабочем времени предприятия
  */
-interface Restrictions {
+ export interface Restrictions {
   /** временная зона предприятия */
   timezone?: string;
 

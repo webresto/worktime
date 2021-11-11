@@ -1609,4 +1609,3 @@ class WorkTimeValidator {
  */
 
 export { TimeZoneIdentifier, WorkTimeValidator, formatDate, isDate };
-//# sourceMappingURL=webresto-worktime.js.map

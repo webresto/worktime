@@ -1,7 +1,7 @@
 /**
  * Базовые данные о времени работы - служебный интерфейс.
  */
-interface WorkTimeBase {
+export interface WorkTimeBase {
     /** время начала рабочего дня*/
     start: string;
     /** время окончания рабочего дня*/
@@ -21,7 +21,7 @@ export interface WorkTime extends WorkTimeBase {
 /**
  * Интерфейс объекта, получаемого от API @webresto/core и содержащего текущие данные о рабочем времени предприятия
  */
-interface Restrictions {
+export interface Restrictions {
     /** временная зона предприятия */
     timezone?: string;
     /**  массив ограничений по времени работы предприятия для разных дней недели. */

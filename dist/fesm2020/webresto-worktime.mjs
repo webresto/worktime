@@ -182,8 +182,8 @@ function getLocaleExtraDayPeriods(locale, formStyle, width) {
     const data = ɵfindLocaleData(locale);
     checkFullData(data);
     const dayPeriodsData = [
-        data[ɵLocaleDataIndex.ExtraData][0 /* ExtraDayPeriodFormats */],
-        data[ɵLocaleDataIndex.ExtraData][1 /* ExtraDayPeriodStandalone */]
+        data[ɵLocaleDataIndex.ExtraData][0 /* ɵExtraLocaleDataIndex.ExtraDayPeriodFormats */],
+        data[ɵLocaleDataIndex.ExtraData][1 /* ɵExtraLocaleDataIndex.ExtraDayPeriodStandalone */]
     ];
     const dayPeriods = getLastDefinedValue(dayPeriodsData, formStyle) || [];
     return getLastDefinedValue(dayPeriods, width) || [];
@@ -191,7 +191,7 @@ function getLocaleExtraDayPeriods(locale, formStyle, width) {
 function getLocaleExtraDayPeriodRules(locale) {
     const data = ɵfindLocaleData(locale);
     checkFullData(data);
-    const rules = data[ɵLocaleDataIndex.ExtraData][2 /* ExtraDayPeriodsRules */] || [];
+    const rules = data[ɵLocaleDataIndex.ExtraData][2 /* ɵExtraLocaleDataIndex.ExtraDayPeriodsRules */] || [];
     return rules.map((rule) => {
         if (typeof rule === 'string') {
             return extractTime(rule);
@@ -1611,3 +1611,4 @@ class WorkTimeValidator {
  */
 
 export { TimeZoneIdentifier, WorkTimeValidator, formatDate, isDate };
+//# sourceMappingURL=webresto-worktime.mjs.map

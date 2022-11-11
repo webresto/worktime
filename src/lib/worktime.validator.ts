@@ -4,7 +4,7 @@ import { TimeZoneIdentifier } from './tz';
 /**
  * Базовые данные о времени работы - служебный интерфейс.
  */
- export interface WorkTimeBase {
+export interface WorkTimeBase {
   /** время начала рабочего дня*/
   start: string;
 
@@ -29,7 +29,7 @@ export interface WorkTime extends WorkTimeBase {
 /**
  * Интерфейс объекта, получаемого от API @webresto/core и содержащего текущие данные о рабочем времени предприятия
  */
- export interface Restrictions {
+export interface Restrictions {
   /** временная зона предприятия */
   timezone?: string;
 
@@ -133,7 +133,7 @@ export class WorkTimeValidator {
    */
   static isWorkNow(restriction: Restrictions | RestrictionsOrder, currentdate: Date = new Date()): ValidatorResult {
 
-       if (!restriction.workTime || !Object.keys(restriction.workTime).length) {
+    if (!restriction.workTime || !Object.keys(restriction.workTime).length) {
 
       return {
         workNow: true
@@ -183,10 +183,24 @@ export class WorkTimeValidator {
    */
   static getPossibleDelieveryOrderDateTime(restriction: RestrictionsOrder, currentdate: Date): string {
     const checkTime = WorkTimeValidator.isWorkNow(restriction, currentdate);
+
     if (checkTime.workNow) {
-      throw new Error('Сейчас рабочее время. Расчет не требуется.');
+
+      console.log('Сейчас рабочее время. Расчет не требуется.');
+      const currentDayWorkTime = WorkTimeValidator.getCurrentWorkTime(
+        restriction,
+        checkTime.isNewDay ? new Date(currentdate.getTime() + 86400000) : currentdate
+      );
+
+      if (checkTime.curentDayStartTime) {
+        console.log(`Форматирование времени из WorkTimeValidator.isWorkNow - `, formatDate(checkTime.curentDayStartTime, 'HH:ss', 'en'));
+      };
+
+      return formatDate(currentdate, `yyyy-MM-dd ${currentDayWorkTime.start}`, 'en')
     } else {
+
       if (checkTime.currentTime && checkTime.curentDayStopTime) {
+
         const currentDayWorkTime = WorkTimeValidator.getCurrentWorkTime(
           restriction,
           checkTime.isNewDay ? new Date(currentdate.getTime() + 86400000) : currentdate
@@ -194,13 +208,14 @@ export class WorkTimeValidator {
         const time = this.getTimeFromString(currentDayWorkTime.start) + (+restriction.minDeliveryTime) + 1;
         const hour = Math.floor(time / 60);
         const minutes = time - (hour * 60);
+
         return formatDate(
           checkTime.isNewDay || checkTime.currentTime > checkTime.curentDayStopTime ? (currentdate.getTime() + 86400000) : currentdate,
           `yyyy-MM-dd ${hour <= 9 ? '0' + hour : hour}:${minutes <= 9 ? '0' + minutes : minutes}`,
           'en');
       } else {
         throw 'Не удалось рассчитать currentTime и curentDayStopTime.';
-      }
+      };
     }
   }
 

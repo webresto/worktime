@@ -1551,7 +1551,13 @@ class WorkTimeValidator {
     static getPossibleDelieveryOrderDateTime(restriction, currentdate) {
         const checkTime = WorkTimeValidator.isWorkNow(restriction, currentdate);
         if (checkTime.workNow) {
-            throw new Error('Сейчас рабочее время. Расчет не требуется.');
+            console.log('Сейчас рабочее время. Расчет не требуется.');
+            const currentDayWorkTime = WorkTimeValidator.getCurrentWorkTime(restriction, checkTime.isNewDay ? new Date(currentdate.getTime() + 86400000) : currentdate);
+            if (checkTime.curentDayStartTime) {
+                console.log(`Форматирование времени из WorkTimeValidator.isWorkNow - `, formatDate(checkTime.curentDayStartTime, 'HH:ss', 'en'));
+            }
+            ;
+            return formatDate(currentdate, `yyyy-MM-dd ${currentDayWorkTime.start}`, 'en');
         }
         else {
             if (checkTime.currentTime && checkTime.curentDayStopTime) {
@@ -1564,6 +1570,7 @@ class WorkTimeValidator {
             else {
                 throw 'Не удалось рассчитать currentTime и curentDayStopTime.';
             }
+            ;
         }
     }
     /**

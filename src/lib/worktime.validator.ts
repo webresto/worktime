@@ -189,15 +189,13 @@ export class WorkTimeValidator {
   static getPossibleDelieveryOrderDateTime(restriction: RestrictionsOrder, currentdate: Date): string {
     const checkTime = WorkTimeValidator.isWorkNow(restriction, currentdate);
 
-    if (checkTime.workNow) {
+    if (checkTime.workNow && checkTime.currentTime) {
 
       console.log('Сейчас рабочее время. Расчет не требуется.');
-      const currentDayWorkTime = WorkTimeValidator.getCurrentWorkTime(
-        restriction,
-        checkTime.isNewDay ? new Date(currentdate.getTime() + 86400000) : currentdate
-      );
-
-      return formatDate(currentdate, `yyyy-MM-dd ${currentDayWorkTime.start}`, 'en')
+      const possibleTime = checkTime.currentTime + (+restriction.minDeliveryTime || 0);
+      const hour = Math.floor(possibleTime / 60);
+      const minutes = possibleTime - (hour * 60);
+      return formatDate(currentdate, `yyyy-MM-dd ${hour <= 9 ? '0' + hour : hour}:${minutes <= 9 ? '0' + minutes : minutes}`, 'en')
     } else {
 
       if (checkTime.currentTime && checkTime.curentDayStopTime) {
@@ -265,12 +263,7 @@ export class WorkTimeValidator {
   * Логика ниже предназначена для использования экземпляра класса WorkTimeValidator 
   */
 
-  /**
-   * 
-   * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
-   */
-
-  constructor(public restriction: Restrictions) { }
+  constructor() { }
 
   private _memory: {
     getMaxOrderDate: Map<string, string>;

@@ -1437,7 +1437,7 @@ class TimeZoneIdentifier {
 
 /**
  * Функция валидации переданного объекта restriction на соответствие интерфейсу Restrictions
- * @param restriction - объект, содержащий информацию о рабочем времени и временной зоне.
+ * @param restriction - проверяемый объект, содержащий информацию о рабочем времени и временной зоне.
  */
 function isValidRestriction(restriction) {
     return 'timezone' in restriction && 'workTime' in restriction;
@@ -1451,9 +1451,27 @@ function isValidRestrictionOrder(restriction) {
 }
 /**
  * Класс, содержащий статические методы, необходимые для работы с ограничениями рабочего времени предприятия.
- * Создавать новый объект этого класса для использования методов не требуется.
+ * Создавать новый экземпляр этого класса для использования статических методов не требуется.
+ *
+ * При этом при создании экземпляра класса у объекта также будут доступны собственные реализации
+ * всех статических методов.
+ * Эти реализации отличаются от вызовов статических методов только мемоизацией выполненных расчетов.
+ *
  */
 class WorkTimeValidator {
+    /**
+    * Логика ниже предназначена для использования экземпляра класса WorkTimeValidator
+    */
+    constructor() {
+        this._memory = {
+            getMaxOrderDate: new Map(),
+            getTimeFromString: new Map(),
+            isWorkNow: new Map(),
+            getPossibleDelieveryOrderDateTime: new Map(),
+            getPossibleSelfServiceOrderDateTime: new Map(),
+            getCurrentWorkTime: new Map()
+        };
+    }
     /**
      * Метод возвращает максимальную возможную дату, на которую можно заказать доставку.
      * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
@@ -1550,14 +1568,12 @@ class WorkTimeValidator {
      */
     static getPossibleDelieveryOrderDateTime(restriction, currentdate) {
         const checkTime = WorkTimeValidator.isWorkNow(restriction, currentdate);
-        if (checkTime.workNow) {
+        if (checkTime.workNow && checkTime.currentTime) {
             console.log('Сейчас рабочее время. Расчет не требуется.');
-            const currentDayWorkTime = WorkTimeValidator.getCurrentWorkTime(restriction, checkTime.isNewDay ? new Date(currentdate.getTime() + 86400000) : currentdate);
-            if (checkTime.curentDayStartTime) {
-                console.log(`Форматирование времени из WorkTimeValidator.isWorkNow - `, formatDate(checkTime.curentDayStartTime, 'HH:ss', 'en'));
-            }
-            ;
-            return formatDate(currentdate, `yyyy-MM-dd ${currentDayWorkTime.start}`, 'en');
+            const possibleTime = checkTime.currentTime + (+restriction.minDeliveryTime || 0);
+            const hour = Math.floor(possibleTime / 60);
+            const minutes = possibleTime - (hour * 60);
+            return formatDate(currentdate, `yyyy-MM-dd ${hour <= 9 ? '0' + hour : hour}:${minutes <= 9 ? '0' + minutes : minutes}`, 'en');
         }
         else {
             if (checkTime.currentTime && checkTime.curentDayStopTime) {
@@ -1609,6 +1625,125 @@ class WorkTimeValidator {
             return result;
         }
     }
+    /**
+      * Метод возвращает максимальную возможную дату, на которую можно заказать доставку.
+      * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
+      * @return :string - Строка, представляющая максимальную доступную дату доставки в формате yyyy-MM-dd.
+      */
+    getMaxOrderDate(restriction, currentdate) {
+        const memoryKey = JSON.stringify({ restriction, currentdate });
+        const checkMemory = this._memory.getMaxOrderDate.get(memoryKey);
+        if (checkMemory) {
+            return checkMemory;
+        }
+        else {
+            const result = WorkTimeValidator.getMaxOrderDate(restriction, currentdate);
+            this._memory.getMaxOrderDate.set(memoryKey, result);
+            return result;
+        }
+    }
+    /**
+     * Метод считает, сколько минут от начала дня (00:00) прошло для переданного времени.
+     * @param time - строка в формате HH:mm - время.
+     * @return :number - кол-во минут.
+     */
+    getTimeFromString(time) {
+        const memoryKey = JSON.stringify({ time });
+        const checkMemory = this._memory.getTimeFromString.get(memoryKey);
+        if (checkMemory) {
+            return checkMemory;
+        }
+        else {
+            const result = WorkTimeValidator.getTimeFromString(time);
+            this._memory.getTimeFromString.set(memoryKey, result);
+            return result;
+        }
+    }
+    ;
+    /**
+     * Метод проверяет, доступна ли возможность доставки на ближайшее время.
+     * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
+     * @param currentdate - объект Date, представляющий локальные дату и время пользователя, для которых и проверяется возможность доставки
+     * @return Обьект, содержащий информацию:
+     * {
+          isWorkNow:boolean - Возможна ли доставка в ближайшее время
+          isNewDay:boolean - Служебный параметр для внутреннего использования.
+            Представляет признак, что из-за разницы часовых поясов расчет даты "перепрыгнул" на новый день.
+          currentTime:number - Служебный параметр для внутреннего использования.
+            Представляет проверяемое методом время в минутах от 00:00 в часовом поясе предприятия.
+          curentDayStartTime:number - Служебный параметр для внутреннего использования.
+            Представляет время начала рабочего дня в минутах от 00:00 в часовом поясе предприятия.
+          curentDayStopTime:number - Служебный параметр для внутреннего использования.
+            Представляет время окончания рабочего дня в минутах от 00:00 в часовом поясе предприятия.
+        }
+     */
+    isWorkNow(restriction, currentdate) {
+        const memoryKey = JSON.stringify({ restriction, currentdate });
+        const checkMemory = this._memory.isWorkNow.get(memoryKey);
+        if (checkMemory) {
+            return checkMemory;
+        }
+        else {
+            const result = WorkTimeValidator.isWorkNow(restriction, currentdate);
+            this._memory.isWorkNow.set(memoryKey, result);
+            return result;
+        }
+    }
+    ;
+    /**
+     * Метод возвращает ближайшую возможную дату-время заказа для способа доставки "Доставка курьером".
+     * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
+     * @param currentdate - объект Date, представляющий текущие локальные дату и время пользователя
+     */
+    getPossibleDelieveryOrderDateTime(restriction, currentdate) {
+        const memoryKey = JSON.stringify({ restriction, currentdate });
+        const checkMemory = this._memory.getPossibleDelieveryOrderDateTime.get(memoryKey);
+        if (checkMemory) {
+            return checkMemory;
+        }
+        else {
+            const result = WorkTimeValidator.getPossibleDelieveryOrderDateTime(restriction, currentdate);
+            this._memory.getPossibleDelieveryOrderDateTime.set(memoryKey, result);
+            return result;
+        }
+    }
+    ;
+    /**
+     * Метод возвращает ближайшую возможную дату-время заказа для способа доставки "Самовывоз".
+     * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
+     * @param currentdate - объект Date, представляющий текущие локальные дату и время пользователя
+     */
+    getPossibleSelfServiceOrderDateTime(restriction, currentdate) {
+        const memoryKey = JSON.stringify({ restriction, currentdate });
+        const checkMemory = this._memory.getPossibleSelfServiceOrderDateTime.get(memoryKey);
+        if (checkMemory) {
+            return checkMemory;
+        }
+        else {
+            const result = WorkTimeValidator.getPossibleSelfServiceOrderDateTime(restriction, currentdate);
+            this._memory.getPossibleSelfServiceOrderDateTime.set(memoryKey, result);
+            return result;
+        }
+    }
+    ;
+    /**
+    * Метод возвращает актуальные данные о времени работы из массива всех вариантов обьекта restriction.
+    * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
+    * @param currentdate - объект Date, представляющий текущие локальные дату и время пользователя
+    */
+    getCurrentWorkTime(restriction, currentdate) {
+        const memoryKey = JSON.stringify({ restriction, currentdate });
+        const checkMemory = this._memory.getCurrentWorkTime.get(memoryKey);
+        if (checkMemory) {
+            return checkMemory;
+        }
+        else {
+            const result = WorkTimeValidator.getCurrentWorkTime(restriction, currentdate);
+            this._memory.getCurrentWorkTime.set(memoryKey, result);
+            return result;
+        }
+    }
+    ;
 }
 
 /**

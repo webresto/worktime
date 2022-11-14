@@ -1,4 +1,4 @@
-import { WorkTimeValidator } from '../lib/worktime.validator';
+import { RestrictionsOrder, WorkTimeValidator } from '../lib/worktime.validator';
 import { formatDate } from '../lib/formatDate';
 import { expect } from 'chai';
 
@@ -15,6 +15,7 @@ const caseOne = {
       break: '00:00-00:00'
     }
   }],
+  deliveryToTimeEnabled: true,
   periodPossibleForOrder: 20160,
   timezone: 'Asia/Yekaterinburg',
   minDeliveryTime: '60'
@@ -99,7 +100,7 @@ describe('WorkTimeValidator', () => {
   });
 
   it('Проверяем на ошибку, не передадим restriction', () =>
-    expect(() => WorkTimeValidator.isWorkNow(undefined, dateForExpect[0].dt)).to.throw('Не передан объект restriction'));
+    expect(() => WorkTimeValidator.isWorkNow(undefined as unknown as RestrictionsOrder, dateForExpect[0].dt)).to.throw('Не передан объект restriction'));
   it('Проверяем на ошибку, не передадим дату', () =>
     expect(() => WorkTimeValidator.isWorkNow(caseOne, undefined)).to.throw('Не передан корректный объект даты'));
 

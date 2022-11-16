@@ -1469,7 +1469,8 @@ class WorkTimeValidator {
             isWorkNow: new Map(),
             getPossibleDelieveryOrderDateTime: new Map(),
             getPossibleSelfServiceOrderDateTime: new Map(),
-            getCurrentWorkTime: new Map()
+            getCurrentWorkTime: new Map(),
+            convertMinutesToTime: new Map()
         };
     }
     /**
@@ -1490,19 +1491,54 @@ class WorkTimeValidator {
     }
     /**
      * Метод считает, сколько минут от начала дня (00:00) прошло для переданного времени.
-     * @param time - строка в формате HH:mm - время.
-     * @return :number - кол-во минут.
+     * @param time - строка в формате HH:mm -`(00-24 часа):(0-59 минут)` - время.
+     * @return кол-во минут.
      */
     static getTimeFromString(time) {
         if (!time) {
-            throw new Error('Не передана строка с преобразуемым временем в формате HH:mm');
+            throw 'Не передана строка с преобразуемым временем в формате HH:mm';
         }
         else {
-            let checkedTime = time.trim();
-            if (checkedTime.includes(' ') || checkedTime.includes('T')) {
-                checkedTime = checkedTime.split(checkedTime.includes(' ') ? ' ' : 'T')[1];
+            const regExp = new RegExp(/^(00|01|02|03|04|05|06|07|08|09|10|11|12|13|14|15|16|17|18|19|20|21|22|23)+:([0-5]\d)+/);
+            if (regExp.test(time)) {
+                let checkedTime = time.trim();
+                if (checkedTime.includes(' ') || checkedTime.includes('T')) {
+                    checkedTime = checkedTime.split(checkedTime.includes(' ') ? ' ' : 'T')[1];
+                }
+                return (+checkedTime.split(':')[0]) * 60 + (+checkedTime.split(':')[1]);
             }
-            return (+checkedTime.split(':')[0]) * 60 + (+checkedTime.split(':')[1]);
+            else {
+                throw 'Переданная строка не соответствует формату HH:mm -`(00-24 часа):(0-59 минут)`';
+            }
+        }
+    }
+    /**
+     * Метод конвертирует переданное кол-во минут в строкове представление времени в формате HH:mm - `(00-24 часа):(0-59 минут)`.
+     * Например:
+     *
+     * const a = convertMinutesToTime(50) // a = '00:50'
+     * const b = convertMinutesToTime(1200) // b = '20:00'
+     *
+     * @param time - Число в диапазоне от 0 до 1440 (так как максимум в 1 сутках = 1440 минут).
+     * При передаче в time отрицательного значения, знак будет "отобршен", а для метод вернет результат, рассчитанный для полученного положительного значения.
+     * Если в time будет передано значение больше 1440 - метод вернет результат для значения без учета "превышающих суток" (т.е. с кратным вычетом 1440 минут)
+     *
+     * Например:
+     *
+     * const a = convertMinutesToTime(60) // a = '01:00'
+     * const b = convertMinutesToTime(1500) // b = '01:00' (1440 минут "целых" суток были "отброшены")
+     *
+     * @returns
+     */
+    static convertMinutesToTime(time) {
+        if (time < 1441) {
+            const hour = Math.floor(time / 60);
+            const hourStr = (hour <= 9 ? `0${String(hour)}` : String(hour));
+            const minutesStr = String(time - (hour * 60));
+            return `${hourStr}:${minutesStr}`;
+        }
+        else {
+            return WorkTimeValidator.convertMinutesToTime(time - 1440);
         }
     }
     /**
@@ -1544,11 +1580,11 @@ class WorkTimeValidator {
             const companyLocalTimeZoneDelta = +companyLocalTimeZone[0] * 60 + (+(companyLocalTimeZone[1]));
             const lokalTimeDelta = companyLocalTimeZoneDelta + currentdate.getTimezoneOffset(); // смещение времени пользователя относительно времени торговой точки
             const currentTimeInMinutesWithLocalDelta = WorkTimeValidator.getTimeFromString(formatDate(currentdate, 'HH:mm', 'en')) + lokalTimeDelta;
-            const currentTime = currentTimeInMinutesWithLocalDelta > 1440 ? currentTimeInMinutesWithLocalDelta - 1440 : currentTimeInMinutesWithLocalDelta;
             /**
              * текущее время в минутах с начала дня (600 = 10:00. 1200 = 20:00)
              * если из-за разницы поясов расчет перепрыгнул на новый день, то приводим время к правильному значению в диапазоне 24 часов
              * */
+            const currentTime = currentTimeInMinutesWithLocalDelta > 1440 ? currentTimeInMinutesWithLocalDelta - 1440 : currentTimeInMinutesWithLocalDelta;
             const currentDayWorkTime = WorkTimeValidator.getCurrentWorkTime(restriction, currentTimeInMinutesWithLocalDelta > 1440 ? new Date(currentdate.getTime() + 86400000) : currentdate); // текущее рабочее время
             const curentDayStartTime = WorkTimeValidator.getTimeFromString(currentDayWorkTime.start); // текущее время начала рабочего дня в минутах
             const curentDayStopTime = WorkTimeValidator.getTimeFromString(currentDayWorkTime.stop); // текущее время окончания рабочего дня в минутах
@@ -1571,17 +1607,15 @@ class WorkTimeValidator {
         if (checkTime.workNow && checkTime.currentTime) {
             console.log('Сейчас рабочее время. Расчет не требуется.');
             const possibleTime = checkTime.currentTime + (+restriction.minDeliveryTime || 0);
-            const hour = Math.floor(possibleTime / 60);
-            const minutes = possibleTime - (hour * 60);
-            return formatDate(currentdate, `yyyy-MM-dd ${hour <= 9 ? '0' + hour : hour}:${minutes <= 9 ? '0' + minutes : minutes}`, 'en');
+            const possibleTimeStr = WorkTimeValidator.convertMinutesToTime(possibleTime);
+            return formatDate(currentdate, `yyyy-MM-dd ${possibleTimeStr}`, 'en');
         }
         else {
             if (checkTime.currentTime && checkTime.curentDayStopTime) {
                 const currentDayWorkTime = WorkTimeValidator.getCurrentWorkTime(restriction, checkTime.isNewDay ? new Date(currentdate.getTime() + 86400000) : currentdate);
-                const time = this.getTimeFromString(currentDayWorkTime.start) + (+restriction.minDeliveryTime) + 1;
-                const hour = Math.floor(time / 60);
-                const minutes = time - (hour * 60);
-                return formatDate(checkTime.isNewDay || checkTime.currentTime > checkTime.curentDayStopTime ? (currentdate.getTime() + 86400000) : currentdate, `yyyy-MM-dd ${hour <= 9 ? '0' + hour : hour}:${minutes <= 9 ? '0' + minutes : minutes}`, 'en');
+                const time = this.getTimeFromString(currentDayWorkTime.start) + (+restriction.minDeliveryTime);
+                const timeString = WorkTimeValidator.convertMinutesToTime(time);
+                return formatDate(checkTime.isNewDay || checkTime.currentTime > checkTime.curentDayStopTime ? (currentdate.getTime() + 86400000) : currentdate, `yyyy-MM-dd ${timeString}`, 'en');
             }
             else {
                 throw 'Не удалось рассчитать currentTime и curentDayStopTime.';
@@ -1746,6 +1780,36 @@ class WorkTimeValidator {
         }
     }
     ;
+    /**
+     * Метод конвертирует переданное кол-во минут в строкове представление времени в формате HH:mm - `(00-24 часа):(0-59 минут)`.
+     * Например:
+     *
+     * const a = convertMinutesToTime(50) // a = '00:50'
+     * const b = convertMinutesToTime(1200) // b = '20:00'
+     *
+     * @param time - Число в диапазоне от 0 до 1440 (так как максимум в 1 сутках = 1440 минут).
+     * При передаче в time отрицательного значения, знак будет "отобршен", а для метод вернет результат, рассчитанный для полученного положительного значения.
+     * Если в time будет передано значение больше 1440 - метод вернет результат для значения без учета "превышающих суток" (т.е. с кратным вычетом 1440 минут)
+     *
+     * Например:
+     *
+     * const a = convertMinutesToTime(60) // a = '01:00'
+     * const b = convertMinutesToTime(1500) // b = '01:00' (1440 минут "целых" суток были "отброшены")
+     *
+     * @returns
+     */
+    convertMinutesToTime(time) {
+        const memoryKey = JSON.stringify({ time });
+        const checkMemory = this._memory.convertMinutesToTime.get(memoryKey);
+        if (checkMemory) {
+            return checkMemory;
+        }
+        else {
+            const result = WorkTimeValidator.convertMinutesToTime(time);
+            this._memory.convertMinutesToTime.set(memoryKey, result);
+            return result;
+        }
+    }
 }
 
 /**

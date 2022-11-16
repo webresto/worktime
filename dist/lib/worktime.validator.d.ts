@@ -30,18 +30,28 @@ export interface Restrictions {
 export interface RestrictionsOrder extends Restrictions {
     /** минимальное время доставки*/
     minDeliveryTime: string;
-    /**установлено ли на текущий момент ограничение доставки на определенное время */
-    deliveryToTimeEnabled: boolean;
     /** ограничение максимальной даты заказа в будущем (в минутах)*/
     periodPossibleForOrder: number;
+    /**установлено ли на текущий момент ограничение доставки на определенное время */
+    deliveryToTimeEnabled?: boolean;
+    /** Дополнительный комментарий по доставке */
+    deliveryDescription?: string;
 }
-interface ValidatorResult {
+export interface ValidatorResult {
     workNow: boolean;
     isNewDay?: boolean;
     currentTime?: number;
     curentDayStartTime?: number;
     curentDayStopTime?: number;
 }
+/** Тип, описывающий строковое представление всех цифр */
+declare type Digits = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9';
+/** Тип, описывающий строковое представление 24 часов одних суток */
+export declare type HoursDigits = '00' | '01' | '02' | '03' | '04' | '05' | '06' | '07' | '08' | '09' | '10' | '11' | '12' | '13' | '14' | '15' | '16' | '17' | '18' | '19' | '20' | '21' | '22' | '23';
+/** Тип, описывающий строковое представление 60 минут одного часа*/
+export declare type MinuteDigits = `${'0' | '1' | '2' | '3' | '4' | '5'}${Digits}`;
+/** Тип, описывающий строковое представление времени в формате HH:mm -`(00-24 часа):(0-59 минут)` */
+export declare type TimeString = `${HoursDigits}:${MinuteDigits}`;
 /**
  * Класс, содержащий статические методы, необходимые для работы с ограничениями рабочего времени предприятия.
  * Создавать новый экземпляр этого класса для использования статических методов не требуется.
@@ -60,10 +70,29 @@ export declare class WorkTimeValidator {
     static getMaxOrderDate(restriction: RestrictionsOrder, currentdate: Date): string;
     /**
      * Метод считает, сколько минут от начала дня (00:00) прошло для переданного времени.
-     * @param time - строка в формате HH:mm - время.
-     * @return :number - кол-во минут.
+     * @param time - строка в формате HH:mm -`(00-24 часа):(0-59 минут)` - время.
+     * @return кол-во минут.
      */
-    static getTimeFromString(time: string): number;
+    static getTimeFromString(time: TimeString): number;
+    /**
+     * Метод конвертирует переданное кол-во минут в строкове представление времени в формате HH:mm - `(00-24 часа):(0-59 минут)`.
+     * Например:
+     *
+     * const a = convertMinutesToTime(50) // a = '00:50'
+     * const b = convertMinutesToTime(1200) // b = '20:00'
+     *
+     * @param time - Число в диапазоне от 0 до 1440 (так как максимум в 1 сутках = 1440 минут).
+     * При передаче в time отрицательного значения, знак будет "отобршен", а для метод вернет результат, рассчитанный для полученного положительного значения.
+     * Если в time будет передано значение больше 1440 - метод вернет результат для значения без учета "превышающих суток" (т.е. с кратным вычетом 1440 минут)
+     *
+     * Например:
+     *
+     * const a = convertMinutesToTime(60) // a = '01:00'
+     * const b = convertMinutesToTime(1500) // b = '01:00' (1440 минут "целых" суток были "отброшены")
+     *
+     * @returns
+     */
+    static convertMinutesToTime(time: number): TimeString;
     /**
      * Метод проверяет, доступна ли возможность доставки на ближайшее время.
      * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
@@ -153,5 +182,24 @@ export declare class WorkTimeValidator {
     * @param currentdate - объект Date, представляющий текущие локальные дату и время пользователя
     */
     getCurrentWorkTime(restriction: Restrictions, currentdate: Date): WorkTime;
+    /**
+     * Метод конвертирует переданное кол-во минут в строкове представление времени в формате HH:mm - `(00-24 часа):(0-59 минут)`.
+     * Например:
+     *
+     * const a = convertMinutesToTime(50) // a = '00:50'
+     * const b = convertMinutesToTime(1200) // b = '20:00'
+     *
+     * @param time - Число в диапазоне от 0 до 1440 (так как максимум в 1 сутках = 1440 минут).
+     * При передаче в time отрицательного значения, знак будет "отобршен", а для метод вернет результат, рассчитанный для полученного положительного значения.
+     * Если в time будет передано значение больше 1440 - метод вернет результат для значения без учета "превышающих суток" (т.е. с кратным вычетом 1440 минут)
+     *
+     * Например:
+     *
+     * const a = convertMinutesToTime(60) // a = '01:00'
+     * const b = convertMinutesToTime(1500) // b = '01:00' (1440 минут "целых" суток были "отброшены")
+     *
+     * @returns
+     */
+    convertMinutesToTime(time: number): TimeString;
 }
 export {};

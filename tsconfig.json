@@ -7,6 +7,12 @@
   "include": [
     "src/**/*.ts"
   ],
+  "angularCompilerOptions": {
+    "disableTypeScriptVersionCheck": true,
+    "strictInjectionParameters": true,
+    "strictTemplates": true,
+    "strictInputAccessModifiers": true
+  },
   "compilerOptions": {
     "rootDir": "src",
     "declarationMap": false,

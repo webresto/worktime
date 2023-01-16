@@ -4,7 +4,7 @@
     "type": "git",
     "url": "https://github.com/webresto/worktime.git"
   },
-  "version": "1.1.0-alpha",
+  "version": "1.1.1-alpha",
   "scripts": {
     "pub": "cd dist && npm publish --access=public",
     "tsc": "tsc",

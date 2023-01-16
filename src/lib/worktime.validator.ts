@@ -34,21 +34,44 @@ export interface Restrictions {
   timezone?: string;
 
   /**  массив ограничений по времени работы предприятия для разных дней недели. */
-  workTime: WorkTime[];
+  worktime: WorkTime[];
+}
+
+export interface HtmlFormField {
+  id: string
+  type: string
+  label: string
+  description: string
+  required: Boolean
+  regex: string
+}
+
+/** Данные о модели авторизации пользователей на сайте предприятия */
+export interface UserRestrictions {
+  /** Показывает, какой вид данных используется пользователем для авторизации */
+  loginField: string
+
+  customFields?: HtmlFormField[] | null
 }
 
 export interface RestrictionsOrder extends Restrictions {
   /** минимальное время доставки*/
-  minDeliveryTime: string;
+  minDeliveryTimeInMinutes: string;
 
   /** ограничение максимальной даты заказа в будущем (в минутах)*/
-  periodPossibleForOrder: number;
+  possibleToOrderInMinutes: number;
 
-  /**установлено ли на текущий момент ограничение доставки на определенное время */
+  /**  установлено ли на текущий момент ограничение доставки на определенное время */
   deliveryToTimeEnabled?: boolean;
 
   /** Дополнительный комментарий по доставке */
   deliveryDescription?: string;
+
+  /** Разновидность вводимой капчи */
+  captchaType?: string | null
+
+  /** Данные о модели авторизации пользователей на сайте предприятия */
+  user?: UserRestrictions | null
 }
 
 export interface ValidatorResult {
@@ -75,9 +98,9 @@ export type TimeString = `${HoursDigits}:${MinuteDigits}`;
  * Функция валидации переданного объекта restriction на соответствие интерфейсу Restrictions
  * @param restriction - проверяемый объект, содержащий информацию о рабочем времени и временной зоне.
  */
-function isValidRestriction(restriction: any): restriction is Restrictions {
+function isValidRestriction(restriction: unknown): restriction is Restrictions {
 
-  return 'timezone' in restriction && 'workTime' in restriction;
+  return typeof restriction === 'object' && restriction !== null && 'timezone' in restriction && 'worktime' in restriction;
 
 }
 
@@ -87,7 +110,7 @@ function isValidRestriction(restriction: any): restriction is Restrictions {
  */
 function isValidRestrictionOrder(restriction: RestrictionsOrder): restriction is RestrictionsOrder {
 
-  return 'minDeliveryTime' in restriction && 'periodPossibleForOrder' in restriction && 'timezone' in restriction && 'workTime' in restriction;
+  return 'minDeliveryTimeInMinutes' in restriction && 'possibleToOrderInMinutes' in restriction && 'timezone' in restriction && 'worktime' in restriction;
 
 }
 
@@ -109,7 +132,7 @@ export class WorkTimeValidator {
   static getMaxOrderDate(restriction: RestrictionsOrder, currentdate: Date): string {
     if (restriction && isValidRestrictionOrder(restriction) && isDate(currentdate)) {
 
-      return formatDate(currentdate.getTime() + restriction.periodPossibleForOrder * 60000, 'yyyy-MM-dd', 'en');
+      return formatDate(currentdate.getTime() + restriction.possibleToOrderInMinutes * 60000, 'yyyy-MM-dd', 'en');
 
     } else {
 
@@ -209,7 +232,7 @@ export class WorkTimeValidator {
    */
   static isWorkNow(restriction: Restrictions | RestrictionsOrder, currentdate: Date = new Date()): ValidatorResult {
 
-    if (!restriction.workTime || !Object.keys(restriction.workTime).length) {
+    if (!restriction.worktime || !Object.keys(restriction.worktime).length) {
 
       return {
         workNow: true
@@ -271,7 +294,7 @@ export class WorkTimeValidator {
     if (checkTime.workNow && checkTime.currentTime) {
 
       console.log('Сейчас рабочее время. Расчет не требуется.');
-      const possibleTime = checkTime.currentTime + (+restriction.minDeliveryTime || 0);
+      const possibleTime = checkTime.currentTime + (+restriction.minDeliveryTimeInMinutes || 0);
       const possibleTimeStr = WorkTimeValidator.convertMinutesToTime(possibleTime);
       return formatDate(currentdate, `yyyy-MM-dd ${possibleTimeStr}`, 'en')
     } else {
@@ -282,7 +305,7 @@ export class WorkTimeValidator {
           restriction,
           checkTime.isNewDay ? new Date(currentdate.getTime() + 86400000) : currentdate
         );
-        const time = this.getTimeFromString(<TimeString>currentDayWorkTime.start) + (+restriction.minDeliveryTime);
+        const time = this.getTimeFromString(<TimeString>currentDayWorkTime.start) + (+restriction.minDeliveryTimeInMinutes);
         const timeString = WorkTimeValidator.convertMinutesToTime(time);
         return formatDate(
           checkTime.isNewDay || checkTime.currentTime > checkTime.curentDayStopTime ? (currentdate.getTime() + 86400000) : currentdate,
@@ -304,11 +327,11 @@ export class WorkTimeValidator {
    */
   static getPossibleSelfServiceOrderDateTime(restriction: RestrictionsOrder, currentdate: Date): string {
     /**
-     * Для обеспечения иммутабельности данных создается новый обьект restrictions, идентичный полученному в параметрах, но с измененным массивом workTime.
-     * В массиве workTime обновляются ограничения времени работы с обычных на актуальные для самовывоза.
+     * Для обеспечения иммутабельности данных создается новый обьект restrictions, идентичный полученному в параметрах, но с измененным массивом worktime.
+     * В массиве worktime обновляются ограничения времени работы с обычных на актуальные для самовывоза.
      * */
     const newRestriction = {
-      ...restriction, workTime: (<WorkTime[]>restriction.workTime).map(workTime => workTime.selfService ? ({ ...workTime, ...workTime.selfService }) : workTime)
+      ...restriction, worktime: (<WorkTime[]>restriction.worktime).map(worktime => worktime.selfService ? ({ ...worktime, ...worktime.selfService }) : worktime)
     };
     return WorkTimeValidator.getPossibleDelieveryOrderDateTime(newRestriction, currentdate);
   }
@@ -321,13 +344,13 @@ export class WorkTimeValidator {
   static getCurrentWorkTime(restriction: Restrictions, currentdate: Date): WorkTime {
     let i = 0;
     let result = null;
-    while (i < restriction.workTime.length && !result) {
-      if (restriction.workTime[i].dayOfWeek === 'all' || (
-        typeof restriction.workTime[i].dayOfWeek === 'string' ?
-          (<string>restriction.workTime[i].dayOfWeek).toLowerCase() :
-          (<string[]>restriction.workTime[i].dayOfWeek).map(day => day.toLowerCase())
+    while (i < restriction.worktime.length && !result) {
+      if (restriction.worktime[i].dayOfWeek === 'all' || (
+        typeof restriction.worktime[i].dayOfWeek === 'string' ?
+          (<string>restriction.worktime[i].dayOfWeek).toLowerCase() :
+          (<string[]>restriction.worktime[i].dayOfWeek).map(day => day.toLowerCase())
       ).includes(formatDate(currentdate, 'EEEE', 'en').toLowerCase())) {
-        result = restriction.workTime[i];
+        result = restriction.worktime[i];
       }
       i += 1;
     }

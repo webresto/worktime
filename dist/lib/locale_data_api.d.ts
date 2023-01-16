@@ -1,4 +1,4 @@
-declare type Time = {
+type Time = {
     hours: number;
     minutes: number;
 };

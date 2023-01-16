@@ -25,17 +25,35 @@ export interface Restrictions {
     /** временная зона предприятия */
     timezone?: string;
     /**  массив ограничений по времени работы предприятия для разных дней недели. */
-    workTime: WorkTime[];
+    worktime: WorkTime[];
+}
+export interface HtmlFormField {
+    id: string;
+    type: string;
+    label: string;
+    description: string;
+    required: Boolean;
+    regex: string;
+}
+/** Данные о модели авторизации пользователей на сайте предприятия */
+export interface UserRestrictions {
+    /** Показывает, какой вид данных используется пользователем для авторизации */
+    loginField: string;
+    customFields?: HtmlFormField[] | null;
 }
 export interface RestrictionsOrder extends Restrictions {
     /** минимальное время доставки*/
-    minDeliveryTime: string;
+    minDeliveryTimeInMinutes: string;
     /** ограничение максимальной даты заказа в будущем (в минутах)*/
-    periodPossibleForOrder: number;
-    /**установлено ли на текущий момент ограничение доставки на определенное время */
+    possibleToOrderInMinutes: number;
+    /**  установлено ли на текущий момент ограничение доставки на определенное время */
     deliveryToTimeEnabled?: boolean;
     /** Дополнительный комментарий по доставке */
     deliveryDescription?: string;
+    /** Разновидность вводимой капчи */
+    captchaType?: string | null;
+    /** Данные о модели авторизации пользователей на сайте предприятия */
+    user?: UserRestrictions | null;
 }
 export interface ValidatorResult {
     workNow: boolean;
@@ -45,13 +63,13 @@ export interface ValidatorResult {
     curentDayStopTime?: number;
 }
 /** Тип, описывающий строковое представление всех цифр */
-declare type Digits = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9';
+type Digits = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9';
 /** Тип, описывающий строковое представление 24 часов одних суток */
-export declare type HoursDigits = '00' | '01' | '02' | '03' | '04' | '05' | '06' | '07' | '08' | '09' | '10' | '11' | '12' | '13' | '14' | '15' | '16' | '17' | '18' | '19' | '20' | '21' | '22' | '23';
+export type HoursDigits = '00' | '01' | '02' | '03' | '04' | '05' | '06' | '07' | '08' | '09' | '10' | '11' | '12' | '13' | '14' | '15' | '16' | '17' | '18' | '19' | '20' | '21' | '22' | '23';
 /** Тип, описывающий строковое представление 60 минут одного часа*/
-export declare type MinuteDigits = `${'0' | '1' | '2' | '3' | '4' | '5'}${Digits}`;
+export type MinuteDigits = `${'0' | '1' | '2' | '3' | '4' | '5'}${Digits}`;
 /** Тип, описывающий строковое представление времени в формате HH:mm -`(00-24 часа):(0-59 минут)` */
-export declare type TimeString = `${HoursDigits}:${MinuteDigits}`;
+export type TimeString = `${HoursDigits}:${MinuteDigits}`;
 /**
  * Класс, содержащий статические методы, необходимые для работы с ограничениями рабочего времени предприятия.
  * Создавать новый экземпляр этого класса для использования статических методов не требуется.

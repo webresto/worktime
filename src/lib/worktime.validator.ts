@@ -42,7 +42,7 @@ export interface HtmlFormField {
   type: string
   label: string
   description: string
-  required: Boolean
+  required: boolean
   regex: string
 }
 

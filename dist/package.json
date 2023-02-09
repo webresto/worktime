@@ -4,7 +4,7 @@
     "type": "git",
     "url": "https://github.com/webresto/worktime.git"
   },
-  "version": "1.1.1-alpha",
+  "version": "1.1.1-beta",
   "contributors": [
     {
       "name": "axrl",
@@ -22,7 +22,7 @@
   "license": "MIT",
   "description": "Библиотека для работы с ограничениями рабочего времени предприятия для @webresto",
   "dependencies": {
-    "tslib": "^2.4.1"
+    "tslib": "^2.5.0"
   },
   "module": "fesm2015/webresto-worktime.mjs",
   "es2020": "fesm2020/webresto-worktime.mjs",
@@ -39,7 +39,7 @@
       "esm2020": "./esm2020/webresto-worktime.mjs",
       "es2020": "./fesm2020/webresto-worktime.mjs",
       "es2015": "./fesm2015/webresto-worktime.mjs",
-      "node": "./fesm2015/webresto-worktime.mjs",
+      "node": "./bundles/index.js",
       "default": "./fesm2020/webresto-worktime.mjs"
     }
   },

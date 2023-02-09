@@ -38,20 +38,44 @@ export interface Restrictions {
 }
 
 export interface HtmlFormField {
-  id: string
-  type: string
-  label: string
-  description: string
-  required: boolean
-  regex: string
+  id: string;
+  type: string;
+  label: string;
+  description: string;
+  required: boolean;
+  regex: string;
 }
+
+export interface Country {
+  phoneCode: string;
+  iso: string;
+  name: string;
+  nativeCountryName: string;
+  language: string[];
+  currency: string;
+  currencySymbol: string;
+  currencyISO: string;
+  currencyUnit: string;
+  currencyDenomination: number;
+  phoneMask: string[];
+  flag: string;
+  }
 
 /** Данные о модели авторизации пользователей на сайте предприятия */
 export interface UserRestrictions {
   /** Показывает, какой вид данных используется пользователем для авторизации */
-  loginField: string
+  loginField: string;
 
-  customFields?: HtmlFormField[] | null
+  customFields?: HtmlFormField[] | null;
+
+  accountsDisable: boolean;
+  bonusProgramDisable: boolean;
+  passwordRequired: boolean;
+  registrationOTPRequired: boolean;
+  allowRestorePassword: boolean;
+  allowedPhoneCountries: Country[];
+  linkToProcessingPersonalData: boolean;
+  linkToUserAgreement: boolean;
 }
 
 export interface RestrictionsOrder extends Restrictions {
@@ -127,7 +151,7 @@ export class WorkTimeValidator {
   /**
    * Метод возвращает максимальную возможную дату, на которую можно заказать доставку.
    * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
-   * @return :string - Строка, представляющая максимальную доступную дату доставки в формате yyyy-MM-dd.
+   * @return Строка, представляющая максимальную доступную дату доставки в формате yyyy-MM-dd.
    */
   static getMaxOrderDate(restriction: RestrictionsOrder, currentdate: Date): string {
     if (restriction && isValidRestrictionOrder(restriction) && isDate(currentdate)) {

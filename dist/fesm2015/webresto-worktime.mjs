@@ -1462,7 +1462,7 @@ class WorkTimeValidator {
     /**
      * Метод возвращает максимальную возможную дату, на которую можно заказать доставку.
      * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
-     * @return :string - Строка, представляющая максимальную доступную дату доставки в формате yyyy-MM-dd.
+     * @return Строка, представляющая максимальную доступную дату доставки в формате yyyy-MM-dd.
      */
     static getMaxOrderDate(restriction, currentdate) {
         if (restriction && isValidRestrictionOrder(restriction) && isDate(currentdate)) {

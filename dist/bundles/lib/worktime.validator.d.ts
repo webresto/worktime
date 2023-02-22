@@ -54,14 +54,39 @@ export interface UserRestrictions {
     /** Показывает, какой вид данных используется пользователем для авторизации */
     loginField: string;
     customFields?: HtmlFormField[] | null;
+    /**
+     * Отключен ли ЛК
+     */
     accountsDisable: boolean;
+    /**
+     * Отключены ли бонусные программы
+     */
     bonusProgramDisable: boolean;
+    /**
+     * Требуется ли для авторизации/регистрации ввод пароля
+     */
     passwordRequired: boolean;
     registrationOTPRequired: boolean;
+    /**
+     * Доступно ли восстановление пароля
+     */
     allowRestorePassword: boolean;
+    /**
+     * Список стран, телефонные коды которых доступны для указания в номере телефона пользователя
+     */
     allowedPhoneCountries: Country[];
+    /**
+     * Ссылка на политику обработки персональных данных
+     */
     linkToProcessingPersonalData: boolean;
+    /**
+     * Ссылка на пользовательское соглашение
+     */
     linkToUserAgreement: boolean;
+    /**
+     * Длина кода подтверждения OTP
+     */
+    OTPlength: number;
 }
 export interface RestrictionsOrder extends Restrictions {
     /** минимальное время доставки*/
@@ -164,21 +189,21 @@ export declare class WorkTimeValidator {
      */
     static getPossibleSelfServiceOrderDateTime(restriction: RestrictionsOrder, currentdate: Date): string;
     /**
-    * Метод возвращает актуальные данные о времени работы из массива всех вариантов обьекта restriction.
-    * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
-    * @param currentdate - объект Date, представляющий текущие локальные дату и время пользователя
-    */
+     * Метод возвращает актуальные данные о времени работы из массива всех вариантов обьекта restriction.
+     * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
+     * @param currentdate - объект Date, представляющий текущие локальные дату и время пользователя
+     */
     static getCurrentWorkTime(restriction: Restrictions, currentdate: Date): WorkTime;
     /**
-    * Логика ниже предназначена для использования экземпляра класса WorkTimeValidator
-    */
+     * Логика ниже предназначена для использования экземпляра класса WorkTimeValidator
+     */
     constructor();
     private _memory;
     /**
-      * Метод возвращает максимальную возможную дату, на которую можно заказать доставку.
-      * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
-      * @return :string - Строка, представляющая максимальную доступную дату доставки в формате yyyy-MM-dd.
-      */
+     * Метод возвращает максимальную возможную дату, на которую можно заказать доставку.
+     * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
+     * @return :string - Строка, представляющая максимальную доступную дату доставки в формате yyyy-MM-dd.
+     */
     getMaxOrderDate(restriction: RestrictionsOrder, currentdate: Date): string;
     /**
      * Метод считает, сколько минут от начала дня (00:00) прошло для переданного времени.
@@ -217,10 +242,10 @@ export declare class WorkTimeValidator {
      */
     getPossibleSelfServiceOrderDateTime(restriction: RestrictionsOrder, currentdate: Date): string;
     /**
-    * Метод возвращает актуальные данные о времени работы из массива всех вариантов обьекта restriction.
-    * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
-    * @param currentdate - объект Date, представляющий текущие локальные дату и время пользователя
-    */
+     * Метод возвращает актуальные данные о времени работы из массива всех вариантов обьекта restriction.
+     * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
+     * @param currentdate - объект Date, представляющий текущие локальные дату и время пользователя
+     */
     getCurrentWorkTime(restriction: Restrictions, currentdate: Date): WorkTime;
     /**
      * Метод конвертирует переданное кол-во минут в строкове представление времени в формате HH:mm - `(00-24 часа):(0-59 минут)`.

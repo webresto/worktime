@@ -1440,14 +1440,20 @@ class TimeZoneIdentifier {
  * @param restriction - проверяемый объект, содержащий информацию о рабочем времени и временной зоне.
  */
 function isValidRestriction(restriction) {
-    return typeof restriction === 'object' && restriction !== null && 'timezone' in restriction && 'worktime' in restriction;
+    return (typeof restriction === 'object' &&
+        restriction !== null &&
+        'timezone' in restriction &&
+        'worktime' in restriction);
 }
 /**
  * Функция валидации переданного объекта restriction на соответствие минимальным данным для заказа
  * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
  */
 function isValidRestrictionOrder(restriction) {
-    return 'minDeliveryTimeInMinutes' in restriction && 'possibleToOrderInMinutes' in restriction && 'timezone' in restriction && 'worktime' in restriction;
+    return ('minDeliveryTimeInMinutes' in restriction &&
+        'possibleToOrderInMinutes' in restriction &&
+        'timezone' in restriction &&
+        'worktime' in restriction);
 }
 /**
  * Класс, содержащий статические методы, необходимые для работы с ограничениями рабочего времени предприятия.
@@ -1465,14 +1471,17 @@ class WorkTimeValidator {
      * @return Строка, представляющая максимальную доступную дату доставки в формате yyyy-MM-dd.
      */
     static getMaxOrderDate(restriction, currentdate) {
-        if (restriction && isValidRestrictionOrder(restriction) && isDate(currentdate)) {
+        if (restriction &&
+            isValidRestrictionOrder(restriction) &&
+            isDate(currentdate)) {
             return formatDate(currentdate.getTime() + restriction.possibleToOrderInMinutes * 60000, 'yyyy-MM-dd', 'en');
         }
         else {
-            throw new Error(isDate(currentdate) ?
-                'Не передан корректный объект даты' :
-                !restriction ? 'Не передан объект restrictions' :
-                    'Передан невалидный обьект restrictions');
+            throw new Error(isDate(currentdate)
+                ? 'Не передан корректный объект даты'
+                : !restriction
+                    ? 'Не передан объект restrictions'
+                    : 'Передан невалидный обьект restrictions');
         }
     }
     /**
@@ -1491,7 +1500,7 @@ class WorkTimeValidator {
                 if (checkedTime.includes(' ') || checkedTime.includes('T')) {
                     checkedTime = checkedTime.split(checkedTime.includes(' ') ? ' ' : 'T')[1];
                 }
-                return (+checkedTime.split(':')[0]) * 60 + (+checkedTime.split(':')[1]);
+                return +checkedTime.split(':')[0] * 60 + +checkedTime.split(':')[1];
             }
             else {
                 throw 'Переданная строка не соответствует формату HH:mm -`(00-24 часа):(0-59 минут)`';
@@ -1519,8 +1528,8 @@ class WorkTimeValidator {
     static convertMinutesToTime(time) {
         if (time < 1441) {
             const hour = Math.floor(time / 60);
-            const hourStr = (hour <= 9 ? `0${String(hour)}` : String(hour));
-            const minutesStr = String(time - (hour * 60));
+            const hourStr = ((hour <= 9 ? `0${String(hour)}` : String(hour)));
+            const minutesStr = String(time - hour * 60);
             return `${hourStr}:${minutesStr}`;
         }
         else {
@@ -1547,31 +1556,37 @@ class WorkTimeValidator {
     static isWorkNow(restriction, currentdate = new Date()) {
         if (!restriction.worktime || !Object.keys(restriction.worktime).length) {
             return {
-                workNow: true
+                workNow: true,
             };
         }
-        ;
         // Если испольняется в NodeJS
         if (typeof process !== 'undefined' && !restriction.timezone) {
-            restriction.timezone = process.env.TZ ? process.env.TZ : Intl.DateTimeFormat().resolvedOptions().timeZone;
+            restriction.timezone = process.env.TZ
+                ? process.env.TZ
+                : Intl.DateTimeFormat().resolvedOptions().timeZone;
         }
-        ;
         if (!restriction || !isValidRestriction(restriction)) {
-            throw new Error(!isDate(currentdate) ? 'Не передан корректный объект даты' :
-                !restriction ? 'Не передан объект restrictions'
+            throw new Error(!isDate(currentdate)
+                ? 'Не передан корректный объект даты'
+                : !restriction
+                    ? 'Не передан объект restrictions'
                     : 'Передан невалидный обьект restrictions');
         }
         else {
             const companyLocalTimeZone = TimeZoneIdentifier.getTimeZoneGMTOffsetfromNameZone(restriction.timezone).split(':');
-            const companyLocalTimeZoneDelta = +companyLocalTimeZone[0] * 60 + (+(companyLocalTimeZone[1]));
+            const companyLocalTimeZoneDelta = +companyLocalTimeZone[0] * 60 + +companyLocalTimeZone[1];
             const lokalTimeDelta = companyLocalTimeZoneDelta + currentdate.getTimezoneOffset(); // смещение времени пользователя относительно времени торговой точки
             const currentTimeInMinutesWithLocalDelta = WorkTimeValidator.getTimeFromString(formatDate(currentdate, 'HH:mm', 'en')) + lokalTimeDelta;
             /**
              * текущее время в минутах с начала дня (600 = 10:00. 1200 = 20:00)
              * если из-за разницы поясов расчет перепрыгнул на новый день, то приводим время к правильному значению в диапазоне 24 часов
              * */
-            const currentTime = currentTimeInMinutesWithLocalDelta > 1440 ? currentTimeInMinutesWithLocalDelta - 1440 : currentTimeInMinutesWithLocalDelta;
-            const currentDayWorkTime = WorkTimeValidator.getCurrentWorkTime(restriction, currentTimeInMinutesWithLocalDelta > 1440 ? new Date(currentdate.getTime() + 86400000) : currentdate); // текущее рабочее время
+            const currentTime = currentTimeInMinutesWithLocalDelta > 1440
+                ? currentTimeInMinutesWithLocalDelta - 1440
+                : currentTimeInMinutesWithLocalDelta;
+            const currentDayWorkTime = WorkTimeValidator.getCurrentWorkTime(restriction, currentTimeInMinutesWithLocalDelta > 1440
+                ? new Date(currentdate.getTime() + 86400000)
+                : currentdate); // текущее рабочее время
             const curentDayStartTime = WorkTimeValidator.getTimeFromString(currentDayWorkTime.start); // текущее время начала рабочего дня в минутах
             const curentDayStopTime = WorkTimeValidator.getTimeFromString(currentDayWorkTime.stop); // текущее время окончания рабочего дня в минутах
             return {
@@ -1579,7 +1594,7 @@ class WorkTimeValidator {
                 isNewDay: currentTimeInMinutesWithLocalDelta > 1440,
                 currentTime,
                 curentDayStartTime,
-                curentDayStopTime
+                curentDayStopTime,
             };
         }
     }
@@ -1598,15 +1613,20 @@ class WorkTimeValidator {
         }
         else {
             if (checkTime.currentTime && checkTime.curentDayStopTime) {
-                const currentDayWorkTime = WorkTimeValidator.getCurrentWorkTime(restriction, checkTime.isNewDay ? new Date(currentdate.getTime() + 86400000) : currentdate);
-                const time = this.getTimeFromString(currentDayWorkTime.start) + (+restriction.minDeliveryTimeInMinutes);
+                const currentDayWorkTime = WorkTimeValidator.getCurrentWorkTime(restriction, checkTime.isNewDay
+                    ? new Date(currentdate.getTime() + 86400000)
+                    : currentdate);
+                const time = this.getTimeFromString(currentDayWorkTime.start) +
+                    +restriction.minDeliveryTimeInMinutes;
                 const timeString = WorkTimeValidator.convertMinutesToTime(time);
-                return formatDate(checkTime.isNewDay || checkTime.currentTime > checkTime.curentDayStopTime ? (currentdate.getTime() + 86400000) : currentdate, `yyyy-MM-dd ${timeString}`, 'en');
+                return formatDate(checkTime.isNewDay ||
+                    checkTime.currentTime > checkTime.curentDayStopTime
+                    ? currentdate.getTime() + 86400000
+                    : currentdate, `yyyy-MM-dd ${timeString}`, 'en');
             }
             else {
                 throw 'Не удалось рассчитать currentTime и curentDayStopTime.';
             }
-            ;
         }
     }
     /**
@@ -1620,22 +1640,26 @@ class WorkTimeValidator {
          * В массиве worktime обновляются ограничения времени работы с обычных на актуальные для самовывоза.
          * */
         const newRestriction = {
-            ...restriction, worktime: restriction.worktime.map(worktime => worktime.selfService ? ({ ...worktime, ...worktime.selfService }) : worktime)
+            ...restriction,
+            worktime: restriction.worktime.map((worktime) => worktime.selfService
+                ? { ...worktime, ...worktime.selfService }
+                : worktime),
         };
         return WorkTimeValidator.getPossibleDelieveryOrderDateTime(newRestriction, currentdate);
     }
     /**
-    * Метод возвращает актуальные данные о времени работы из массива всех вариантов обьекта restriction.
-    * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
-    * @param currentdate - объект Date, представляющий текущие локальные дату и время пользователя
-    */
+     * Метод возвращает актуальные данные о времени работы из массива всех вариантов обьекта restriction.
+     * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
+     * @param currentdate - объект Date, представляющий текущие локальные дату и время пользователя
+     */
     static getCurrentWorkTime(restriction, currentdate) {
         let i = 0;
         let result = null;
         while (i < restriction.worktime.length && !result) {
-            if (restriction.worktime[i].dayOfWeek === 'all' || (typeof restriction.worktime[i].dayOfWeek === 'string' ?
-                restriction.worktime[i].dayOfWeek.toLowerCase() :
-                restriction.worktime[i].dayOfWeek.map(day => day.toLowerCase())).includes(formatDate(currentdate, 'EEEE', 'en').toLowerCase())) {
+            if (restriction.worktime[i].dayOfWeek === 'all' ||
+                (typeof restriction.worktime[i].dayOfWeek === 'string'
+                    ? restriction.worktime[i].dayOfWeek.toLowerCase()
+                    : restriction.worktime[i].dayOfWeek.map((day) => day.toLowerCase())).includes(formatDate(currentdate, 'EEEE', 'en').toLowerCase())) {
                 result = restriction.worktime[i];
             }
             i += 1;
@@ -1648,8 +1672,8 @@ class WorkTimeValidator {
         }
     }
     /**
-    * Логика ниже предназначена для использования экземпляра класса WorkTimeValidator
-    */
+     * Логика ниже предназначена для использования экземпляра класса WorkTimeValidator
+     */
     constructor() {
         this._memory = {
             getMaxOrderDate: new Map(),
@@ -1658,14 +1682,14 @@ class WorkTimeValidator {
             getPossibleDelieveryOrderDateTime: new Map(),
             getPossibleSelfServiceOrderDateTime: new Map(),
             getCurrentWorkTime: new Map(),
-            convertMinutesToTime: new Map()
+            convertMinutesToTime: new Map(),
         };
     }
     /**
-      * Метод возвращает максимальную возможную дату, на которую можно заказать доставку.
-      * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
-      * @return :string - Строка, представляющая максимальную доступную дату доставки в формате yyyy-MM-dd.
-      */
+     * Метод возвращает максимальную возможную дату, на которую можно заказать доставку.
+     * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
+     * @return :string - Строка, представляющая максимальную доступную дату доставки в формате yyyy-MM-dd.
+     */
     getMaxOrderDate(restriction, currentdate) {
         const memoryKey = JSON.stringify({ restriction, currentdate });
         const checkMemory = this._memory.getMaxOrderDate.get(memoryKey);
@@ -1695,7 +1719,6 @@ class WorkTimeValidator {
             return result;
         }
     }
-    ;
     /**
      * Метод проверяет, доступна ли возможность доставки на ближайшее время.
      * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
@@ -1725,7 +1748,6 @@ class WorkTimeValidator {
             return result;
         }
     }
-    ;
     /**
      * Метод возвращает ближайшую возможную дату-время заказа для способа доставки "Доставка курьером".
      * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
@@ -1743,7 +1765,6 @@ class WorkTimeValidator {
             return result;
         }
     }
-    ;
     /**
      * Метод возвращает ближайшую возможную дату-время заказа для способа доставки "Самовывоз".
      * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
@@ -1761,12 +1782,11 @@ class WorkTimeValidator {
             return result;
         }
     }
-    ;
     /**
-    * Метод возвращает актуальные данные о времени работы из массива всех вариантов обьекта restriction.
-    * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
-    * @param currentdate - объект Date, представляющий текущие локальные дату и время пользователя
-    */
+     * Метод возвращает актуальные данные о времени работы из массива всех вариантов обьекта restriction.
+     * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
+     * @param currentdate - объект Date, представляющий текущие локальные дату и время пользователя
+     */
     getCurrentWorkTime(restriction, currentdate) {
         const memoryKey = JSON.stringify({ restriction, currentdate });
         const checkMemory = this._memory.getCurrentWorkTime.get(memoryKey);
@@ -1779,7 +1799,6 @@ class WorkTimeValidator {
             return result;
         }
     }
-    ;
     /**
      * Метод конвертирует переданное кол-во минут в строкове представление времени в формате HH:mm - `(00-24 часа):(0-59 минут)`.
      * Например:

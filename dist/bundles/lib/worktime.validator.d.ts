@@ -78,11 +78,11 @@ export interface UserRestrictions {
     /**
      * Ссылка на политику обработки персональных данных
      */
-    linkToProcessingPersonalData: boolean;
+    linkToProcessingPersonalData: string;
     /**
      * Ссылка на пользовательское соглашение
      */
-    linkToUserAgreement: boolean;
+    linkToUserAgreement: string;
     /**
      * Длина кода подтверждения OTP
      */

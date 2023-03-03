@@ -62,29 +62,21 @@ export interface Country {
 }
 
 /** Данные о модели авторизации пользователей на сайте предприятия */
-export interface UserRestrictions {
+export type UserRestrictions<T extends {} = {}> = {
   /** Показывает, какой вид данных используется пользователем для авторизации */
   loginField: string;
-
+  /**
+   * Zodiac sign, Human desing type, Best Friend, referal link etc
+   */
   customFields?: HtmlFormField[] | null;
-
   /**
-   * Отключен ли ЛК
+   * possible 3 variants ['required', 'from_otp', 'disabled'] by default: `from_otp` it means what need only OTP, for next logins  passwordRequired, disabled is means password forbidden and you need all time get OTP password
    */
-  accountsDisable: boolean;
+  passwordPolicy: 'required' | 'from_otp' | 'disabled';
   /**
-   * Отключены ли бонусные программы
+   * by default = false
    */
-  bonusProgramDisable: boolean;
-  /**
-   * Требуется ли для авторизации/регистрации ввод пароля
-   */
-  passwordRequired: boolean;
-  registrationOTPRequired: boolean;
-  /**
-   * Доступно ли восстановление пароля
-   */
-  allowRestorePassword: boolean;
+  loginOTPRequired: boolean;
   /**
    * Список стран, телефонные коды которых доступны для указания в номере телефона пользователя
    */
@@ -101,9 +93,9 @@ export interface UserRestrictions {
    * Длина кода подтверждения OTP
    */
   OTPlength: number;
-}
+} & T;
 
-export interface RestrictionsOrder extends Restrictions {
+export interface RestrictionsOrder<T extends {} = {}> extends Restrictions {
   /** минимальное время доставки*/
   minDeliveryTimeInMinutes: string;
 
@@ -120,7 +112,7 @@ export interface RestrictionsOrder extends Restrictions {
   captchaType?: string | null;
 
   /** Данные о модели авторизации пользователей на сайте предприятия */
-  user?: UserRestrictions | null;
+  user?: UserRestrictions<T> | null;
 }
 
 export interface ValidatorResult {

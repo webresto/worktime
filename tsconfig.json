@@ -1,12 +1,7 @@
 {
   "compileOnSave": false,
-  "exclude": [
-    "node_modules",
-    "src/test/*.spec.ts"
-  ],
-  "include": [
-    "src/**/*.ts"
-  ],
+  "exclude": ["node_modules", "src/test/*.spec.ts"],
+  "include": ["src/**/*.ts"],
   "angularCompilerOptions": {
     "disableTypeScriptVersionCheck": true,
     "strictInjectionParameters": true,
@@ -17,10 +12,7 @@
     "rootDir": "src",
     "declarationMap": false,
     "inlineSources": false,
-    "types": [
-      "mocha",
-      "node"
-    ],
+    "types": ["mocha", "node"],
     "baseUrl": "./",
     "outDir": "./ts-dist",
     "forceConsistentCasingInFileNames": true,
@@ -35,8 +27,6 @@
     "importHelpers": false,
     "target": "es2020",
     "module": "es2020",
-    "lib": [
-      "es2020"
-    ]
+    "lib": ["es2020"]
   }
 }

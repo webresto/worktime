@@ -10,7 +10,7 @@
     "tsc:commonjs": "tsc -p tsconfig.commonjs.json",
     "build:esm": "ng-packagr -p ng-package.json",
     "fix-commonjs-build": "node fix-commonjs-build.js",
-    "build": "npm run build:esm && npm run tsc:commonjs && npm run fix-commonjs-build",
+    "build": "npm run build:esm && npm run tsc:commonjs && npm run fix-commonjs-build && cp .npmrc dist",
     "test": "ts-mocha --experimental-module -p ./tsconfig.test.json src/test/*.spec.ts"
   },
   "devDependencies": {

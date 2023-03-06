@@ -66,6 +66,10 @@ export type UserRestrictions<T extends {} = {}> = {
      */
     loginOTPRequired: boolean;
     /**
+     * Отключены ли бонусные программы
+     */
+    bonusProgramDisable: boolean;
+    /**
      * Список стран, телефонные коды которых доступны для указания в номере телефона пользователя
      */
     allowedPhoneCountries: Country[];

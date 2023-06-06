@@ -78,10 +78,6 @@ export type UserRestrictions<T extends {} = {}> = {
    */
   loginOTPRequired: boolean;
   /**
-   * Отключены ли бонусные программы
-   */
-  bonusProgramDisable: boolean;
-  /**
    * Список стран, телефонные коды которых доступны для указания в номере телефона пользователя
    */
   allowedPhoneCountries: Country[];
@@ -163,6 +159,13 @@ export type MinuteDigits = `${'0' | '1' | '2' | '3' | '4' | '5'}${Digits}`;
 /** Тип, описывающий строковое представление времени в формате HH:mm -`(00-24 часа):(0-59 минут)` */
 export type TimeString = `${HoursDigits}:${MinuteDigits}`;
 
+/** Функция-хелпер для проверки, что переданное значение не является null или undefined */
+function isValue<T extends any>(
+  value: T | null | undefined
+): value is NonNullable<T> {
+  return value !== null && value !== undefined;
+}
+
 /**
  * Функция валидации переданного объекта restriction на соответствие интерфейсу Restrictions
  * @param restriction - проверяемый объект, содержащий информацию о рабочем времени и временной зоне.
@@ -172,7 +175,9 @@ function isValidRestriction(restriction: unknown): restriction is Restrictions {
     typeof restriction === 'object' &&
     restriction !== null &&
     'timezone' in restriction &&
-    'worktime' in restriction
+    'worktime' in restriction &&
+    isValue(restriction.timezone) &&
+    isValue(restriction.worktime)
   );
 }
 
@@ -184,10 +189,11 @@ function isValidRestrictionOrder(
   restriction: RestrictionsOrder
 ): restriction is RestrictionsOrder {
   return (
+    isValidRestriction(restriction) &&
     'minDeliveryTimeInMinutes' in restriction &&
     'possibleToOrderInMinutes' in restriction &&
-    'timezone' in restriction &&
-    'worktime' in restriction
+    isValue(restriction.minDeliveryTimeInMinutes) &&
+    isValue(restriction.possibleToOrderInMinutes)
   );
 }
 
@@ -243,15 +249,15 @@ export class WorkTimeValidator {
       const regExp = new RegExp(
         /^(00|01|02|03|04|05|06|07|08|09|10|11|12|13|14|15|16|17|18|19|20|21|22|23)+:([0-5]\d)+/
       );
+      let checkedTime = time.trim();
 
-      if (regExp.test(time)) {
-        let checkedTime = time.trim();
-        if (checkedTime.includes(' ') || checkedTime.includes('T')) {
-          checkedTime = checkedTime.split(
-            checkedTime.includes(' ') ? ' ' : 'T'
-          )[1];
-        }
+      if (checkedTime.includes(' ') || checkedTime.includes('T')) {
+        checkedTime = checkedTime.split(
+          checkedTime.includes(' ') ? ' ' : 'T'
+        )[1];
+      }
 
+      if (regExp.test(checkedTime)) {
         return +checkedTime.split(':')[0] * 60 + +checkedTime.split(':')[1];
       } else {
         throw 'Переданная строка не соответствует формату HH:mm -`(00-24 часа):(0-59 минут)`';
@@ -283,7 +289,10 @@ export class WorkTimeValidator {
       const hourStr: HoursDigits = <HoursDigits>(
         (hour <= 9 ? `0${String(hour)}` : String(hour))
       );
-      const minutesStr: MinuteDigits = <MinuteDigits>String(time - hour * 60);
+      const minutes = String(time - hour * 60);
+      const minutesStr: MinuteDigits = <MinuteDigits>(
+        `${minutes.length == 1 ? '0' : ''}${minutes}`
+      );
       return `${hourStr}:${minutesStr}`;
     } else {
       return WorkTimeValidator.convertMinutesToTime(time - 1440);
@@ -311,17 +320,14 @@ export class WorkTimeValidator {
     restriction: Restrictions | RestrictionsOrder,
     currentdate: Date = new Date()
   ): ValidatorResult {
-    if (!restriction.worktime || !Object.keys(restriction.worktime).length) {
-      return {
-        workNow: true,
-      };
-    }
-
     // Если испольняется в NodeJS
-    if (typeof process !== 'undefined' && !restriction.timezone) {
-      restriction.timezone = process.env.TZ
-        ? process.env.TZ
-        : Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (
+      isValue(process) &&
+      isValue(restriction) &&
+      !isValue(!restriction.timezone)
+    ) {
+      restriction.timezone =
+        process?.env?.TZ ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
     }
 
     if (!restriction || !isValidRestriction(restriction)) {
@@ -333,6 +339,12 @@ export class WorkTimeValidator {
           : 'Передан невалидный обьект restrictions'
       );
     } else {
+      if (!restriction?.worktime || !Object.keys(restriction.worktime).length) {
+        return {
+          workNow: true,
+        };
+      }
+
       const companyLocalTimeZone =
         TimeZoneIdentifier.getTimeZoneGMTOffsetfromNameZone(
           restriction.timezone
@@ -386,6 +398,10 @@ export class WorkTimeValidator {
     restriction: RestrictionsOrder,
     currentdate: Date
   ): string {
+    if (!isValidRestrictionOrder(restriction)) {
+      throw new Error('Не передан или передан невалидный объект restrictions');
+    }
+
     const checkTime = WorkTimeValidator.isWorkNow(restriction, currentdate);
 
     if (checkTime.workNow && checkTime.currentTime) {
@@ -430,6 +446,10 @@ export class WorkTimeValidator {
     restriction: RestrictionsOrder,
     currentdate: Date
   ): string {
+    if (!isValidRestrictionOrder(restriction)) {
+      throw new Error('Не передан или передан невалидный объект restrictions');
+    }
+
     /**
      * Для обеспечения иммутабельности данных создается новый обьект restrictions, идентичный полученному в параметрах, но с измененным массивом worktime.
      * В массиве worktime обновляются ограничения времени работы с обычных на актуальные для самовывоза.
@@ -457,8 +477,13 @@ export class WorkTimeValidator {
     restriction: Restrictions,
     currentdate: Date
   ): WorkTime {
+    if (!isValidRestriction(restriction)) {
+      throw new Error('Не передан или передан невалидный объект restrictions');
+    }
+
     let i = 0;
     let result = null;
+
     while (i < restriction.worktime.length && !result) {
       if (
         restriction.worktime[i].dayOfWeek === 'all' ||
@@ -473,6 +498,7 @@ export class WorkTimeValidator {
       }
       i += 1;
     }
+
     if (!result) {
       throw new Error('Нет актуального расписания работы для текущего дня');
     } else {

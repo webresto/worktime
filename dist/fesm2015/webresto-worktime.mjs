@@ -1435,6 +1435,10 @@ class TimeZoneIdentifier {
     }
 }
 
+/** Функция-хелпер для проверки, что переданное значение не является null или undefined */
+function isValue(value) {
+    return value !== null && value !== undefined;
+}
 /**
  * Функция валидации переданного объекта restriction на соответствие интерфейсу Restrictions
  * @param restriction - проверяемый объект, содержащий информацию о рабочем времени и временной зоне.
@@ -1443,17 +1447,20 @@ function isValidRestriction(restriction) {
     return (typeof restriction === 'object' &&
         restriction !== null &&
         'timezone' in restriction &&
-        'worktime' in restriction);
+        'worktime' in restriction &&
+        isValue(restriction.timezone) &&
+        isValue(restriction.worktime));
 }
 /**
  * Функция валидации переданного объекта restriction на соответствие минимальным данным для заказа
  * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
  */
 function isValidRestrictionOrder(restriction) {
-    return ('minDeliveryTimeInMinutes' in restriction &&
+    return (isValidRestriction(restriction) &&
+        'minDeliveryTimeInMinutes' in restriction &&
         'possibleToOrderInMinutes' in restriction &&
-        'timezone' in restriction &&
-        'worktime' in restriction);
+        isValue(restriction.minDeliveryTimeInMinutes) &&
+        isValue(restriction.possibleToOrderInMinutes));
 }
 /**
  * Класс, содержащий статические методы, необходимые для работы с ограничениями рабочего времени предприятия.
@@ -1495,11 +1502,11 @@ class WorkTimeValidator {
         }
         else {
             const regExp = new RegExp(/^(00|01|02|03|04|05|06|07|08|09|10|11|12|13|14|15|16|17|18|19|20|21|22|23)+:([0-5]\d)+/);
-            if (regExp.test(time)) {
-                let checkedTime = time.trim();
-                if (checkedTime.includes(' ') || checkedTime.includes('T')) {
-                    checkedTime = checkedTime.split(checkedTime.includes(' ') ? ' ' : 'T')[1];
-                }
+            let checkedTime = time.trim();
+            if (checkedTime.includes(' ') || checkedTime.includes('T')) {
+                checkedTime = checkedTime.split(checkedTime.includes(' ') ? ' ' : 'T')[1];
+            }
+            if (regExp.test(checkedTime)) {
                 return +checkedTime.split(':')[0] * 60 + +checkedTime.split(':')[1];
             }
             else {
@@ -1529,7 +1536,8 @@ class WorkTimeValidator {
         if (time < 1441) {
             const hour = Math.floor(time / 60);
             const hourStr = ((hour <= 9 ? `0${String(hour)}` : String(hour)));
-            const minutesStr = String(time - hour * 60);
+            const minutes = String(time - hour * 60);
+            const minutesStr = (`${minutes.length == 1 ? '0' : ''}${minutes}`);
             return `${hourStr}:${minutesStr}`;
         }
         else {
@@ -1554,16 +1562,13 @@ class WorkTimeValidator {
         }
      */
     static isWorkNow(restriction, currentdate = new Date()) {
-        if (!restriction.worktime || !Object.keys(restriction.worktime).length) {
-            return {
-                workNow: true,
-            };
-        }
+        var _a, _b;
         // Если испольняется в NodeJS
-        if (typeof process !== 'undefined' && !restriction.timezone) {
-            restriction.timezone = process.env.TZ
-                ? process.env.TZ
-                : Intl.DateTimeFormat().resolvedOptions().timeZone;
+        if (isValue(process) &&
+            isValue(restriction) &&
+            !isValue(!restriction.timezone)) {
+            restriction.timezone =
+                (_b = (_a = process === null || process === void 0 ? void 0 : process.env) === null || _a === void 0 ? void 0 : _a.TZ) !== null && _b !== void 0 ? _b : Intl.DateTimeFormat().resolvedOptions().timeZone;
         }
         if (!restriction || !isValidRestriction(restriction)) {
             throw new Error(!isDate(currentdate)
@@ -1573,6 +1578,11 @@ class WorkTimeValidator {
                     : 'Передан невалидный обьект restrictions');
         }
         else {
+            if (!(restriction === null || restriction === void 0 ? void 0 : restriction.worktime) || !Object.keys(restriction.worktime).length) {
+                return {
+                    workNow: true,
+                };
+            }
             const companyLocalTimeZone = TimeZoneIdentifier.getTimeZoneGMTOffsetfromNameZone(restriction.timezone).split(':');
             const companyLocalTimeZoneDelta = +companyLocalTimeZone[0] * 60 + +companyLocalTimeZone[1];
             const lokalTimeDelta = companyLocalTimeZoneDelta + currentdate.getTimezoneOffset(); // смещение времени пользователя относительно времени торговой точки
@@ -1604,6 +1614,9 @@ class WorkTimeValidator {
      * @param currentdate - объект Date, представляющий текущие локальные дату и время пользователя
      */
     static getPossibleDelieveryOrderDateTime(restriction, currentdate) {
+        if (!isValidRestrictionOrder(restriction)) {
+            throw new Error('Не передан или передан невалидный объект restrictions');
+        }
         const checkTime = WorkTimeValidator.isWorkNow(restriction, currentdate);
         if (checkTime.workNow && checkTime.currentTime) {
             console.log('Сейчас рабочее время. Расчет не требуется.');
@@ -1635,6 +1648,9 @@ class WorkTimeValidator {
      * @param currentdate - объект Date, представляющий текущие локальные дату и время пользователя
      */
     static getPossibleSelfServiceOrderDateTime(restriction, currentdate) {
+        if (!isValidRestrictionOrder(restriction)) {
+            throw new Error('Не передан или передан невалидный объект restrictions');
+        }
         /**
          * Для обеспечения иммутабельности данных создается новый обьект restrictions, идентичный полученному в параметрах, но с измененным массивом worktime.
          * В массиве worktime обновляются ограничения времени работы с обычных на актуальные для самовывоза.
@@ -1649,6 +1665,9 @@ class WorkTimeValidator {
      * @param currentdate - объект Date, представляющий текущие локальные дату и время пользователя
      */
     static getCurrentWorkTime(restriction, currentdate) {
+        if (!isValidRestriction(restriction)) {
+            throw new Error('Не передан или передан невалидный объект restrictions');
+        }
         let i = 0;
         let result = null;
         while (i < restriction.worktime.length && !result) {

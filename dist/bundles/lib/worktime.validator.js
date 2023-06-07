@@ -13,7 +13,7 @@ function isValue(value) {
  */
 function isValidRestriction(restriction) {
     return (typeof restriction === 'object' &&
-        restriction !== null &&
+        isValue(restriction) &&
         'timezone' in restriction &&
         'worktime' in restriction &&
         isValue(restriction.timezone) &&
@@ -54,7 +54,7 @@ class WorkTimeValidator {
         else {
             throw new Error((0, formatDate_1.isDate)(currentdate)
                 ? 'Не передан корректный объект даты'
-                : !restriction
+                : !isValue(restriction)
                     ? 'Не передан объект restrictions'
                     : 'Передан невалидный обьект restrictions');
         }
@@ -65,7 +65,7 @@ class WorkTimeValidator {
      * @return кол-во минут.
      */
     static getTimeFromString(time) {
-        if (!time) {
+        if (!isValue(time)) {
             throw 'Не передана строка с преобразуемым временем в формате HH:mm';
         }
         else {
@@ -133,19 +133,20 @@ class WorkTimeValidator {
         // Если испольняется в NodeJS
         if (isValue(process) &&
             isValue(restriction) &&
-            !isValue(!restriction.timezone)) {
+            !isValue(restriction.timezone)) {
             restriction.timezone =
                 process?.env?.TZ ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
         }
-        if (!restriction || !isValidRestriction(restriction)) {
+        if (!isValue(restriction) || !isValidRestriction(restriction)) {
             throw new Error(!(0, formatDate_1.isDate)(currentdate)
                 ? 'Не передан корректный объект даты'
-                : !restriction
+                : !isValue(restriction)
                     ? 'Не передан объект restrictions'
                     : 'Передан невалидный обьект restrictions');
         }
         else {
-            if (!restriction?.worktime || !Object.keys(restriction.worktime).length) {
+            if (!isValue(restriction.worktime) ||
+                !Object.keys(restriction.worktime).length) {
                 return {
                     workNow: true,
                 };
@@ -241,7 +242,7 @@ class WorkTimeValidator {
         }
         let i = 0;
         let result = null;
-        while (i < restriction.worktime.length && !result) {
+        while (i < restriction.worktime.length && !isValue(result)) {
             if (restriction.worktime[i].dayOfWeek === 'all' ||
                 (typeof restriction.worktime[i].dayOfWeek === 'string'
                     ? restriction.worktime[i].dayOfWeek.toLowerCase()
@@ -250,7 +251,7 @@ class WorkTimeValidator {
             }
             i += 1;
         }
-        if (!result) {
+        if (!isValue(result)) {
             throw new Error('Нет актуального расписания работы для текущего дня');
         }
         else {

@@ -222,7 +222,6 @@ describe('WorkTimeValidator', () => {
     it(`Проверяем рабочее время заказа в ${element.dt.toLocaleString()} - ${
       element.result
     } `, () => {
-      console.log(element, WorkTimeValidator.isWorkNow(caseOne, element.dt));
       expect(WorkTimeValidator.isWorkNow(caseOne, element.dt).workNow).equal(
         element.result
       );
@@ -233,7 +232,6 @@ describe('WorkTimeValidator', () => {
     it(`Проверяем "только" рабочее время в ${element.dt.toLocaleString()} - ${
       element.result
     } `, () => {
-      console.log(WorkTimeValidator.isWorkNow(caseTwo, element.dt));
       expect(WorkTimeValidator.isWorkNow(caseTwo, element.dt).workNow).equal(
         element.result
       );

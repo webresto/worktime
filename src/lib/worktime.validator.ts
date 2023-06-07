@@ -322,9 +322,9 @@ export class WorkTimeValidator {
   ): ValidatorResult {
     // Если испольняется в NodeJS
     if (
-      isValue(process) &&
       isValue(restriction) &&
-      !isValue(restriction.timezone)
+      !isValue(restriction.timezone) &&
+      typeof process !== 'undefined'
     ) {
       restriction.timezone =
         process?.env?.TZ ?? Intl.DateTimeFormat().resolvedOptions().timeZone;

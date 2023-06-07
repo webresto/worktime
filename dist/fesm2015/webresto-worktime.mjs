@@ -1564,9 +1564,9 @@ class WorkTimeValidator {
     static isWorkNow(restriction, currentdate = new Date()) {
         var _a, _b;
         // Если испольняется в NodeJS
-        if (isValue(process) &&
-            isValue(restriction) &&
-            !isValue(restriction.timezone)) {
+        if (isValue(restriction) &&
+            !isValue(restriction.timezone) &&
+            typeof process !== 'undefined') {
             restriction.timezone =
                 (_b = (_a = process === null || process === void 0 ? void 0 : process.env) === null || _a === void 0 ? void 0 : _a.TZ) !== null && _b !== void 0 ? _b : Intl.DateTimeFormat().resolvedOptions().timeZone;
         }

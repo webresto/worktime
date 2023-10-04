@@ -217,7 +217,7 @@ export class WorkTimeValidator {
     currentdate: Date
   ): string {
     if (
-      restriction &&
+      isValue(restriction) &&
       isValidRestrictionOrder(restriction) &&
       isDate(currentdate)
     ) {
@@ -407,7 +407,7 @@ export class WorkTimeValidator {
 
     const checkTime = WorkTimeValidator.isWorkNow(restriction, currentdate);
 
-    if (checkTime.workNow && checkTime.currentTime) {
+    if (checkTime.workNow && isValue(checkTime.currentTime)) {
       console.log('Сейчас рабочее время. Расчет не требуется.');
       const possibleTime =
         checkTime.currentTime + (+restriction.minDeliveryTimeInMinutes || 0);
@@ -415,7 +415,10 @@ export class WorkTimeValidator {
         WorkTimeValidator.convertMinutesToTime(possibleTime);
       return formatDate(currentdate, `yyyy-MM-dd ${possibleTimeStr}`, 'en');
     } else {
-      if (checkTime.currentTime && checkTime.curentDayStopTime) {
+      if (
+        isValue(checkTime.currentTime) &&
+        isValue(checkTime.curentDayStopTime)
+      ) {
         const currentDayWorkTime = WorkTimeValidator.getCurrentWorkTime(
           restriction,
           checkTime.isNewDay
@@ -541,7 +544,7 @@ export class WorkTimeValidator {
   getMaxOrderDate(restriction: RestrictionsOrder, currentdate: Date): string {
     const memoryKey = JSON.stringify({ restriction, currentdate });
     const checkMemory = this._memory.getMaxOrderDate.get(memoryKey);
-    if (checkMemory) {
+    if (isValue(checkMemory)) {
       return checkMemory;
     } else {
       const result = WorkTimeValidator.getMaxOrderDate(
@@ -561,7 +564,7 @@ export class WorkTimeValidator {
   getTimeFromString(time: string): number {
     const memoryKey = JSON.stringify({ time });
     const checkMemory = this._memory.getTimeFromString.get(memoryKey);
-    if (checkMemory) {
+    if (isValue(checkMemory)) {
       return checkMemory;
     } else {
       const result = WorkTimeValidator.getTimeFromString(<TimeString>time);
@@ -592,7 +595,7 @@ export class WorkTimeValidator {
   ): ValidatorResult {
     const memoryKey = JSON.stringify({ restriction, currentdate });
     const checkMemory = this._memory.isWorkNow.get(memoryKey);
-    if (checkMemory) {
+    if (isValue(checkMemory)) {
       return checkMemory;
     } else {
       const result = WorkTimeValidator.isWorkNow(restriction, currentdate);
@@ -612,7 +615,7 @@ export class WorkTimeValidator {
     const memoryKey = JSON.stringify({ restriction, currentdate });
     const checkMemory =
       this._memory.getPossibleDelieveryOrderDateTime.get(memoryKey);
-    if (checkMemory) {
+    if (isValue(checkMemory)) {
       return checkMemory;
     } else {
       const result = WorkTimeValidator.getPossibleDelieveryOrderDateTime(
@@ -635,7 +638,7 @@ export class WorkTimeValidator {
     const memoryKey = JSON.stringify({ restriction, currentdate });
     const checkMemory =
       this._memory.getPossibleSelfServiceOrderDateTime.get(memoryKey);
-    if (checkMemory) {
+    if (isValue(checkMemory)) {
       return checkMemory;
     } else {
       const result = WorkTimeValidator.getPossibleSelfServiceOrderDateTime(
@@ -654,7 +657,7 @@ export class WorkTimeValidator {
   getCurrentWorkTime(restriction: Restrictions, currentdate: Date): WorkTime {
     const memoryKey = JSON.stringify({ restriction, currentdate });
     const checkMemory = this._memory.getCurrentWorkTime.get(memoryKey);
-    if (checkMemory) {
+    if (isValue(checkMemory)) {
       return <WorkTime>checkMemory;
     } else {
       const result = WorkTimeValidator.getCurrentWorkTime(
@@ -687,7 +690,7 @@ export class WorkTimeValidator {
   convertMinutesToTime(time: number): TimeString {
     const memoryKey = JSON.stringify({ time });
     const checkMemory = this._memory.convertMinutesToTime.get(memoryKey);
-    if (checkMemory) {
+    if (isValue(checkMemory)) {
       return checkMemory;
     } else {
       const result = WorkTimeValidator.convertMinutesToTime(time);

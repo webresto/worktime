@@ -46,7 +46,7 @@ class WorkTimeValidator {
      * @return Строка, представляющая максимальную доступную дату доставки в формате yyyy-MM-dd.
      */
     static getMaxOrderDate(restriction, currentdate) {
-        if (restriction &&
+        if (isValue(restriction) &&
             isValidRestrictionOrder(restriction) &&
             (0, formatDate_1.isDate)(currentdate)) {
             return (0, formatDate_1.formatDate)(currentdate.getTime() + restriction.possibleToOrderInMinutes * 60000, 'yyyy-MM-dd', 'en');
@@ -186,14 +186,15 @@ class WorkTimeValidator {
             throw new Error('Не передан или передан невалидный объект restrictions');
         }
         const checkTime = WorkTimeValidator.isWorkNow(restriction, currentdate);
-        if (checkTime.workNow && checkTime.currentTime) {
+        if (checkTime.workNow && isValue(checkTime.currentTime)) {
             console.log('Сейчас рабочее время. Расчет не требуется.');
             const possibleTime = checkTime.currentTime + (+restriction.minDeliveryTimeInMinutes || 0);
             const possibleTimeStr = WorkTimeValidator.convertMinutesToTime(possibleTime);
             return (0, formatDate_1.formatDate)(currentdate, `yyyy-MM-dd ${possibleTimeStr}`, 'en');
         }
         else {
-            if (checkTime.currentTime && checkTime.curentDayStopTime) {
+            if (isValue(checkTime.currentTime) &&
+                isValue(checkTime.curentDayStopTime)) {
                 const currentDayWorkTime = WorkTimeValidator.getCurrentWorkTime(restriction, checkTime.isNewDay
                     ? new Date(currentdate.getTime() + 86400000)
                     : currentdate);
@@ -280,7 +281,7 @@ class WorkTimeValidator {
     getMaxOrderDate(restriction, currentdate) {
         const memoryKey = JSON.stringify({ restriction, currentdate });
         const checkMemory = this._memory.getMaxOrderDate.get(memoryKey);
-        if (checkMemory) {
+        if (isValue(checkMemory)) {
             return checkMemory;
         }
         else {
@@ -297,7 +298,7 @@ class WorkTimeValidator {
     getTimeFromString(time) {
         const memoryKey = JSON.stringify({ time });
         const checkMemory = this._memory.getTimeFromString.get(memoryKey);
-        if (checkMemory) {
+        if (isValue(checkMemory)) {
             return checkMemory;
         }
         else {
@@ -326,7 +327,7 @@ class WorkTimeValidator {
     isWorkNow(restriction, currentdate) {
         const memoryKey = JSON.stringify({ restriction, currentdate });
         const checkMemory = this._memory.isWorkNow.get(memoryKey);
-        if (checkMemory) {
+        if (isValue(checkMemory)) {
             return checkMemory;
         }
         else {
@@ -343,7 +344,7 @@ class WorkTimeValidator {
     getPossibleDelieveryOrderDateTime(restriction, currentdate) {
         const memoryKey = JSON.stringify({ restriction, currentdate });
         const checkMemory = this._memory.getPossibleDelieveryOrderDateTime.get(memoryKey);
-        if (checkMemory) {
+        if (isValue(checkMemory)) {
             return checkMemory;
         }
         else {
@@ -360,7 +361,7 @@ class WorkTimeValidator {
     getPossibleSelfServiceOrderDateTime(restriction, currentdate) {
         const memoryKey = JSON.stringify({ restriction, currentdate });
         const checkMemory = this._memory.getPossibleSelfServiceOrderDateTime.get(memoryKey);
-        if (checkMemory) {
+        if (isValue(checkMemory)) {
             return checkMemory;
         }
         else {
@@ -377,7 +378,7 @@ class WorkTimeValidator {
     getCurrentWorkTime(restriction, currentdate) {
         const memoryKey = JSON.stringify({ restriction, currentdate });
         const checkMemory = this._memory.getCurrentWorkTime.get(memoryKey);
-        if (checkMemory) {
+        if (isValue(checkMemory)) {
             return checkMemory;
         }
         else {
@@ -407,7 +408,7 @@ class WorkTimeValidator {
     convertMinutesToTime(time) {
         const memoryKey = JSON.stringify({ time });
         const checkMemory = this._memory.convertMinutesToTime.get(memoryKey);
-        if (checkMemory) {
+        if (isValue(checkMemory)) {
             return checkMemory;
         }
         else {

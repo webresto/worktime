@@ -1,3 +1,6 @@
+# TODO
+1. rename to Restrictions
+
 # NgWorktime
  Библиотека для работы с ограничениями рабочего времени предприятия
 

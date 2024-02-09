@@ -93,9 +93,20 @@ export type UserRestrictions<T extends {} = {}> = {
    * Длина кода подтверждения OTP
    */
   OTPlength: number;
+
+  /**
+   * Allow spending bonuses
+   */
+  allowBonusSpending: boolean
 } & T;
 
 export interface RestrictionsOrder<T extends {} = {}> extends Restrictions {
+
+  /**
+   * GraphQL schema backward compatibility version
+   */
+  graphqlSchemaBackwardCompatibilityVersion: boolean
+
   /** минимальное время доставки*/
   minDeliveryTimeInMinutes: string;
 
@@ -231,8 +242,8 @@ export class WorkTimeValidator {
         isDate(currentdate)
           ? 'Не передан корректный объект даты'
           : !isValue(restriction)
-          ? 'Не передан объект restrictions'
-          : 'Передан невалидный обьект restrictions'
+            ? 'Не передан объект restrictions'
+            : 'Передан невалидный обьект restrictions'
       );
     }
   }
@@ -335,8 +346,8 @@ export class WorkTimeValidator {
         !isDate(currentdate)
           ? 'Не передан корректный объект даты'
           : !isValue(restriction)
-          ? 'Не передан объект restrictions'
-          : 'Передан невалидный обьект restrictions'
+            ? 'Не передан объект restrictions'
+            : 'Передан невалидный обьект restrictions'
       );
     } else {
       if (
@@ -496,8 +507,8 @@ export class WorkTimeValidator {
         (typeof restriction.worktime[i].dayOfWeek === 'string'
           ? (<string>restriction.worktime[i].dayOfWeek).toLowerCase()
           : (<string[]>restriction.worktime[i].dayOfWeek).map((day) =>
-              day.toLowerCase()
-            )
+            day.toLowerCase()
+          )
         ).includes(formatDate(currentdate, 'EEEE', 'en').toLowerCase())
       ) {
         result = restriction.worktime[i];
@@ -516,7 +527,7 @@ export class WorkTimeValidator {
    * Логика ниже предназначена для использования экземпляра класса WorkTimeValidator
    */
 
-  constructor() {}
+  constructor() { }
 
   private _memory: {
     getMaxOrderDate: Map<string, string>;
@@ -527,14 +538,14 @@ export class WorkTimeValidator {
     getCurrentWorkTime: Map<string, WorkTime>;
     convertMinutesToTime: Map<string, TimeString>;
   } = {
-    getMaxOrderDate: new Map<string, string>(),
-    getTimeFromString: new Map<string, number>(),
-    isWorkNow: new Map<string, ValidatorResult>(),
-    getPossibleDelieveryOrderDateTime: new Map<string, string>(),
-    getPossibleSelfServiceOrderDateTime: new Map<string, string>(),
-    getCurrentWorkTime: new Map<string, WorkTime>(),
-    convertMinutesToTime: new Map<string, TimeString>(),
-  };
+      getMaxOrderDate: new Map<string, string>(),
+      getTimeFromString: new Map<string, number>(),
+      isWorkNow: new Map<string, ValidatorResult>(),
+      getPossibleDelieveryOrderDateTime: new Map<string, string>(),
+      getPossibleSelfServiceOrderDateTime: new Map<string, string>(),
+      getCurrentWorkTime: new Map<string, WorkTime>(),
+      convertMinutesToTime: new Map<string, TimeString>(),
+    };
 
   /**
    * Метод возвращает максимальную возможную дату, на которую можно заказать доставку.

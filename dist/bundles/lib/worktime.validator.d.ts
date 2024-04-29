@@ -81,8 +81,16 @@ export type UserRestrictions<T extends {} = {}> = {
      * Длина кода подтверждения OTP
      */
     OTPlength: number;
+    /**
+     * Allow spending bonuses
+     */
+    allowBonusSpending: boolean;
 } & T;
 export interface RestrictionsOrder<T extends {} = {}> extends Restrictions {
+    /**
+     * GraphQL schema backward compatibility version
+     */
+    graphqlSchemaBackwardCompatibilityVersion: boolean;
     /** минимальное время доставки*/
     minDeliveryTimeInMinutes: string;
     /** ограничение максимальной даты заказа в будущем (в минутах)*/

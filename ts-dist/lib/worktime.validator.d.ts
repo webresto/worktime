@@ -90,7 +90,7 @@ export interface RestrictionsOrder<T extends {} = {}> extends Restrictions {
     /**
      * GraphQL schema backward compatibility version
      */
-    graphqlSchemaBackwardCompatibilityVersion: boolean;
+    graphqlSchemaBackwardCompatibilityVersion?: boolean;
     /** минимальное время доставки*/
     minDeliveryTimeInMinutes: string;
     /** ограничение максимальной даты заказа в будущем (в минутах)*/

@@ -1,11 +1,8 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.TimeZoneIdentifier = void 0;
 /**
  *Класс, содержащий статический метод, определяющий смещение часового пояса относительно GMT (+00:00) по переданной строке с названием таймзоны.
  *Создавать новый объект этого класса для использования метода не требуется.
  */
-class TimeZoneIdentifier {
+export class TimeZoneIdentifier {
     /**
      *Метод определяет смещение часового пояса относительно GMT (+00:00) по переданной строке с названием таймзоны.
      *@param zone - Строка с названием таймзоны ( например 'America/New_York').
@@ -486,4 +483,3 @@ class TimeZoneIdentifier {
         }
     }
 }
-exports.TimeZoneIdentifier = TimeZoneIdentifier;

@@ -8,7 +8,7 @@ import { expect } from 'chai';
 const caseOne: RestrictionsOrder = {
   worktime: [
     {
-      dayOfWeek: 'all',
+      dayOfWeek: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
       start: '10:00',
       stop: '20:00',
       break: '00:00-00:00',
@@ -23,6 +23,7 @@ const caseOne: RestrictionsOrder = {
   possibleToOrderInMinutes: 20160,
   timezone: 'Asia/Yekaterinburg',
   minDeliveryTimeInMinutes: '60',
+  graphqlSchemaBackwardCompatibilityVersion: 0
 };
 
 const caseTwo = {

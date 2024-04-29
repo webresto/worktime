@@ -1,28 +1,34 @@
 import { formatDate, isDate } from './formatDate';
-import { TimeZoneIdentifier } from './tz';
+import { TimeZoneIdentifier , TimeZoneString} from './tz';
 
 /**
  * Базовые данные о времени работы - служебный интерфейс.
  */
 export interface WorkTimeBase {
   /** время начала рабочего дня*/
-  start: string;
+  start: TimeString;
 
   /** время окончания рабочего дня*/
-  stop: string;
+  stop: TimeString;
 
   /** перерыв на обед*/
-  break?: string;
+  break?: `${number}${number}:${number}${number}-${number}${number}:${number}${number}`;
 }
+
+
+type Day = "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday"
+
+
 
 /**
  * Информация о времени работы предприятия - служебный интерфейс.
  */
 export interface WorkTime extends WorkTimeBase {
-  /** день недели, к которому применяется это время доставки   */
-  dayOfWeek: string | string[];
+  /** день недели, к которому применяется это время */
+  dayOfWeek: Day[];
 
   /** ограничения по времени работы для самовывоза */
+  /** @deprecated */
   selfService?: WorkTimeBase;
 }
 
@@ -31,7 +37,7 @@ export interface WorkTime extends WorkTimeBase {
  */
 export interface Restrictions {
   /** временная зона предприятия */
-  timezone?: string;
+  timezone?: TimeZoneString;
 
   /**  массив ограничений по времени работы предприятия для разных дней недели. */
   worktime: WorkTime[];
@@ -105,7 +111,7 @@ export interface RestrictionsOrder<T extends {} = {}> extends Restrictions {
   /**
    * GraphQL schema backward compatibility version
    */
-  graphqlSchemaBackwardCompatibilityVersion: boolean
+  graphqlSchemaBackwardCompatibilityVersion: number
 
   /** минимальное время доставки*/
   minDeliveryTimeInMinutes: string;
@@ -134,41 +140,8 @@ export interface ValidatorResult {
   curentDayStopTime?: number;
 }
 
-/** Тип, описывающий строковое представление всех цифр */
-type Digits = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9';
 
-/** Тип, описывающий строковое представление 24 часов одних суток */
-export type HoursDigits =
-  | '00'
-  | '01'
-  | '02'
-  | '03'
-  | '04'
-  | '05'
-  | '06'
-  | '07'
-  | '08'
-  | '09'
-  | '10'
-  | '11'
-  | '12'
-  | '13'
-  | '14'
-  | '15'
-  | '16'
-  | '17'
-  | '18'
-  | '19'
-  | '20'
-  | '21'
-  | '22'
-  | '23';
-
-/** Тип, описывающий строковое представление 60 минут одного часа*/
-export type MinuteDigits = `${'0' | '1' | '2' | '3' | '4' | '5'}${Digits}`;
-
-/** Тип, описывающий строковое представление времени в формате HH:mm -`(00-24 часа):(0-59 минут)` */
-export type TimeString = `${HoursDigits}:${MinuteDigits}`;
+export type TimeString = `${number}${number}:${number}${number}`;
 
 /** Функция-хелпер для проверки, что переданное значение не является null или undefined */
 function isValue<T extends any>(

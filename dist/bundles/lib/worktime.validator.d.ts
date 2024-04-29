@@ -15,7 +15,9 @@ export interface WorkTimeBase {
 export interface WorkTime extends WorkTimeBase {
     /** день недели, к которому применяется это время доставки   */
     dayOfWeek: string | string[];
-    /** ограничения по времени работы для самовывоза */
+    /**  
+     * @deprecated 
+     * ограничения по времени работы для самовывоза */
     selfService?: WorkTimeBase;
 }
 /**

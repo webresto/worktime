@@ -9,9 +9,9 @@ export declare class TimeZoneIdentifier {
      *@return  - Строка, представляющая смещение относительно GMT.
      *
      *Пример :
-     *const offset = TimeZoneIdentifier.getTimeZoneGMTOffsetfromNameZone('Europe/Moscow');
+     *const offset = TimeZoneIdentifier.getTimeZoneGMTOffset('Europe/Moscow');
      *console.log(offset) /// "+03:00"
      *
      * */
-    static getTimeZoneGMTOffsetfromNameZone(zone?: string): string;
+    static getTimeZoneGMTOffset(zone?: string): string;
 }

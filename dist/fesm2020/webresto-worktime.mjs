@@ -960,11 +960,11 @@ class TimeZoneIdentifier {
      *@return  - Строка, представляющая смещение относительно GMT.
      *
      *Пример :
-     *const offset = TimeZoneIdentifier.getTimeZoneGMTOffsetfromNameZone('Europe/Moscow');
+     *const offset = TimeZoneIdentifier.getTimeZoneGMTOffset('Europe/Moscow');
      *console.log(offset) /// "+03:00"
      *
      * */
-    static getTimeZoneGMTOffsetfromNameZone(zone) {
+    static getTimeZoneGMTOffset(zone) {
         if (!zone) {
             zone = process.env.TZ ? process.env.TZ : Intl.DateTimeFormat().resolvedOptions().timeZone;
         }
@@ -1583,7 +1583,7 @@ class WorkTimeValidator {
                     workNow: true,
                 };
             }
-            const companyLocalTimeZone = TimeZoneIdentifier.getTimeZoneGMTOffsetfromNameZone(restriction.timezone).split(':');
+            const companyLocalTimeZone = TimeZoneIdentifier.getTimeZoneGMTOffset(restriction.timezone).split(':');
             const companyLocalTimeZoneDelta = +companyLocalTimeZone[0] * 60 + +companyLocalTimeZone[1];
             const lokalTimeDelta = companyLocalTimeZoneDelta + currentdate.getTimezoneOffset(); // смещение времени пользователя относительно времени торговой точки
             const currentTimeInMinutesWithLocalDelta = WorkTimeValidator.getTimeFromString(formatDate(currentdate, 'HH:mm', 'en')) + lokalTimeDelta;

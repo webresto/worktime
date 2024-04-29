@@ -11,12 +11,7 @@ const caseOne: RestrictionsOrder = {
       dayOfWeek: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
       start: '10:00',
       stop: '20:00',
-      break: '00:00-00:00',
-      selfService: {
-        start: '10:00',
-        stop: '20:00',
-        break: '00:00-00:00',
-      },
+      break: '00:00-00:00'
     },
   ],
   deliveryToTimeEnabled: true,
@@ -290,12 +285,7 @@ describe('WorkTimeValidator', () => {
         start: '10:00',
         stop: '20:00',
         break: '00:00-00:00',
-        timezone: 'Asia/Yekaterinburg',
-        selfService: {
-          start: '10:00',
-          stop: '20:00',
-          break: '00:00-00:00',
-        },
+        timezone: 'Asia/Yekaterinburg'
       },
     ],
     possibleToOrderInMinutes: 20160,
@@ -339,24 +329,14 @@ describe('WorkTimeValidator', () => {
         start: '10:00',
         stop: '20:00',
         break: '00:00-00:00',
-        timezone: 'Asia/Yekaterinburg',
-        selfService: {
-          start: '10:00',
-          stop: '20:00',
-          break: '00:00-00:00',
-        },
+        timezone: 'Asia/Yekaterinburg'
       },
       {
         dayOfWeek: 'all',
         start: '10:00',
         stop: '20:00',
         break: '00:00-00:00',
-        timezone: 'Asia/Yekaterinburg',
-        selfService: {
-          start: '10:00',
-          stop: '20:00',
-          break: '00:00-00:00',
-        },
+        timezone: 'Asia/Yekaterinburg'
       },
     ],
     possibleToOrderInMinutes: 20160,
@@ -382,40 +362,19 @@ describe('WorkTimeValidator', () => {
         dayOfWeek: 'friday',
         start: '10:00',
         stop: '21:30',
-        lastOrder: '21:30',
-        break: '11:00-12:00',
-        selfService: {
-          start: '08:00',
-          stop: '21:00',
-          lastOrder: '20:30',
-          break: '00:00-00:00',
-        },
+        break: '11:00-12:00'
       },
       {
         dayOfWeek: ['saturday', 'sunday'],
         start: '12:00',
         stop: '18:30',
-        break: '14:00-18:00',
-        lastOrder: '21:30',
-        selfService: {
-          start: '08:00',
-          stop: '18:00',
-          break: '00:00-00:00',
-          lastOrder: '21:30',
-        },
+        break: '14:00-18:00'
       },
       {
         dayOfWeek: 'all',
         start: '10:00',
         stop: '21:00',
-        lastOrder: '21:30',
-        break: '00:00-00:00',
-        selfService: {
-          start: '10:00',
-          stop: '21:00',
-          lastOrder: '20:30',
-          break: '00:00-00:00',
-        },
+        break: '00:00-00:00'
       },
     ],
     possibleToOrderInMinutes: 20160,

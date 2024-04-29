@@ -27,8 +27,10 @@ export interface WorkTime extends WorkTimeBase {
   /** день недели, к которому применяется это время */
   dayOfWeek: Day[];
 
-  /** ограничения по времени работы для самовывоза */
-  /** @deprecated */
+  /** 
+   * @deprecated 
+   * ограничения по времени работы для самовывоза
+  */
   selfService?: WorkTimeBase;
 }
 
@@ -68,6 +70,9 @@ export interface Country {
 }
 
 /** Данные о модели авторизации пользователей на сайте предприятия */
+/**
+ * @deprecated нужно вынести из либы работы с расписаниями
+ */
 export type UserRestrictions<T extends {} = {}> = {
   /** Показывает, какой вид данных используется пользователем для авторизации */
   loginField: string;
@@ -106,6 +111,9 @@ export type UserRestrictions<T extends {} = {}> = {
   allowBonusSpending: boolean
 } & T;
 
+/**
+ * @deprecated Это нужно перенести из либы worktime в ngGQL потомучто тут очень много всего что не относится к ворктайму
+ */
 export interface RestrictionsOrder<T extends {} = {}> extends Restrictions {
 
   /**
@@ -140,8 +148,9 @@ export interface ValidatorResult {
   curentDayStopTime?: number;
 }
 
-
-export type TimeString = `${number}${number}:${number}${number}`;
+type HoursDigits = `${number}${number}`
+type MinuteDigits = `${number}${number}`
+export type TimeString = `${HoursDigits}:${MinuteDigits}`;
 
 /** Функция-хелпер для проверки, что переданное значение не является null или undefined */
 function isValue<T extends any>(
@@ -249,6 +258,7 @@ export class WorkTimeValidator {
     }
   }
 
+
   /**
    * Метод конвертирует переданное кол-во минут в строкове представление времени в формате HH:mm - `(00-24 часа):(0-59 минут)`.
    * Например:
@@ -311,7 +321,7 @@ export class WorkTimeValidator {
       typeof process !== 'undefined'
     ) {
       restriction.timezone =
-        process?.env?.TZ ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
+        process?.env?.TZ as TimeZoneString ?? Intl.DateTimeFormat().resolvedOptions().timeZone as TimeZoneString;
     }
 
     if (!isValue(restriction) || !isValidRestriction(restriction)) {
@@ -333,7 +343,7 @@ export class WorkTimeValidator {
       }
 
       const companyLocalTimeZone =
-        TimeZoneIdentifier.getTimeZoneGMTOffsetfromNameZone(
+        TimeZoneIdentifier.getTimeZoneGMTOffset(
           restriction.timezone
         ).split(':');
       const companyLocalTimeZoneDelta =
@@ -446,11 +456,7 @@ export class WorkTimeValidator {
      * */
     const newRestriction = {
       ...restriction,
-      worktime: (<WorkTime[]>restriction.worktime).map((worktime) =>
-        worktime.selfService
-          ? { ...worktime, ...worktime.selfService }
-          : worktime
-      ),
+      worktime: (<WorkTime[]>restriction.worktime).map((worktime) => worktime)
     };
     return WorkTimeValidator.getPossibleDelieveryOrderDateTime(
       newRestriction,
@@ -475,14 +481,8 @@ export class WorkTimeValidator {
     let result = null;
 
     while (i < restriction.worktime.length && !isValue(result)) {
-      if (
-        restriction.worktime[i].dayOfWeek === 'all' ||
-        (typeof restriction.worktime[i].dayOfWeek === 'string'
-          ? (<string>restriction.worktime[i].dayOfWeek).toLowerCase()
-          : (<string[]>restriction.worktime[i].dayOfWeek).map((day) =>
-            day.toLowerCase()
-          )
-        ).includes(formatDate(currentdate, 'EEEE', 'en').toLowerCase())
+      
+      if (((<string[]>restriction.worktime[i].dayOfWeek).map((day) => day.toLowerCase())).includes(formatDate(currentdate, 'EEEE', 'en').toLowerCase())
       ) {
         result = restriction.worktime[i];
       }

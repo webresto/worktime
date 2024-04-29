@@ -148,7 +148,7 @@ export class WorkTimeValidator {
                     workNow: true,
                 };
             }
-            const companyLocalTimeZone = TimeZoneIdentifier.getTimeZoneGMTOffsetfromNameZone(restriction.timezone).split(':');
+            const companyLocalTimeZone = TimeZoneIdentifier.getTimeZoneGMTOffset(restriction.timezone).split(':');
             const companyLocalTimeZoneDelta = +companyLocalTimeZone[0] * 60 + +companyLocalTimeZone[1];
             const lokalTimeDelta = companyLocalTimeZoneDelta + currentdate.getTimezoneOffset(); // смещение времени пользователя относительно времени торговой точки
             const currentTimeInMinutesWithLocalDelta = WorkTimeValidator.getTimeFromString(formatDate(currentdate, 'HH:mm', 'en')) + lokalTimeDelta;
@@ -223,9 +223,7 @@ export class WorkTimeValidator {
          * */
         const newRestriction = {
             ...restriction,
-            worktime: restriction.worktime.map((worktime) => worktime.selfService
-                ? { ...worktime, ...worktime.selfService }
-                : worktime),
+            worktime: restriction.worktime.map((worktime) => worktime)
         };
         return WorkTimeValidator.getPossibleDelieveryOrderDateTime(newRestriction, currentdate);
     }
@@ -241,10 +239,7 @@ export class WorkTimeValidator {
         let i = 0;
         let result = null;
         while (i < restriction.worktime.length && !isValue(result)) {
-            if (restriction.worktime[i].dayOfWeek === 'all' ||
-                (typeof restriction.worktime[i].dayOfWeek === 'string'
-                    ? restriction.worktime[i].dayOfWeek.toLowerCase()
-                    : restriction.worktime[i].dayOfWeek.map((day) => day.toLowerCase())).includes(formatDate(currentdate, 'EEEE', 'en').toLowerCase())) {
+            if ((restriction.worktime[i].dayOfWeek.map((day) => day.toLowerCase())).includes(formatDate(currentdate, 'EEEE', 'en').toLowerCase())) {
                 result = restriction.worktime[i];
             }
             i += 1;

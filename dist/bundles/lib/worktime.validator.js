@@ -151,7 +151,7 @@ class WorkTimeValidator {
                     workNow: true,
                 };
             }
-            const companyLocalTimeZone = tz_1.TimeZoneIdentifier.getTimeZoneGMTOffsetfromNameZone(restriction.timezone).split(':');
+            const companyLocalTimeZone = tz_1.TimeZoneIdentifier.getTimeZoneGMTOffset(restriction.timezone).split(':');
             const companyLocalTimeZoneDelta = +companyLocalTimeZone[0] * 60 + +companyLocalTimeZone[1];
             const lokalTimeDelta = companyLocalTimeZoneDelta + currentdate.getTimezoneOffset(); // смещение времени пользователя относительно времени торговой точки
             const currentTimeInMinutesWithLocalDelta = WorkTimeValidator.getTimeFromString((0, formatDate_1.formatDate)(currentdate, 'HH:mm', 'en')) + lokalTimeDelta;

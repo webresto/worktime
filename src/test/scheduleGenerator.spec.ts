@@ -94,7 +94,6 @@ describe('ScheduleGenerator', function () {
         
 
         const generatedCompactIntervals = scheduleGenerator.generateTimeIntervals(startDate, endDate, timeZone, true);
-        console.log(generatedCompactIntervals)
         assert.deepStrictEqual(generatedCompactIntervals, expectedCompactIntervals);
     });
 

@@ -493,7 +493,6 @@ export class WorkTimeValidator {
       i += 1;
     }
 
-    console.log(result)
     if (!isValue(result)) {
       throw new Error('There is no current work schedule for the current day');
     } else {

@@ -24,6 +24,10 @@ describe('ScheduleGenerator', function () {
 
     it('should generate compact time intervals when compact parameter is true', function () {
         const expectedCompactIntervals = 
+
+        /**
+         * TODO: check data just copied from method
+         */
             [
                [
                  1711936800,
@@ -100,6 +104,11 @@ describe('ScheduleGenerator', function () {
     it('should adjust time intervals according to the specified time zone', function () {
         // Define expected intervals adjusted for the time zone
         const expectedAdjustedIntervals =  [
+
+
+        /**
+         * TODO: check data just copied from method
+         */
            {
              "start": 1711936800,
              "stop": 1711944000

@@ -201,6 +201,7 @@ function isValidRestrictionOrder(
  */
 export class WorkTimeValidator {
   /**
+   * @deprecated Будет перемещена из либы
    * Метод возвращает максимальную возможную дату, на которую можно заказать доставку.
    * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
    * @return Строка, представляющая максимальную доступную дату доставки в формате yyyy-MM-dd.
@@ -482,15 +483,19 @@ export class WorkTimeValidator {
 
     while (i < restriction.worktime.length && !isValue(result)) {
       
-      if (((<string[]>restriction.worktime[i].dayOfWeek).map((day) => day.toLowerCase())).includes(formatDate(currentdate, 'EEEE', 'en').toLowerCase())
+      if(restriction.worktime[i].dayOfWeek === undefined) {
+        throw `dayOfWeek is required`
+      }
+      if ((<string[]>restriction.worktime[i].dayOfWeek).includes(formatDate(currentdate, 'EEEE', 'en').toLowerCase())
       ) {
         result = restriction.worktime[i];
       }
       i += 1;
     }
 
+    console.log(result)
     if (!isValue(result)) {
-      throw new Error('Нет актуального расписания работы для текущего дня');
+      throw new Error('There is no current work schedule for the current day');
     } else {
       return result;
     }

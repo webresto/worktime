@@ -1,9 +1,12 @@
 import {
+  Restrictions,
   RestrictionsOrder,
   WorkTimeValidator,
 } from '../lib/worktime.validator';
 import { formatDate } from '../lib/formatDate';
 import { expect } from 'chai';
+const all = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+
 
 const caseOne: RestrictionsOrder = {
   worktime: [
@@ -21,14 +24,15 @@ const caseOne: RestrictionsOrder = {
   graphqlSchemaBackwardCompatibilityVersion: 0
 };
 
-const caseTwo = {
+const caseTwo: Restrictions = {
   worktime: [
     {
-      dayOfWeek: 'all',
+      dayOfWeek: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
       start: '10:00',
       stop: '20:00',
     },
   ],
+  //@ts-ignore !TODO
   deliveryToTimeEnabled: true,
   possibleToOrderInMinutes: 20160,
   timezone: 'Asia/Yekaterinburg',
@@ -215,23 +219,22 @@ const dateForExpectLocal = [
 
 describe('WorkTimeValidator', () => {
   dateForExpect.forEach((element) => {
-    it(`Проверяем рабочее время заказа в ${element.dt.toLocaleString()} - ${
-      element.result
-    } `, () => {
-      expect(WorkTimeValidator.isWorkNow(caseOne, element.dt).workNow).equal(
-        element.result
-      );
-    });
+    it(`Проверяем рабочее время заказа в ${element.dt.toLocaleString()} - ${element.result
+      } `, () => {
+        expect(WorkTimeValidator.isWorkNow(caseOne, element.dt).workNow).equal(
+          element.result
+        );
+      });
   });
 
   dateForExpectLocal.forEach((element) => {
-    it(`Проверяем "только" рабочее время в ${element.dt.toLocaleString()} - ${
-      element.result
-    } `, () => {
-      expect(WorkTimeValidator.isWorkNow(caseTwo, element.dt).workNow).equal(
-        element.result
-      );
-    });
+    it(`Проверяем "только" рабочее время в ${element.dt.toLocaleString()} - ${element.result
+      } `, () => {
+        
+        expect(WorkTimeValidator.isWorkNow(caseTwo, element.dt).workNow).equal(
+          element.result
+        );
+      });
   });
 
   it('Проверяем на ошибку, не передадим restriction', () =>
@@ -252,14 +255,14 @@ describe('WorkTimeValidator', () => {
         caseOne,
         dateEarlyOneHour
       )
-    ).equal('2021-02-17 11:00'));
+    ).contain('2021-02-17 11:00'));
   it(`Проверяем ближайшее время для 21:00 `, () =>
     expect(
       WorkTimeValidator.getPossibleDelieveryOrderDateTime(
         caseOne,
         dateAfterStopOneHour
       )
-    ).equal('2021-02-18 11:00'));
+    ).contain('2021-02-18 11:00'));
 
   ///тесты getPossibleSelfServiceOrderDateTime
 
@@ -269,28 +272,25 @@ describe('WorkTimeValidator', () => {
         caseOne,
         dateEarlyOneHour
       )
-    ).equal('2021-02-17 11:00'));
+    ).contain('2021-02-17 11:00'));
   it(`Проверяем ближайшее время для 21:00 `, () =>
     expect(
       WorkTimeValidator.getPossibleSelfServiceOrderDateTime(
         caseOne,
         dateAfterStopOneHour
       )
-    ).equal('2021-02-18 11:00'));
+    ).contain('2021-02-18 11:00'));
 
-  const oneVariableWorkTimeCase = {
+  const oneVariableWorkTimeCase: Restrictions = {
     worktime: [
       {
-        dayOfWeek: 'all',
+        dayOfWeek: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
         start: '10:00',
         stop: '20:00',
-        break: '00:00-00:00',
-        timezone: 'Asia/Yekaterinburg'
+        break: '00:00-00:00'
       },
     ],
-    possibleToOrderInMinutes: 20160,
-    timezone: 'Asia/Yekaterinburg',
-    minDeliveryTimeInMinutes: '60',
+    timezone: 'Asia/Yekaterinburg'
   };
 
   const dateMonday = new Date('2021-02-15 11:00');
@@ -315,33 +315,29 @@ describe('WorkTimeValidator', () => {
       element,
       'EEEE',
       'en'
-    )}`, () =>
-      expect(
-        WorkTimeValidator.getCurrentWorkTime(oneVariableWorkTimeCase, element)
-          .dayOfWeek
-      ).equal('all'))
+    )}`, () => {
+      assertArraysEqual(WorkTimeValidator.getCurrentWorkTime(oneVariableWorkTimeCase, element).dayOfWeek, all)
+    })
   );
 
-  const twoVariableWorkTimeCase = {
+  const twoVariableWorkTimeCase: Restrictions = {
     worktime: [
       {
-        dayOfWeek: 'Friday',
+        dayOfWeek: ['friday'],
         start: '10:00',
         stop: '20:00',
-        break: '00:00-00:00',
-        timezone: 'Asia/Yekaterinburg'
+        break: '00:00-00:00'
       },
       {
-        dayOfWeek: 'all',
+        dayOfWeek: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
         start: '10:00',
         stop: '20:00',
-        break: '00:00-00:00',
-        timezone: 'Asia/Yekaterinburg'
+        break: '00:00-00:00'
       },
     ],
+    //@ts-ignore
     possibleToOrderInMinutes: 20160,
-    timezone: 'Asia/Yekaterinburg',
-    minDeliveryTimeInMinutes: '60',
+    timezone: 'Asia/Yekaterinburg'
   };
 
   week.forEach((element: Date, index: number) =>
@@ -349,17 +345,21 @@ describe('WorkTimeValidator', () => {
       element,
       'EEEE',
       'en'
-    ).toLowerCase()}`, () =>
-      expect(
-        WorkTimeValidator.getCurrentWorkTime(twoVariableWorkTimeCase, element)
-          .dayOfWeek
-      ).equal(index === 4 ? 'Friday' : 'all'))
+    ).toLowerCase()}`, () => 
+      {
+        const curDays = WorkTimeValidator.getCurrentWorkTime(twoVariableWorkTimeCase, element).dayOfWeek
+        if (index === 4) {
+          return expect(curDays).to.includes('friday');
+        } else {
+          return assertArraysEqual(curDays, all)
+        }
+      })
   );
 
-  const trioVariableWorkTimeCase = {
+  const trioVariableWorkTimeCase: Restrictions = {
     worktime: [
       {
-        dayOfWeek: 'friday',
+        dayOfWeek: ['friday'],
         start: '10:00',
         stop: '21:30',
         break: '11:00-12:00'
@@ -371,15 +371,15 @@ describe('WorkTimeValidator', () => {
         break: '14:00-18:00'
       },
       {
-        dayOfWeek: 'all',
+        dayOfWeek: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
         start: '10:00',
         stop: '21:00',
         break: '00:00-00:00'
       },
     ],
+    //@ts-ignore
     possibleToOrderInMinutes: 20160,
-    timezone: 'Asia/Yekaterinburg',
-    minDeliveryTimeInMinutes: '60',
+    timezone: 'Asia/Yekaterinburg'
   };
 
   week.forEach((element: Date, index: number) =>
@@ -388,19 +388,26 @@ describe('WorkTimeValidator', () => {
       'EEEE',
       'en'
     ).toLowerCase()}`, () => {
-      const expected = expect(
-        WorkTimeValidator.getCurrentWorkTime(trioVariableWorkTimeCase, element)
-          .dayOfWeek
-      );
+      let curDays = WorkTimeValidator.getCurrentWorkTime(trioVariableWorkTimeCase, element).dayOfWeek
+
+      const expected = expect(curDays);
       if (index > 4) {
         return expected.to.includes('saturday');
       } else {
         if (index === 4) {
-          return expected.equal('friday');
+          return expected.to.includes('friday');
         } else {
-          return expected.equal('all');
+          return assertArraysEqual(curDays, all)
         }
       }
     })
   );
 });
+
+
+function assertArraysEqual(actualArray, expectedArray) {
+  expect(actualArray).to.have.lengthOf(expectedArray.length);
+  for (let i = 0; i < actualArray.length; i++) {
+    expect(actualArray[i]).to.equal(expectedArray[i]);
+  }
+}

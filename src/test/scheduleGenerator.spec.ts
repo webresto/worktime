@@ -1,10 +1,8 @@
 import { assert } from 'chai';
 import { ScheduleGenerator } from '../lib/scheduleGenerator';
-import { WorkTime } from '../lib/worktime.validator';
-import { TimeZoneString } from '../lib/tz';
 
 describe('ScheduleGenerator', function () {
-    const jsonData: WorkTime[] = [
+    const jsonData = [
         {
             "dayOfWeek": ["monday", "tuesday", "wednesday", "thursday", "sunday"],
             "start": "10:00",
@@ -18,32 +16,159 @@ describe('ScheduleGenerator', function () {
             "break": "12:00-13:00"
         }
     ];
+    const startDate = new Date("2024-04-01T00:00:00.000Z");
+    const endDate = new Date("2024-04-08T00:00:00.000Z");
+    const timeZone = "Etc/GMT+5";
 
-    const startDate: Date = new Date("1970-01-01T00:00:00.000Z");
-    const endDate: Date = new Date("1970-01-15T00:00:00.000Z");
-    const timeZone: TimeZoneString = "Etc/GMT+5";
+    const scheduleGenerator = new ScheduleGenerator(jsonData);
 
-    const scheduleGenerator: ScheduleGenerator = new ScheduleGenerator(jsonData);
+    it('should generate compact time intervals when compact parameter is true', function () {
+        const expectedCompactIntervals = 
+            [
+               [
+                 1711936800,
+                 1711944000
+               ],
+               [
+                 1711944600,
+                 1711979100
+               ],
+               [
+                 1712023200,
+                 1712030400
+               ],
+               [
+                 1712031000,
+                 1712065500
+               ],
+               [
+                 1712109600,
+                 1712116800
+               ],
+               [
+                 1712117400,
+                 1712151900
+               ],
+               [
+                 1712196000,
+                 1712203200
+               ],
+               [
+                 1712203800,
+                 1712238300
+               ],
+               [
+                 1712282400,
+                 1712289600
+               ],
+               [
+                 1712293200,
+                 1712324700
+               ],
+               [
+                 1712368800,
+                 1712376000
+               ],
+               [
+                 1712379600,
+                 1712411100
+               ],
+               [
+                 1712455200,
+                 1712462400
+               ],
+               [
+                 1712463000,
+                 1712497500
+               ],
+               [
+                 1712541600,
+                 1712548800
+               ],
+               [
+                 1712549400,
+                 1712583900
+               ]
+            ]
+          
+        
 
-    describe('#generateTimeIntervals()', function () {
-        it('should generate time intervals correctly', function () {
-            const result = scheduleGenerator.generateTimeIntervals(startDate, endDate, timeZone);
-            // Example assertions, customize based on your needs
-            assert.strictEqual(result.length, 24); // Example assertion, customize based on your expected output
-        });
-
-        // Add more test cases for different scenarios if needed
+        const generatedCompactIntervals = scheduleGenerator.generateTimeIntervals(startDate, endDate, timeZone, true);
+        console.log(generatedCompactIntervals)
+        assert.deepStrictEqual(generatedCompactIntervals, expectedCompactIntervals);
     });
 
-    describe('#adjustTimezone()', function () {
-        it('should adjust time zones correctly', function () {
-            const intervals = [{ start: 0, stop: 3600 }];
-            const adjustedIntervals = scheduleGenerator.adjustTimezone(intervals, timeZone);
-            assert.deepStrictEqual(adjustedIntervals, [{ start: 10800, stop: 14400 }]);
-        });
+    it('should adjust time intervals according to the specified time zone', function () {
+        // Define expected intervals adjusted for the time zone
+        const expectedAdjustedIntervals =  [
+           {
+             "start": 1711936800,
+             "stop": 1711944000
+           },
+           {
+             "start": 1711944600,
+             "stop": 1711979100
+           },
+           {
+             "start": 1712023200,
+             "stop": 1712030400
+           },
+           {
+             "start": 1712031000,
+             "stop": 1712065500
+           },
+           {
+             "start": 1712109600,
+             "stop": 1712116800
+           },
+           {
+             "start": 1712117400,
+             "stop": 1712151900
+           },
+           {
+             "start": 1712196000,
+             "stop": 1712203200
+           },
+           {
+             "start": 1712203800,
+             "stop": 1712238300
+           },
+           {
+             "start": 1712282400,
+             "stop": 1712289600
+           },
+           {
+             "start": 1712293200,
+             "stop": 1712324700
+           },
+           {
+             "start": 1712368800,
+             "stop": 1712376000
+           },
+           {
+             "start": 1712379600,
+             "stop": 1712411100
+           },
+           {
+             "start": 1712455200,
+             "stop": 1712462400
+           },
+           {
+             "start": 1712463000,
+             "stop": 1712497500
+           },
+           {
+             "start": 1712541600,
+             "stop": 1712548800
+           },
+           {
+             "start": 1712549400,
+             "stop": 1712583900
+           }
+        ]
+      ;
 
-        // Add more test cases for different scenarios if needed
+        const generatedAdjustedIntervals = scheduleGenerator.generateTimeIntervals(startDate, endDate, timeZone);
+        assert.deepStrictEqual(generatedAdjustedIntervals, expectedAdjustedIntervals);
     });
-
-    // Add more describe blocks for other methods if needed
 });

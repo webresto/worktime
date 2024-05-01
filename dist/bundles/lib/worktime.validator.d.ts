@@ -1,23 +1,26 @@
+import { TimeZoneString } from './tz';
 /**
  * Базовые данные о времени работы - служебный интерфейс.
  */
 export interface WorkTimeBase {
     /** время начала рабочего дня*/
-    start: string;
+    start: TimeString;
     /** время окончания рабочего дня*/
-    stop: string;
+    stop: TimeString;
     /** перерыв на обед*/
-    break?: string;
+    break?: `${number}${number}:${number}${number}-${number}${number}:${number}${number}`;
 }
+type Day = "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
 /**
  * Информация о времени работы предприятия - служебный интерфейс.
  */
 export interface WorkTime extends WorkTimeBase {
-    /** день недели, к которому применяется это время доставки   */
-    dayOfWeek: string | string[];
-    /**  
-     * @deprecated 
-     * ограничения по времени работы для самовывоза */
+    /** день недели, к которому применяется это время */
+    dayOfWeek: Day[];
+    /**
+     * @deprecated
+     * ограничения по времени работы для самовывоза
+    */
     selfService?: WorkTimeBase;
 }
 /**
@@ -25,7 +28,7 @@ export interface WorkTime extends WorkTimeBase {
  */
 export interface Restrictions {
     /** временная зона предприятия */
-    timezone?: string;
+    timezone?: TimeZoneString;
     /**  массив ограничений по времени работы предприятия для разных дней недели. */
     worktime: WorkTime[];
 }
@@ -52,6 +55,9 @@ export interface Country {
     flag: string;
 }
 /** Данные о модели авторизации пользователей на сайте предприятия */
+/**
+ * @deprecated нужно вынести из либы работы с расписаниями
+ */
 export type UserRestrictions<T extends {} = {}> = {
     /** Показывает, какой вид данных используется пользователем для авторизации */
     loginField: string;
@@ -88,11 +94,14 @@ export type UserRestrictions<T extends {} = {}> = {
      */
     allowBonusSpending: boolean;
 } & T;
+/**
+ * @deprecated Это нужно перенести из либы worktime в ngGQL потомучто тут очень много всего что не относится к ворктайму
+ */
 export interface RestrictionsOrder<T extends {} = {}> extends Restrictions {
     /**
      * GraphQL schema backward compatibility version
      */
-    graphqlSchemaBackwardCompatibilityVersion: boolean;
+    graphqlSchemaBackwardCompatibilityVersion: number;
     /** минимальное время доставки*/
     minDeliveryTimeInMinutes: string;
     /** ограничение максимальной даты заказа в будущем (в минутах)*/
@@ -113,13 +122,8 @@ export interface ValidatorResult {
     curentDayStartTime?: number;
     curentDayStopTime?: number;
 }
-/** Тип, описывающий строковое представление всех цифр */
-type Digits = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9';
-/** Тип, описывающий строковое представление 24 часов одних суток */
-export type HoursDigits = '00' | '01' | '02' | '03' | '04' | '05' | '06' | '07' | '08' | '09' | '10' | '11' | '12' | '13' | '14' | '15' | '16' | '17' | '18' | '19' | '20' | '21' | '22' | '23';
-/** Тип, описывающий строковое представление 60 минут одного часа*/
-export type MinuteDigits = `${'0' | '1' | '2' | '3' | '4' | '5'}${Digits}`;
-/** Тип, описывающий строковое представление времени в формате HH:mm -`(00-24 часа):(0-59 минут)` */
+type HoursDigits = `${number}${number}`;
+type MinuteDigits = `${number}${number}`;
 export type TimeString = `${HoursDigits}:${MinuteDigits}`;
 /**
  * Класс, содержащий статические методы, необходимые для работы с ограничениями рабочего времени предприятия.
@@ -132,6 +136,7 @@ export type TimeString = `${HoursDigits}:${MinuteDigits}`;
  */
 export declare class WorkTimeValidator {
     /**
+     * @deprecated Будет перемещена из либы
      * Метод возвращает максимальную возможную дату, на которую можно заказать доставку.
      * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
      * @return Строка, представляющая максимальную доступную дату доставки в формате yyyy-MM-dd.

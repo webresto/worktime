@@ -955,15 +955,39 @@ function getThursdayThisWeek(datetime) {
  */
 class TimeZoneIdentifier {
     /**
-     *Метод определяет смещение часового пояса относительно GMT (+00:00) по переданной строке с названием таймзоны.
-     *@param zone - Строка с названием таймзоны ( например 'America/New_York').
-     *@return  - Строка, представляющая смещение относительно GMT.
+     * Converts a time zone offset string in the format "+hh:mm" or "-hh:mm" to seconds.
+     * @param offset The time zone offset string (e.g., "+03:00" or "-05:30").
+     * @returns The time zone offset in seconds. Positive for offsets ahead of GMT, negative for offsets behind GMT.
      *
-     *Пример :
-     *const offset = TimeZoneIdentifier.getTimeZoneGMTOffset('Europe/Moscow');
-     *console.log(offset) /// "+03:00"
-     *
-     * */
+     * Example:
+     * const offsetInSeconds = TimeZoneIdentifier.getTimeZoneOffsetInSeconds('+03:00');
+     * console.log(offsetInSeconds); // 10800 (3 hours ahead of GMT)
+     */
+    static getTimeZoneOffsetInSeconds(zone) {
+        const offset = TimeZoneIdentifier.getTimeZoneGMTOffset(zone);
+        console.log(offset, 999);
+        const [hoursStr, minutesStr] = offset.substring(1).split(':'); // Remove the '+' or '-' sign
+        const hours = parseInt(hoursStr, 10);
+        const minutes = parseInt(minutesStr, 10);
+        const totalSeconds = (hours * 60 + minutes) * 60;
+        return offset.startsWith('-') ? -totalSeconds : totalSeconds;
+    }
+    /**
+     * @deprecated please use `getTimeZoneGMTOffset` or `getTimeZoneOffsetInSeconds`
+     */
+    static getTimeZoneGMTOffsetfromNameZone(zone) {
+        return TimeZoneIdentifier.getTimeZoneGMTOffset(zone);
+    }
+    /**
+   *The method determines the time zone offset relative to GMT (+00:00) using the transmitted string with the name of the time zone.
+   *@param zone - A string with the name of the time zone (for example 'America/New_York').
+   *@return  - A string representing the offset relative to GMT.
+   *
+   *Example :
+   *const offset = TimeZoneIdentifier.getTimeZoneGMTOffset('Europe/Moscow');
+   *console.log(offset) /// "+03:00"
+   *
+   * */
     static getTimeZoneGMTOffset(zone) {
         if (!zone) {
             zone = process.env.TZ ? process.env.TZ : Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -1430,7 +1454,7 @@ class TimeZoneIdentifier {
             case 'Pacific/Tongatapu': return '+13:00';
             case 'Etc/GMT-14': return '+14:00';
             case 'Pacific/Kiritimati': return '+14:00';
-            default: throw Error('Неизвестная таймзона');
+            default: throw Error(`Unknown timezone \`${zone}\``);
         }
     }
 }
@@ -1473,6 +1497,7 @@ function isValidRestrictionOrder(restriction) {
  */
 class WorkTimeValidator {
     /**
+     * @deprecated Будет перемещена из либы
      * Метод возвращает максимальную возможную дату, на которую можно заказать доставку.
      * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
      * @return Строка, представляющая максимальную доступную дату доставки в формате yyyy-MM-dd.
@@ -1658,9 +1683,7 @@ class WorkTimeValidator {
          * */
         const newRestriction = {
             ...restriction,
-            worktime: restriction.worktime.map((worktime) => worktime.selfService
-                ? { ...worktime, ...worktime.selfService }
-                : worktime),
+            worktime: restriction.worktime.map((worktime) => worktime)
         };
         return WorkTimeValidator.getPossibleDelieveryOrderDateTime(newRestriction, currentdate);
     }
@@ -1676,16 +1699,16 @@ class WorkTimeValidator {
         let i = 0;
         let result = null;
         while (i < restriction.worktime.length && !isValue(result)) {
-            if (restriction.worktime[i].dayOfWeek === 'all' ||
-                (typeof restriction.worktime[i].dayOfWeek === 'string'
-                    ? restriction.worktime[i].dayOfWeek.toLowerCase()
-                    : restriction.worktime[i].dayOfWeek.map((day) => day.toLowerCase())).includes(formatDate(currentdate, 'EEEE', 'en').toLowerCase())) {
+            if (restriction.worktime[i].dayOfWeek === undefined) {
+                throw `dayOfWeek is required`;
+            }
+            if (restriction.worktime[i].dayOfWeek.includes(formatDate(currentdate, 'EEEE', 'en').toLowerCase())) {
                 result = restriction.worktime[i];
             }
             i += 1;
         }
         if (!isValue(result)) {
-            throw new Error('Нет актуального расписания работы для текущего дня');
+            throw new Error('There is no current work schedule for the current day');
         }
         else {
             return result;

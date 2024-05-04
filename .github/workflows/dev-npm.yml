@@ -16,7 +16,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       # waiting https://github.com/ds300/patch-package/issues/339
-      - run: npm install 2>&1 || true && npm run test
+      - run: npm install 2>&1 || true && TZ=GMT-3 npm run test
       
       # resolve version
       - run: |

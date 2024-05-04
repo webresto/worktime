@@ -99,12 +99,24 @@ export class ScheduleGenerator {
         }));
     }
 
-    public generateTimeIntervals(startDate: Date, endDate: Date, timeZone: TimeZoneString, compact: true): [number, number][];
-    public generateTimeIntervals(startDate: Date, endDate: Date, timeZone: TimeZoneString, compact?: false): { start: number, stop: number }[];
-    public generateTimeIntervals(startDate: Date, endDate: Date, timeZone: TimeZoneString, compact?: true | false): { start: number, stop: number }[] | [number, number][] {
+    /**
+     * 
+     * @param startDate Дата начала
+     * @param endDate Дата окончания
+     * @param timeZone можно расчитать таймзону но она не обязательная потомучто new Date() для startDate и endDate будет уже смещена
+     * @param compact Выдать массивом
+     */
+    public generateTimeIntervals(startDate: Date, endDate: Date, timeZone?: TimeZoneString, compact?: true): [number, number][];
+    public generateTimeIntervals(startDate: Date, endDate: Date, timeZone?: TimeZoneString, compact?: false): { start: number, stop: number }[];
+    public generateTimeIntervals(startDate: Date, endDate: Date, timeZone?: TimeZoneString, compact?: true | false): { start: number, stop: number }[] | [number, number][] {
         const datesInRange = this.getDatesInRange(startDate, endDate);
         const workingDates = this.filterWorkingDates(datesInRange);
         const timeIntervals = this.createTimeIntervals(workingDates);
+        
+        if(!timeZone) {
+            timeZone = "Etc/GMT+0"
+        }
+        
         const timeZoneOffsetSeconds = TimeZoneIdentifier.getTimeZoneOffsetInSeconds(timeZone)
         if(compact){
             return this.compact(this.adjustTimezone(timeIntervals, timeZoneOffsetSeconds));

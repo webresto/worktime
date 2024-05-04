@@ -12,8 +12,15 @@ export declare class ScheduleGenerator {
     private filterWorkingDates;
     private createTimeIntervals;
     private adjustTimezone;
-    generateTimeIntervals(startDate: Date, endDate: Date, timeZone: TimeZoneString, compact: true): [number, number][];
-    generateTimeIntervals(startDate: Date, endDate: Date, timeZone: TimeZoneString, compact?: false): {
+    /**
+     *
+     * @param startDate Дата начала
+     * @param endDate Дата окончания
+     * @param timeZone можно расчитать таймзону но она не обязательная потомучто new Date() для startDate и endDate будет уже смещена
+     * @param compact Выдать массивом
+     */
+    generateTimeIntervals(startDate: Date, endDate: Date, timeZone?: TimeZoneString, compact?: true): [number, number][];
+    generateTimeIntervals(startDate: Date, endDate: Date, timeZone?: TimeZoneString, compact?: false): {
         start: number;
         stop: number;
     }[];

@@ -11,7 +11,7 @@
     "build:esm": "ng-packagr -p ng-package.json",
     "fix-commonjs-build": "node fix-commonjs-build.js",
     "build": "npm run build:esm && npm run tsc:commonjs && npm run fix-commonjs-build && cp .npmrc dist",
-    "test": "ts-mocha -p ./tsconfig.test.json src/test/*.spec.ts"
+    "test": "TZ=GMT-3 ts-mocha -p ./tsconfig.test.json src/test/*.spec.ts"
   },
   "devDependencies": {
     "@angular/compiler": "^15.2.1",

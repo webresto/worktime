@@ -81,6 +81,9 @@ export class ScheduleGenerator {
         const datesInRange = this.getDatesInRange(startDate, endDate);
         const workingDates = this.filterWorkingDates(datesInRange);
         const timeIntervals = this.createTimeIntervals(workingDates);
+        if (!timeZone) {
+            timeZone = "Etc/GMT+0";
+        }
         const timeZoneOffsetSeconds = TimeZoneIdentifier.getTimeZoneOffsetInSeconds(timeZone);
         if (compact) {
             return this.compact(this.adjustTimezone(timeIntervals, timeZoneOffsetSeconds));

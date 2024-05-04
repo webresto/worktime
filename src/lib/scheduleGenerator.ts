@@ -5,6 +5,12 @@ export class ScheduleGenerator {
     private days: Map<string, { start: number, stop: number }>;
     private breaks: Map<string, { start: number, stop: number }>;
 
+
+    /**
+     * Constructor for the ScheduleGenerator class.
+     * Parses the given worktime array into days and breaks.
+     * @param worktime An array of WorkTime objects representing the work schedule.
+     */
     constructor(worktime: WorkTime[]) {
         const { days, breaks } = this.parseSchedule(worktime);
         this.days = days;
@@ -81,10 +87,10 @@ export class ScheduleGenerator {
                     const breakStop = new Date(date);
                     breakStop.setHours(0, 0, breakTime.stop);
 
-                    intervals.push({ start: intervalStart.getTime() / 1000, stop: breakStart.getTime() / 1000 });
-                    intervals.push({ start: breakStop.getTime() / 1000, stop: intervalStop.getTime() / 1000 });
+                    intervals.push({ start: Math.round(intervalStart.getTime() / 1000), stop: Math.round(breakStart.getTime() / 1000) });
+                    intervals.push({ start: Math.round(breakStop.getTime() / 1000), stop: Math.round(intervalStop.getTime() / 1000) });
                 } else {
-                    intervals.push({ start: intervalStart.getTime() / 1000, stop: intervalStop.getTime() / 1000 });
+                    intervals.push({ start: Math.round(intervalStart.getTime() / 1000), stop: Math.round(intervalStop.getTime() / 1000) });
                 }
             }
         }
@@ -99,12 +105,14 @@ export class ScheduleGenerator {
         }));
     }
 
+
     /**
-     * 
-     * @param startDate Дата начала
-     * @param endDate Дата окончания
-     * @param timeZone можно расчитать таймзону но она не обязательная потомучто new Date() для startDate и endDate будет уже смещена
-     * @param compact Выдать массивом
+     * Generates time intervals between the provided start and end dates.
+     * @param startDate The start date of the interval.
+     * @param endDate The end date of the interval.
+     * @param timeZone Optional: The time zone to consider for the dates. If not provided, assumes "Etc/GMT+0". It is not necessary because new Date() for startDate and endDate will already be offset
+     * @param compact Optional: Whether to output time intervals in a compact array format or an array of objects.
+     * @returns An array of time intervals between the start and end dates.
      */
     public generateTimeIntervals(startDate: Date, endDate: Date, timeZone?: TimeZoneString, compact?: true): [number, number][];
     public generateTimeIntervals(startDate: Date, endDate: Date, timeZone?: TimeZoneString, compact?: false): { start: number, stop: number }[];
@@ -131,14 +139,69 @@ export class ScheduleGenerator {
     }
 }
 
-function convertTimestampsToReadableDate(array: { start: number, stop: number }[]) {
-    return array.map(item => {
-        const startDate = new Date(item.start * 1000);
-        const stopDate = new Date(item.stop * 1000);
 
-        const startDateStr = startDate.toLocaleString('en-US', { timeZone: 'UTC' });
-        const stopDateStr = stopDate.toLocaleString('en-US', { timeZone: 'UTC' });
+export class ScheduleValidator {
+    readonly schedule: Schedule | undefined;
 
-        return { start: startDateStr, stop: stopDateStr };
-    });
+    /**
+     * Constructor for ScheduleValidator class.
+     * @param schedule The schedule to be validated.
+     */
+    constructor(schedule: Schedule) {
+        this.schedule = schedule;
+    }
+
+    /**
+     * Checks if a given date falls within any of the intervals in the schedule.
+     * @param date The date to check.
+     * @returns A boolean indicating whether the date falls within the schedule.
+     */
+    doesTimeFallWithin(date: Date): boolean {
+        if (!this.schedule) return false;
+
+        const time = Math.round(date.getTime() / 1000); // Convert date to Unix timestamp
+
+        for (const interval of this.schedule) {
+            const [start, stop] = interval;
+            if (start <= time && time <= stop) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks if a given duration starting from a specific date falls within any of the intervals in the schedule.
+     * @param startDateTime The start date and time.
+     * @param durationInSeconds The duration in seconds.
+     * @returns A boolean indicating whether the duration falls within the schedule.
+     */
+    doesDurationFallWithin(startDateTime: Date, durationInSeconds: number): boolean {
+        if (!this.schedule) return false;
+
+        const startTime = Math.round(startDateTime.getTime() / 1000);
+        const endTime = startTime + durationInSeconds;
+
+        for (const interval of this.schedule) {
+            const [start, stop] = interval;
+            if (start <= startTime && stop >= endTime) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
+
+// function convertTimestampsToReadableDate(array: { start: number, stop: number }[]) {
+//     return array.map(item => {
+//         const startDate = new Date(item.start * 1000);
+//         const stopDate = new Date(item.stop * 1000);
+
+//         const startDateStr = startDate.toLocaleString('en-US', { timeZone: 'UTC' });
+//         const stopDateStr = stopDate.toLocaleString('en-US', { timeZone: 'UTC' });
+
+//         return { start: startDateStr, stop: stopDateStr };
+//     });
+// }

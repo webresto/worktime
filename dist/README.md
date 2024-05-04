@@ -1,21 +1,18 @@
-# TODO
-1. rename to Restrictions
+# Worktime
+Library for working with working hours restrictions
 
-# NgWorktime
- Библиотека для работы с ограничениями рабочего времени предприятия
-
-## Установка
+## Installation
 
 npm i @webresto/worktime
 
-## Пример
-Импорт
+## Example
+Import
 
 ~~~ typescript
 import { WorkTimeValidator,TimeZoneIdentifier } from '@webresto/worktime'
 ~~~
 
-В вашем коде:
+In your code:
 
 ~~~ typescript
 

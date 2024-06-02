@@ -17,7 +17,7 @@ jobs:
 
       # waiting https://github.com/ds300/patch-package/issues/339
       - run: npm install 2>&1 || true && TZ=GMT-3 npm run test
-      
+      - run: npm run build
       # resolve version
       - run: |
           set -ex

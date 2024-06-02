@@ -21,6 +21,7 @@ jobs:
       # resolve version
       - run: |
           set -x
+          cd ./dist
           BRANCH=${GITHUB_REF##*/}
           PACKAGE=$(cat package.json | jq -r '.["name"]')
           VERLOC=$(cat package.json | jq -r '.["version"]')

@@ -38,8 +38,8 @@ export interface WorkTime extends WorkTimeBase {
  * Интерфейс объекта, получаемого от API @webresto/core и содержащего текущие данные о рабочем времени предприятия
  */
 export interface Restrictions {
-  /** временная зона предприятия */
-  timezone?: TimeZoneString;
+  /** temporary zone of the enterprise */
+  timezone: TimeZoneString;
 
   /**  массив ограничений по времени работы предприятия для разных дней недели. */
   worktime: WorkTime[];

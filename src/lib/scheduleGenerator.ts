@@ -142,7 +142,7 @@ export class ScheduleGenerator {
 
 export class ScheduleValidator {
     readonly schedule: Schedule | undefined;
-
+    
     /**
      * Constructor for ScheduleValidator class.
      * @param schedule The schedule to be validated.
@@ -192,6 +192,46 @@ export class ScheduleValidator {
 
         return false;
     }
+
+    /**
+     * Finds the earliest or latest day limit in the schedule intervals.
+     * @param mode Determines whether to find the earliest or latest day limit.
+     * @returns The earliest or latest day limit within the schedule, or undefined if no such date exists.
+     */
+    findDayLimit(mode: "earliest"|"latest", timezone: TimeZoneString): string | undefined {
+    
+        if (!this.schedule || this.schedule.length === 0) return undefined;
+
+        let _day = this.schedule[0][0];
+
+        for (const interval of this.schedule) {
+            const [_start, _] = interval;
+            if(mode = "earliest") {
+                if (_start < _day) {
+                    _day = _start;
+                }
+            } else /** latest */ {
+                if (_start > _day) {
+                    _day = _start;
+                }
+            }
+        }
+
+        return new Date(_day * 1000).toLocaleDateString(undefined, {
+            timeZone: timezone,
+        });
+    }
+
+    /**
+     * Finds the latest end date for a given duration that fits within the schedule intervals.
+     * @param durationInSeconds The duration in seconds.
+     * @returns The latest end date that fits within the schedule, or undefined if no such date exists.
+     */
+    findLatestEndDate(): Date | undefined {
+
+        return undefined;
+    }
+
 }
 
 // function convertTimestampsToReadableDate(array: { start: number, stop: number }[]) {

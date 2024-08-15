@@ -133,6 +133,9 @@ export interface RestrictionsOrder<T extends {} = {}> extends Restrictions {
   /** Дополнительный комментарий по доставке */
   deliveryDescription?: string;
 
+  /** Строгая валидация телефона по маске */
+  strictPhoneInput?: boolean;
+  
   /** Разновидность вводимой капчи */
   captchaType?: string | null;
 
@@ -494,6 +497,7 @@ export class WorkTimeValidator {
     }
 
     if (!isValue(result)) {
+      console.debug("getCurrentWorkTime > !isValue(result):", result, restriction)
       throw new Error('There is no current work schedule for the current day');
     } else {
       return result;

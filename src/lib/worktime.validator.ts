@@ -133,6 +133,9 @@ export interface RestrictionsOrder<T extends {} = {}> extends Restrictions {
   /** Дополнительный комментарий по доставке */
   deliveryDescription?: string;
 
+  /** Бекенд пропускает при ошибке доставки */
+  softDeliveryCalculation?:boolean
+
   /** Строгая валидация телефона по маске */
   strictPhoneInput?: boolean;
   

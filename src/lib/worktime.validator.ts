@@ -158,7 +158,7 @@ export interface RestrictionsOrder<T extends {} = {}> extends Restrictions {
 
   multipleCities?: boolean | null;
 
-  city: City | null
+  city?: City | null
 
   /** Данные о модели авторизации пользователей на сайте предприятия */
   user?: UserRestrictions<T> | null;

@@ -54,6 +54,17 @@ export interface HtmlFormField {
   regex: string;
 }
 
+export interface City {
+  name: string
+  slug: string
+  url: string
+  id: string  
+  /** Id in external system */
+  externalId:  string,
+  boundingBox: [[number, number], [number, number]],
+  customData: Record<string,any>,
+}
+
 export interface Country {
   phoneCode: string;
   iso: string;
@@ -144,6 +155,10 @@ export interface RestrictionsOrder<T extends {} = {}> extends Restrictions {
   
   /** Разновидность вводимой капчи */
   captchaType?: string | null;
+
+  multipleCities?: boolean | null;
+
+  city: City | null
 
   /** Данные о модели авторизации пользователей на сайте предприятия */
   user?: UserRestrictions<T> | null;

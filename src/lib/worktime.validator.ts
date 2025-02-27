@@ -160,6 +160,9 @@ export interface RestrictionsOrder<T extends {} = {}> extends Restrictions {
 
   city?: City | null
 
+  /** Поля обязательные при создании корзины */
+  fieldsForOrderInitialization: string[] | null;
+
   /** Данные о модели авторизации пользователей на сайте предприятия */
   user?: UserRestrictions<T> | null;
 }

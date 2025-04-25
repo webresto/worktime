@@ -40,6 +40,7 @@ export interface WorkTime extends WorkTimeBase {
 export interface Restrictions {
   /** temporary zone of the enterprise */
   timezone: TimeZoneString;
+  utcOffsetInSeconds: number;
 
   /**  массив ограничений по времени работы предприятия для разных дней недели. */
   worktime: WorkTime[];

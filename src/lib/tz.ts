@@ -510,6 +510,11 @@ export class TimeZoneIdentifier {
       }
     }
 
+    // ✅ Проверка если zone уже в формате смещения +HH:MM или -HH:MM
+    if (/^[+-]\d{2}:\d{2}$/.test(zone)) {
+      return zone;
+    }
+
     switch (zone) {
       case 'Etc/GMT+12': return '-12:00';
       case 'Etc/GMT+11': return '-11:00';

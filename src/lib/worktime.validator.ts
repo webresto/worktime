@@ -417,10 +417,19 @@ export class WorkTimeValidator {
 
   /**
    * Метод возвращает ближайшую возможную дату-время заказа для способа доставки "Доставка курьером".
+   * @deprecated use getPossibleDelieveryOrderDateTime
+   * 
+   * 
    * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
    * @param currentdate - объект Date, представляющий текущие локальные дату и время пользователя
    */
   static getPossibleDelieveryOrderDateTime(
+    restriction: RestrictionsOrder,
+    currentdate: Date
+  ): string {
+    return WorkTimeValidator.getPossibleMinDelieveryOrderDateTime(restriction, currentdate)
+  }
+  static getPossibleMinDelieveryOrderDateTime(
     restriction: RestrictionsOrder,
     currentdate: Date
   ): string {
@@ -431,7 +440,7 @@ export class WorkTimeValidator {
     const checkTime = WorkTimeValidator.isWorkNow(restriction, currentdate);
 
     if (checkTime.workNow && isValue(checkTime.currentTime)) {
-      console.log('Сейчас рабочее время. Расчет не требуется.');
+      // console.log('Сейчас рабочее время. Расчет не требуется.');
       const possibleTime =
         checkTime.currentTime + (+restriction.minDeliveryTimeInMinutes || 0);
       const possibleTimeStr =

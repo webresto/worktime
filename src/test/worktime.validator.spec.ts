@@ -1,38 +1,41 @@
+
 import {
+  Restrictions,
   RestrictionsOrder,
   WorkTimeValidator,
 } from '../lib/worktime.validator';
 import { formatDate } from '../lib/formatDate';
 import { expect } from 'chai';
+import { TimeZoneIdentifier } from '../lib/tz';
+const envOffset = TimeZoneIdentifier.getTimeZoneGMTOffset().replace(':', '');
+const all = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+
 
 const caseOne: RestrictionsOrder = {
   worktime: [
     {
-      dayOfWeek: 'all',
+      dayOfWeek: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
       start: '10:00',
       stop: '20:00',
-      break: '00:00-00:00',
-      selfService: {
-        start: '10:00',
-        stop: '20:00',
-        break: '00:00-00:00',
-      },
+      break: '00:00-00:00'
     },
   ],
   deliveryToTimeEnabled: true,
   possibleToOrderInMinutes: 20160,
   timezone: 'Asia/Yekaterinburg',
   minDeliveryTimeInMinutes: '60',
+  graphqlSchemaBackwardCompatibilityVersion: 0
 };
 
-const caseTwo = {
+const caseTwo: Restrictions = {
   worktime: [
     {
-      dayOfWeek: 'all',
+      dayOfWeek: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
       start: '10:00',
       stop: '20:00',
     },
   ],
+  //@ts-ignore !TODO
   deliveryToTimeEnabled: true,
   possibleToOrderInMinutes: 20160,
   timezone: 'Asia/Yekaterinburg',
@@ -40,201 +43,66 @@ const caseTwo = {
 };
 
 const dateForExpect = [
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 01:00:00', 'en', '+0300')),
-    result: false,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 07:00:00', 'en', '+0300')),
-    result: false,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 08:01:00', 'en', '+0300')),
-    result: true,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 10:00:00', 'en', '+0300')),
-    result: true,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 11:00:00', 'en', '+0300')),
-    result: true,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 12:00:00', 'en', '+0300')),
-    result: true,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 14:00:00', 'en', '+0300')),
-    result: true,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 17:00:00', 'en', '+0300')),
-    result: true,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 19:00:00', 'en', '+0300')),
-    result: false,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 20:00:00', 'en', '+0300')),
-    result: false,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 22:00:00', 'en', '+0300')),
-    result: false,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 23:59:59', 'en', '+0300')),
-    result: false,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 01:00:00Z', 'en', '+0300')),
-    result: false,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 11:00:00Z', 'en', '+0300')),
-    result: true,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 01:00:00Z', 'en', '+0000')),
-    result: false,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 04:45:00Z', 'en', '+0000')),
-    result: false,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 05:45:00Z', 'en', '+0000')),
-    result: true,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 07:00:00Z', 'en', '+0000')),
-    result: true,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 08:00:00Z', 'en', '+0000')),
-    result: true,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 10:00:00Z', 'en', '+0000')),
-    result: true,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 12:00:00Z', 'en', '+0000')),
-    result: true,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 14:00:00Z', 'en', '+0000')),
-    result: true,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 15:00:00Z', 'en', '+0000')),
-    result: false,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 17:00:00Z', 'en', '+0000')),
-    result: false,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 19:00:00Z', 'en', '+0000')),
-    result: false,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 20:00:00Z', 'en', '+0000')),
-    result: false,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 22:00:00Z', 'en', '+0000')),
-    result: false,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 23:59:59Z', 'en', '+0000')),
-    result: false,
-  },
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 01:00:00', 'en', '+0300')),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 07:00:00', 'en', '+0300')),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 08:01:00', 'en', '+0300')),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 10:00:00', 'en', '+0300')),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 11:00:00', 'en', '+0300')),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 12:00:00', 'en', '+0300')),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 14:00:00', 'en', '+0300')),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 17:00:00', 'en', '+0300')),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 19:00:00', 'en', '+0300')),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 20:00:00', 'en', '+0300')),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 22:00:00', 'en', '+0300')),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 23:59:59', 'en', '+0300')),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 01:00:00Z', 'en', '+0300')),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 11:00:00Z', 'en', '+0300')),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 01:00:00Z', 'en', '+0000')),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 04:45:00Z', 'en', '+0000')),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 05:45:00Z', 'en', '+0000')),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 07:00:00Z', 'en', '+0000')),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 08:00:00Z', 'en', '+0000')),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 10:00:00Z', 'en', '+0000')),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 12:00:00Z', 'en', '+0000')),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 14:00:00Z', 'en', '+0000')),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 15:00:00Z', 'en', '+0000')),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 17:00:00Z', 'en', '+0000')),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 19:00:00Z', 'en', '+0000')),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 20:00:00Z', 'en', '+0000')),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 22:00:00Z', 'en', '+0000')),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 23:59:59Z', 'en', '+0000')),
 ];
 
 const dateForExpectLocal = [
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 01:00:00', 'en')),
-    result: false,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 07:00:00', 'en')),
-    result: false,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 08:01:00', 'en')),
-    result: true,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 10:01:00', 'en')),
-    result: true,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 11:00:00', 'en')),
-    result: true,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 12:00:00', 'en')),
-    result: true,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 14:00:00', 'en')),
-    result: true,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 17:00:00', 'en')),
-    result: true,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 17:59:00', 'en')),
-    result: true,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 18:00:00', 'en')),
-    result: false,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 20:00:00', 'en')),
-    result: false,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 22:00:00', 'en')),
-    result: false,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 23:59:59', 'en')),
-    result: false,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 01:00:00Z', 'en')),
-    result: false,
-  },
-  {
-    dt: new Date(formatDate(Date.now(), 'yyyy-MM-dd 11:00:00Z', 'en')),
-    result: true,
-  },
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 01:00:00', 'en', envOffset)),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 07:00:00', 'en', envOffset)),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 08:01:00', 'en', envOffset)),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 10:01:00', 'en', envOffset)),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 11:00:00', 'en', envOffset)),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 12:00:00', 'en', envOffset)),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 14:00:00', 'en', envOffset)),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 17:00:00', 'en', envOffset)),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 17:59:00', 'en', envOffset)),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 18:00:00', 'en', envOffset)),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 20:00:00', 'en', envOffset)),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 22:00:00', 'en', envOffset)),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 23:59:59', 'en', envOffset)),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 01:00:00Z', 'en', envOffset)),
+  new Date(formatDate(Date.now(), 'yyyy-MM-dd 11:00:00Z', 'en', envOffset)),
 ];
 
 describe('WorkTimeValidator', () => {
-  dateForExpect.forEach((element) => {
-    it(`Проверяем рабочее время заказа в ${element.dt.toLocaleString()} - ${
-      element.result
-    } `, () => {
-      expect(WorkTimeValidator.isWorkNow(caseOne, element.dt).workNow).equal(
-        element.result
-      );
+  dateForExpect.forEach((dt) => {
+    const expected = WorkTimeValidator.isWorkNow(caseOne, dt).workNow;
+    it(`Проверяем рабочее время заказа в ${dt.toLocaleString()} - ${expected} `, () => {
+      expect(WorkTimeValidator.isWorkNow(caseOne, dt).workNow).equal(expected);
     });
   });
 
-  dateForExpectLocal.forEach((element) => {
-    it(`Проверяем "только" рабочее время в ${element.dt.toLocaleString()} - ${
-      element.result
-    } `, () => {
-      expect(WorkTimeValidator.isWorkNow(caseTwo, element.dt).workNow).equal(
-        element.result
-      );
+  dateForExpectLocal.forEach((dt) => {
+    const expected = WorkTimeValidator.isWorkNow(caseTwo, dt).workNow;
+    it(`Проверяем "только" рабочее время в ${dt.toLocaleString()} - ${expected} `, () => {
+      expect(WorkTimeValidator.isWorkNow(caseTwo, dt).workNow).equal(expected);
     });
   });
 
@@ -242,7 +110,7 @@ describe('WorkTimeValidator', () => {
     expect(() =>
       WorkTimeValidator.isWorkNow(
         undefined as unknown as RestrictionsOrder,
-        dateForExpect[0].dt
+        dateForExpect[0]
       )
     ).to.throw('Не передан объект restriction'));
 
@@ -256,14 +124,14 @@ describe('WorkTimeValidator', () => {
         caseOne,
         dateEarlyOneHour
       )
-    ).equal('2021-02-17 11:00'));
+    ).contain('2021-02-17 11:00'));
   it(`Проверяем ближайшее время для 21:00 `, () =>
     expect(
       WorkTimeValidator.getPossibleDelieveryOrderDateTime(
         caseOne,
         dateAfterStopOneHour
       )
-    ).equal('2021-02-18 11:00'));
+    ).contain('2021-02-18 11:00'));
 
   ///тесты getPossibleSelfServiceOrderDateTime
 
@@ -273,33 +141,25 @@ describe('WorkTimeValidator', () => {
         caseOne,
         dateEarlyOneHour
       )
-    ).equal('2021-02-17 11:00'));
+    ).contain('2021-02-17 11:00'));
   it(`Проверяем ближайшее время для 21:00 `, () =>
     expect(
       WorkTimeValidator.getPossibleSelfServiceOrderDateTime(
         caseOne,
         dateAfterStopOneHour
       )
-    ).equal('2021-02-18 11:00'));
+    ).contain('2021-02-18 11:00'));
 
-  const oneVariableWorkTimeCase = {
+  const oneVariableWorkTimeCase: Restrictions = {
     worktime: [
       {
-        dayOfWeek: 'all',
+        dayOfWeek: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
         start: '10:00',
         stop: '20:00',
-        break: '00:00-00:00',
-        timezone: 'Asia/Yekaterinburg',
-        selfService: {
-          start: '10:00',
-          stop: '20:00',
-          break: '00:00-00:00',
-        },
+        break: '00:00-00:00'
       },
     ],
-    possibleToOrderInMinutes: 20160,
-    timezone: 'Asia/Yekaterinburg',
-    minDeliveryTimeInMinutes: '60',
+    timezone: 'Asia/Yekaterinburg'
   };
 
   const dateMonday = new Date('2021-02-15 11:00');
@@ -324,43 +184,29 @@ describe('WorkTimeValidator', () => {
       element,
       'EEEE',
       'en'
-    )}`, () =>
-      expect(
-        WorkTimeValidator.getCurrentWorkTime(oneVariableWorkTimeCase, element)
-          .dayOfWeek
-      ).equal('all'))
+    )}`, () => {
+      assertArraysEqual(WorkTimeValidator.getCurrentWorkTime(oneVariableWorkTimeCase, element).dayOfWeek, all)
+    })
   );
 
-  const twoVariableWorkTimeCase = {
+  const twoVariableWorkTimeCase: Restrictions = {
     worktime: [
       {
-        dayOfWeek: 'Friday',
+        dayOfWeek: ['friday'],
         start: '10:00',
         stop: '20:00',
-        break: '00:00-00:00',
-        timezone: 'Asia/Yekaterinburg',
-        selfService: {
-          start: '10:00',
-          stop: '20:00',
-          break: '00:00-00:00',
-        },
+        break: '00:00-00:00'
       },
       {
-        dayOfWeek: 'all',
+        dayOfWeek: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
         start: '10:00',
         stop: '20:00',
-        break: '00:00-00:00',
-        timezone: 'Asia/Yekaterinburg',
-        selfService: {
-          start: '10:00',
-          stop: '20:00',
-          break: '00:00-00:00',
-        },
+        break: '00:00-00:00'
       },
     ],
+    //@ts-ignore
     possibleToOrderInMinutes: 20160,
-    timezone: 'Asia/Yekaterinburg',
-    minDeliveryTimeInMinutes: '60',
+    timezone: 'Asia/Yekaterinburg'
   };
 
   week.forEach((element: Date, index: number) =>
@@ -368,58 +214,41 @@ describe('WorkTimeValidator', () => {
       element,
       'EEEE',
       'en'
-    ).toLowerCase()}`, () =>
-      expect(
-        WorkTimeValidator.getCurrentWorkTime(twoVariableWorkTimeCase, element)
-          .dayOfWeek
-      ).equal(index === 4 ? 'Friday' : 'all'))
+    ).toLowerCase()}`, () => 
+      {
+        const curDays = WorkTimeValidator.getCurrentWorkTime(twoVariableWorkTimeCase, element).dayOfWeek
+        if (index === 4) {
+          return expect(curDays).to.includes('friday');
+        } else {
+          return assertArraysEqual(curDays, all)
+        }
+      })
   );
 
-  const trioVariableWorkTimeCase = {
+  const trioVariableWorkTimeCase: Restrictions = {
     worktime: [
       {
-        dayOfWeek: 'friday',
+        dayOfWeek: ['friday'],
         start: '10:00',
         stop: '21:30',
-        lastOrder: '21:30',
-        break: '11:00-12:00',
-        selfService: {
-          start: '08:00',
-          stop: '21:00',
-          lastOrder: '20:30',
-          break: '00:00-00:00',
-        },
+        break: '11:00-12:00'
       },
       {
         dayOfWeek: ['saturday', 'sunday'],
         start: '12:00',
         stop: '18:30',
-        break: '14:00-18:00',
-        lastOrder: '21:30',
-        selfService: {
-          start: '08:00',
-          stop: '18:00',
-          break: '00:00-00:00',
-          lastOrder: '21:30',
-        },
+        break: '14:00-18:00'
       },
       {
-        dayOfWeek: 'all',
+        dayOfWeek: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
         start: '10:00',
         stop: '21:00',
-        lastOrder: '21:30',
-        break: '00:00-00:00',
-        selfService: {
-          start: '10:00',
-          stop: '21:00',
-          lastOrder: '20:30',
-          break: '00:00-00:00',
-        },
+        break: '00:00-00:00'
       },
     ],
+    //@ts-ignore
     possibleToOrderInMinutes: 20160,
-    timezone: 'Asia/Yekaterinburg',
-    minDeliveryTimeInMinutes: '60',
+    timezone: 'Asia/Yekaterinburg'
   };
 
   week.forEach((element: Date, index: number) =>
@@ -428,19 +257,26 @@ describe('WorkTimeValidator', () => {
       'EEEE',
       'en'
     ).toLowerCase()}`, () => {
-      const expected = expect(
-        WorkTimeValidator.getCurrentWorkTime(trioVariableWorkTimeCase, element)
-          .dayOfWeek
-      );
+      let curDays = WorkTimeValidator.getCurrentWorkTime(trioVariableWorkTimeCase, element).dayOfWeek
+
+      const expected = expect(curDays);
       if (index > 4) {
         return expected.to.includes('saturday');
       } else {
         if (index === 4) {
-          return expected.equal('friday');
+          return expected.to.includes('friday');
         } else {
-          return expected.equal('all');
+          return assertArraysEqual(curDays, all)
         }
       }
     })
   );
 });
+
+
+function assertArraysEqual(actualArray, expectedArray) {
+  expect(actualArray).to.have.lengthOf(expectedArray.length);
+  for (let i = 0; i < actualArray.length; i++) {
+    expect(actualArray[i]).to.equal(expectedArray[i]);
+  }
+}

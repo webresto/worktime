@@ -1,28 +1,36 @@
 import { formatDate, isDate } from './formatDate';
-import { TimeZoneIdentifier } from './tz';
+import { TimeZoneIdentifier , TimeZoneString} from './tz';
 
 /**
  * Базовые данные о времени работы - служебный интерфейс.
  */
 export interface WorkTimeBase {
   /** время начала рабочего дня*/
-  start: string;
+  start: TimeString;
 
   /** время окончания рабочего дня*/
-  stop: string;
+  stop: TimeString;
 
   /** перерыв на обед*/
-  break?: string;
+  break?: `${number}${number}:${number}${number}-${number}${number}:${number}${number}`;
 }
+
+
+type Day = "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday"
+
+
 
 /**
  * Информация о времени работы предприятия - служебный интерфейс.
  */
 export interface WorkTime extends WorkTimeBase {
-  /** день недели, к которому применяется это время доставки   */
-  dayOfWeek: string | string[];
+  /** день недели, к которому применяется это время */
+  dayOfWeek: Day[];
 
-  /** ограничения по времени работы для самовывоза */
+  /** 
+   * @deprecated 
+   * ограничения по времени работы для самовывоза
+  */
   selfService?: WorkTimeBase;
 }
 
@@ -30,8 +38,9 @@ export interface WorkTime extends WorkTimeBase {
  * Интерфейс объекта, получаемого от API @webresto/core и содержащего текущие данные о рабочем времени предприятия
  */
 export interface Restrictions {
-  /** временная зона предприятия */
-  timezone?: string;
+  /** temporary zone of the enterprise */
+  timezone: TimeZoneString;
+  utcOffsetInSeconds: number;
 
   /**  массив ограничений по времени работы предприятия для разных дней недели. */
   worktime: WorkTime[];
@@ -44,6 +53,17 @@ export interface HtmlFormField {
   description: string;
   required: boolean;
   regex: string;
+}
+
+export interface City {
+  name: string
+  slug: string
+  url: string
+  id: string  
+  /** Id in external system */
+  externalId:  string,
+  boundingBox: [[number, number], [number, number]],
+  customData: Record<string,any>,
 }
 
 export interface Country {
@@ -62,6 +82,9 @@ export interface Country {
 }
 
 /** Данные о модели авторизации пользователей на сайте предприятия */
+/**
+ * @deprecated нужно вынести из либы работы с расписаниями
+ */
 export type UserRestrictions<T extends {} = {}> = {
   /** Показывает, какой вид данных используется пользователем для авторизации */
   loginField: string;
@@ -100,12 +123,15 @@ export type UserRestrictions<T extends {} = {}> = {
   allowBonusSpending: boolean
 } & T;
 
+/**
+ * @deprecated Это нужно перенести из либы worktime в ngGQL потомучто тут очень много всего что не относится к ворктайму
+ */
 export interface RestrictionsOrder<T extends {} = {}> extends Restrictions {
 
   /**
    * GraphQL schema backward compatibility version
    */
-  graphqlSchemaBackwardCompatibilityVersion: boolean
+  graphqlSchemaBackwardCompatibilityVersion: number
 
   /** минимальное время доставки*/
   minDeliveryTimeInMinutes: string;
@@ -119,8 +145,24 @@ export interface RestrictionsOrder<T extends {} = {}> extends Restrictions {
   /** Дополнительный комментарий по доставке */
   deliveryDescription?: string;
 
+  /** Бекенд пропускает при ошибке доставки */
+  softDeliveryCalculation?:boolean
+
+  /** Краткое описание условий доставки */
+  deliveryTerms: string | null;
+
+  /** Строгая валидация телефона по маске */
+  strictPhoneInput?: boolean;
+  
   /** Разновидность вводимой капчи */
   captchaType?: string | null;
+
+  multipleCities?: boolean | null;
+
+  city?: City | null
+
+  /** Поля обязательные при создании корзины */
+  fieldsForOrderInitialization: string[] | null;
 
   /** Данные о модели авторизации пользователей на сайте предприятия */
   user?: UserRestrictions<T> | null;
@@ -134,40 +176,8 @@ export interface ValidatorResult {
   curentDayStopTime?: number;
 }
 
-/** Тип, описывающий строковое представление всех цифр */
-type Digits = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9';
-
-/** Тип, описывающий строковое представление 24 часов одних суток */
-export type HoursDigits =
-  | '00'
-  | '01'
-  | '02'
-  | '03'
-  | '04'
-  | '05'
-  | '06'
-  | '07'
-  | '08'
-  | '09'
-  | '10'
-  | '11'
-  | '12'
-  | '13'
-  | '14'
-  | '15'
-  | '16'
-  | '17'
-  | '18'
-  | '19'
-  | '20'
-  | '21'
-  | '22'
-  | '23';
-
-/** Тип, описывающий строковое представление 60 минут одного часа*/
-export type MinuteDigits = `${'0' | '1' | '2' | '3' | '4' | '5'}${Digits}`;
-
-/** Тип, описывающий строковое представление времени в формате HH:mm -`(00-24 часа):(0-59 минут)` */
+type HoursDigits = `${number}${number}`
+type MinuteDigits = `${number}${number}`
 export type TimeString = `${HoursDigits}:${MinuteDigits}`;
 
 /** Функция-хелпер для проверки, что переданное значение не является null или undefined */
@@ -219,6 +229,7 @@ function isValidRestrictionOrder(
  */
 export class WorkTimeValidator {
   /**
+   * @deprecated Будет перемещена из либы
    * Метод возвращает максимальную возможную дату, на которую можно заказать доставку.
    * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
    * @return Строка, представляющая максимальную доступную дату доставки в формате yyyy-MM-dd.
@@ -275,6 +286,7 @@ export class WorkTimeValidator {
       }
     }
   }
+
 
   /**
    * Метод конвертирует переданное кол-во минут в строкове представление времени в формате HH:mm - `(00-24 часа):(0-59 минут)`.
@@ -338,7 +350,7 @@ export class WorkTimeValidator {
       typeof process !== 'undefined'
     ) {
       restriction.timezone =
-        process?.env?.TZ ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
+        process?.env?.TZ as TimeZoneString ?? Intl.DateTimeFormat().resolvedOptions().timeZone as TimeZoneString;
     }
 
     if (!isValue(restriction) || !isValidRestriction(restriction)) {
@@ -360,7 +372,7 @@ export class WorkTimeValidator {
       }
 
       const companyLocalTimeZone =
-        TimeZoneIdentifier.getTimeZoneGMTOffsetfromNameZone(
+        TimeZoneIdentifier.getTimeZoneGMTOffset(
           restriction.timezone
         ).split(':');
       const companyLocalTimeZoneDelta =
@@ -473,11 +485,7 @@ export class WorkTimeValidator {
      * */
     const newRestriction = {
       ...restriction,
-      worktime: (<WorkTime[]>restriction.worktime).map((worktime) =>
-        worktime.selfService
-          ? { ...worktime, ...worktime.selfService }
-          : worktime
-      ),
+      worktime: (<WorkTime[]>restriction.worktime).map((worktime) => worktime)
     };
     return WorkTimeValidator.getPossibleDelieveryOrderDateTime(
       newRestriction,
@@ -502,14 +510,11 @@ export class WorkTimeValidator {
     let result = null;
 
     while (i < restriction.worktime.length && !isValue(result)) {
-      if (
-        restriction.worktime[i].dayOfWeek === 'all' ||
-        (typeof restriction.worktime[i].dayOfWeek === 'string'
-          ? (<string>restriction.worktime[i].dayOfWeek).toLowerCase()
-          : (<string[]>restriction.worktime[i].dayOfWeek).map((day) =>
-            day.toLowerCase()
-          )
-        ).includes(formatDate(currentdate, 'EEEE', 'en').toLowerCase())
+      
+      if(restriction.worktime[i].dayOfWeek === undefined) {
+        throw `dayOfWeek is required`
+      }
+      if ((<string[]>restriction.worktime[i].dayOfWeek).includes(formatDate(currentdate, 'EEEE', 'en').toLowerCase())
       ) {
         result = restriction.worktime[i];
       }
@@ -517,7 +522,8 @@ export class WorkTimeValidator {
     }
 
     if (!isValue(result)) {
-      throw new Error('Нет актуального расписания работы для текущего дня');
+      console.debug("getCurrentWorkTime > !isValue(result):", result, restriction)
+      throw new Error('There is no current work schedule for the current day');
     } else {
       return result;
     }

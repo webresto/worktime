@@ -503,8 +503,12 @@ export class TimeZoneIdentifier {
  * */
   static getTimeZoneGMTOffset(zone?: TimeZoneString): string {
     if (!zone) {
-      zone = process.env.TZ ? process.env.TZ  as TimeZoneString : Intl.DateTimeFormat().resolvedOptions().timeZone as TimeZoneString;
-    };
+      if (typeof process !== 'undefined' && process.env?.TZ) {
+        zone = process.env.TZ as TimeZoneString;
+      } else {
+        zone = Intl.DateTimeFormat().resolvedOptions().timeZone as TimeZoneString;
+      }
+    }
 
     switch (zone) {
       case 'Etc/GMT+12': return '-12:00';

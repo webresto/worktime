@@ -503,8 +503,12 @@ export class TimeZoneIdentifier {
  * */
   static getTimeZoneGMTOffset(zone?: TimeZoneString): string {
     if (!zone) {
-      zone = process.env.TZ ? process.env.TZ  as TimeZoneString : Intl.DateTimeFormat().resolvedOptions().timeZone as TimeZoneString;
-    };
+      if (typeof process !== 'undefined' && process.env?.TZ) {
+        zone = process.env.TZ as TimeZoneString;
+      } else {
+        zone = Intl.DateTimeFormat().resolvedOptions().timeZone as TimeZoneString;
+      }
+    }
 
     // ✅ Проверка если zone уже в формате смещения +HH:MM или -HH:MM
     if (/^[+-]\d{2}:\d{2}$/.test(zone)) {

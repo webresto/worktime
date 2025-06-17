@@ -4,14 +4,14 @@
     "type": "git",
     "url": "https://github.com/webresto/worktime.git"
   },
-  "version": "2.0.2",
+  "version": "2.1.0",
   "scripts": {
     "pub": "cd dist && npm publish --access=public",
     "tsc:commonjs": "tsc -p tsconfig.commonjs.json",
     "build:esm": "ng-packagr -p ng-package.json",
     "fix-commonjs-build": "node fix-commonjs-build.js",
     "build": "npm run build:esm && npm run tsc:commonjs && npm run fix-commonjs-build && cp .npmrc dist",
-    "test": "TZ=GMT-3 ts-mocha -p ./tsconfig.test.json src/test/*.spec.ts"
+    "test": "node ./run-tests-multi-tz.js"
   },
   "devDependencies": {
     "@angular/compiler": "^15.2.1",

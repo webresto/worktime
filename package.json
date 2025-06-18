@@ -4,7 +4,7 @@
     "type": "git",
     "url": "https://github.com/webresto/worktime.git"
   },
-  "version": "2.1.0",
+  "version": "2.2.0",
   "scripts": {
     "pub": "cd dist && npm publish --access=public",
     "tsc:commonjs": "tsc -p tsconfig.commonjs.json",
@@ -45,5 +45,26 @@
   "description": "Library for working with enterprise working hours restrictions for @webresto",
   "dependencies": {
     "tslib": "^2.5.3"
-  }
+  },
+  "main": "dist/bundles/index.js",
+  "module": "dist/fesm2015/webresto-worktime.mjs",
+  "es2020": "dist/fesm2020/webresto-worktime.mjs",
+  "esm2020": "dist/esm2020/webresto-worktime.mjs",
+  "fesm2020": "dist/fesm2020/webresto-worktime.mjs",
+  "fesm2015": "dist/fesm2015/webresto-worktime.mjs",
+  "typings": "dist/index.d.ts",
+  "exports": {
+    "./package.json": {
+      "default": "./package.json"
+    },
+    ".": {
+      "types": "./dist/index.d.ts",
+      "esm2020": "./dist/esm2020/webresto-worktime.mjs",
+      "es2020": "./dist/fesm2020/webresto-worktime.mjs",
+      "es2015": "./dist/fesm2015/webresto-worktime.mjs",
+      "node": "./dist/bundles/index.js",
+      "default": "./dist/fesm2020/webresto-worktime.mjs"
+    }
+  },
+  "sideEffects": false
 }

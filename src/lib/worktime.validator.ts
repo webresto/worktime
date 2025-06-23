@@ -221,12 +221,10 @@ function isValidRestrictionOrder(
 
 /**
  * Класс, содержащий статические методы, необходимые для работы с ограничениями рабочего времени предприятия.
- * Создавать новый экземпляр этого класса для использования статических методов не требуется.
  *
  * При этом при создании экземпляра класса у объекта также будут доступны собственные реализации
  * всех статических методов.
  * Эти реализации отличаются от вызовов статических методов только мемоизацией выполненных расчетов.
- *
  */
 export class WorkTimeValidator {
   /**
@@ -418,7 +416,7 @@ export class WorkTimeValidator {
 
   /**
    * Метод возвращает ближайшую возможную дату-время заказа для способа доставки "Доставка курьером".
-   * @deprecated use getPossibleDelieveryOrderDateTime
+   * @deprecated use getPossibleMinDelieveryOrderDateTime
    * 
    * 
    * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
@@ -430,6 +428,7 @@ export class WorkTimeValidator {
   ): string {
     return WorkTimeValidator.getPossibleMinDelieveryOrderDateTime(restriction, currentdate)
   }
+
   static getPossibleMinDelieveryOrderDateTime(
     restriction: RestrictionsOrder,
     currentdate: Date
@@ -645,7 +644,7 @@ export class WorkTimeValidator {
     if (isValue(checkMemory)) {
       return checkMemory;
     } else {
-      const result = WorkTimeValidator.getPossibleDelieveryOrderDateTime(
+      const result = WorkTimeValidator.getPossibleMinDelieveryOrderDateTime(
         restriction,
         currentdate
       );

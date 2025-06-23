@@ -422,6 +422,13 @@ export class WorkTimeValidator {
    * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
    * @param currentdate - объект Date, представляющий текущие локальные дату и время пользователя
    */
+  static getPossibleDelieveryOrderDateTime(
+    restriction: RestrictionsOrder,
+    currentdate: Date
+  ): string {
+    return WorkTimeValidator.getPossibleMinDelieveryOrderDateTime(restriction, currentdate)
+  }
+
   static getPossibleMinDelieveryOrderDateTime(
     restriction: RestrictionsOrder,
     currentdate: Date
@@ -452,9 +459,11 @@ export class WorkTimeValidator {
       isValue(checkTime.currentTime) &&
       isValue(checkTime.curentDayStopTime)
     ) {
-      const baseDate = checkTime.isNewDay
-        ? new Date(currentdate.getTime() + 86400000)
-        : currentdate;
+      const baseDate =
+        checkTime.isNewDay ||
+        checkTime.currentTime > checkTime.curentDayStopTime
+          ? new Date(currentdate.getTime() + 86400000)
+          : currentdate;
 
       const currentDayWorkTime = WorkTimeValidator.getCurrentWorkTime(
         restriction,

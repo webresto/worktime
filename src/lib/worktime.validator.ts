@@ -433,31 +433,36 @@ export class WorkTimeValidator {
     restriction: RestrictionsOrder,
     currentdate: Date
   ): string {
-    return WorkTimeValidator.getPossibleMinDelieveryOrderDateTime(restriction, currentdate)
+    return WorkTimeValidator.getPossibleMinDelieveryOrderDateTime(restriction, 0, currentdate)
   }
 
   static getPossibleMinDelieveryOrderDateTime(
     restriction: RestrictionsOrder,
+    minCoockingTimeInMinutes: number,
     currentdate: Date
   ): string {
     if (!isValidRestrictionOrder(restriction)) {
       throw new Error('Не передан или передан невалидный объект restrictions');
     }
 
-    const checkTime = WorkTimeValidator.isWorkNow(restriction, currentdate);
+    const readyDate = new Date(
+      currentdate.getTime() + minCoockingTimeInMinutes * 60_000
+    );
+
+    const checkTime = WorkTimeValidator.isWorkNow(restriction, readyDate);
 
     // ✔ Если сейчас рабочее время и можем доставить сегодня
     if (checkTime.workNow && isValue(checkTime.currentTime)) {
       let possibleTime =
         checkTime.currentTime + (+restriction.minDeliveryTimeInMinutes || 0);
-      let baseDate = currentdate;
+      let baseDate = readyDate;
 
       if (
         isValue(checkTime.curentDayStopTime) &&
         possibleTime > checkTime.curentDayStopTime
       ) {
         const overtime = possibleTime - checkTime.curentDayStopTime;
-        baseDate = new Date(currentdate.getTime() + 86400000);
+        baseDate = new Date(readyDate.getTime() + 86400000);
         const nextWork = WorkTimeValidator.getCurrentWorkTime(restriction, baseDate);
         possibleTime =
           WorkTimeValidator.getTimeFromString(<TimeString>nextWork.start) +
@@ -482,8 +487,8 @@ export class WorkTimeValidator {
       let baseDate =
         checkTime.isNewDay ||
         checkTime.currentTime > checkTime.curentDayStopTime
-          ? new Date(currentdate.getTime() + 86400000)
-          : currentdate;
+          ? new Date(readyDate.getTime() + 86400000)
+          : readyDate;
 
       const currentDayWorkTime = WorkTimeValidator.getCurrentWorkTime(
         restriction,
@@ -493,12 +498,12 @@ export class WorkTimeValidator {
       let totalMinutes = startMinutes + +restriction.minDeliveryTimeInMinutes;
 
       if (
-        baseDate.getTime() === currentdate.getTime() &&
+        baseDate.getTime() === readyDate.getTime() &&
         isValue(checkTime.curentDayStopTime) &&
         totalMinutes > checkTime.curentDayStopTime
       ) {
         const overtime = totalMinutes - checkTime.curentDayStopTime;
-        baseDate = new Date(currentdate.getTime() + 86400000);
+        baseDate = new Date(readyDate.getTime() + 86400000);
         const nextWork = WorkTimeValidator.getCurrentWorkTime(restriction, baseDate);
         startMinutes = this.getTimeFromString(<TimeString>nextWork.start);
         totalMinutes = startMinutes + overtime;
@@ -688,6 +693,7 @@ export class WorkTimeValidator {
     } else {
       const result = WorkTimeValidator.getPossibleMinDelieveryOrderDateTime(
         restriction,
+        0,
         currentdate
       );
       this._memory.getPossibleDelieveryOrderDateTime.set(memoryKey, result);

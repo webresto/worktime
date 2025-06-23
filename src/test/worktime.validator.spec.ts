@@ -118,7 +118,7 @@ describe('WorkTimeValidator', () => {
   const dateAfterStopOneHour = new Date('2021-02-17 21:00+0500');
   const caseLongDelivery: RestrictionsOrder = {
     ...caseOne,
-    minDeliveryTimeInMinutes: '960',
+    minDeliveryTimeInMinutes: '60',
   };
   const dateLongDelivery = new Date('2021-02-17 10:00+0500');
   ///тесты getPossibleDelieveryOrderDateTime
@@ -137,13 +137,14 @@ describe('WorkTimeValidator', () => {
         dateAfterStopOneHour
       )
     ).to.satisfy((v: string) => v.includes('2021-02-18 11:00') || v.includes('2021-02-19 11:00')));
-  it('Проверяем переход на следующий день при minDeliveryTime=960', () =>
+  it('Проверяем переход на следующий день при MinCoockingTime=900', () =>
     expect(
       WorkTimeValidator.getPossibleMinDelieveryOrderDateTime(
         caseLongDelivery,
+        900,
         dateLongDelivery
       )
-    ).contain('2021-02-18 16:00'));
+    ).contain('2021-02-18 11:00'));
 
   ///тесты getPossibleSelfServiceOrderDateTime
 

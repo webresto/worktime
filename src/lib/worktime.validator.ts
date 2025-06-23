@@ -422,13 +422,6 @@ export class WorkTimeValidator {
    * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
    * @param currentdate - объект Date, представляющий текущие локальные дату и время пользователя
    */
-  static getPossibleDelieveryOrderDateTime(
-    restriction: RestrictionsOrder,
-    currentdate: Date
-  ): string {
-    return WorkTimeValidator.getPossibleMinDelieveryOrderDateTime(restriction, currentdate)
-  }
-
   static getPossibleMinDelieveryOrderDateTime(
     restriction: RestrictionsOrder,
     currentdate: Date
@@ -439,40 +432,49 @@ export class WorkTimeValidator {
 
     const checkTime = WorkTimeValidator.isWorkNow(restriction, currentdate);
 
+    // ✔ Если сейчас рабочее время и можем доставить сегодня
     if (checkTime.workNow && isValue(checkTime.currentTime)) {
-      // console.log('Сейчас рабочее время. Расчет не требуется.');
       const possibleTime =
         checkTime.currentTime + (+restriction.minDeliveryTimeInMinutes || 0);
-      const possibleTimeStr =
-        WorkTimeValidator.convertMinutesToTime(possibleTime);
-      return formatDate(currentdate, `yyyy-MM-dd ${possibleTimeStr}`, 'en');
-    } else {
-      if (
-        isValue(checkTime.currentTime) &&
-        isValue(checkTime.curentDayStopTime)
-      ) {
-        const currentDayWorkTime = WorkTimeValidator.getCurrentWorkTime(
-          restriction,
-          checkTime.isNewDay
-            ? new Date(currentdate.getTime() + 86400000)
-            : currentdate
-        );
-        const time =
-          this.getTimeFromString(<TimeString>currentDayWorkTime.start) +
-          +restriction.minDeliveryTimeInMinutes;
-        const timeString = WorkTimeValidator.convertMinutesToTime(time);
-        return formatDate(
-          checkTime.isNewDay ||
-            checkTime.currentTime > checkTime.curentDayStopTime
-            ? currentdate.getTime() + 86400000
-            : currentdate,
-          `yyyy-MM-dd ${timeString}`,
-          'en'
-        );
-      } else {
-        throw 'Не удалось рассчитать currentTime и curentDayStopTime.';
-      }
+
+      const dayShift = Math.floor(possibleTime / 1440);
+      const remainder = possibleTime % 1440;
+      const hours = Math.floor(remainder / 60);
+      const minutes = remainder % 60;
+      const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+
+      const dateWithShift = new Date(currentdate.getTime() + dayShift * 86400000);
+      return formatDate(dateWithShift, `yyyy-MM-dd ${timeStr}`, 'en');
     }
+
+    // ❌ Сейчас нерабочее время, ищем следующую рабочую дату
+    if (
+      isValue(checkTime.currentTime) &&
+      isValue(checkTime.curentDayStopTime)
+    ) {
+      const baseDate = checkTime.isNewDay
+        ? new Date(currentdate.getTime() + 86400000)
+        : currentdate;
+
+      const currentDayWorkTime = WorkTimeValidator.getCurrentWorkTime(
+        restriction,
+        baseDate
+      );
+
+      const startMinutes = this.getTimeFromString(<TimeString>currentDayWorkTime.start);
+      const totalMinutes = startMinutes + +restriction.minDeliveryTimeInMinutes;
+
+      const dayShift = Math.floor(totalMinutes / 1440);
+      const remainder = totalMinutes % 1440;
+      const hours = Math.floor(remainder / 60);
+      const minutes = remainder % 60;
+      const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+
+      const targetDate = new Date(baseDate.getTime() + dayShift * 86400000);
+      return formatDate(targetDate, `yyyy-MM-dd ${timeStr}`, 'en');
+    }
+
+    throw new Error('Не удалось рассчитать currentTime и curentDayStopTime.');
   }
 
   /**

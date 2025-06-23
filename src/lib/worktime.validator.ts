@@ -384,18 +384,25 @@ export class WorkTimeValidator {
         ) + lokalTimeDelta;
       /**
        * текущее время в минутах с начала дня (600 = 10:00. 1200 = 20:00)
-       * если из-за разницы поясов расчет перепрыгнул на новый день, то приводим время к правильному значению в диапазоне 24 часов
+       * если из-за разницы поясов расчет перепрыгнул на новый/предыдущий день, то приводим время к правильному значению в диапазоне 24 часов
        * */
-      const currentTime =
-        currentTimeInMinutesWithLocalDelta > 1440
-          ? currentTimeInMinutesWithLocalDelta - 1440
+
+      const isPrevDay = currentTimeInMinutesWithLocalDelta < 0;
+      const isNextDay = currentTimeInMinutesWithLocalDelta > 1440;
+
+      const currentTime = isNextDay
+        ? currentTimeInMinutesWithLocalDelta - 1440
+        : isPrevDay
+          ? 1440 + currentTimeInMinutesWithLocalDelta
           : currentTimeInMinutesWithLocalDelta;
 
       const currentDayWorkTime = WorkTimeValidator.getCurrentWorkTime(
         restriction,
-        currentTimeInMinutesWithLocalDelta > 1440
+        isNextDay
           ? new Date(currentdate.getTime() + 86400000)
-          : currentdate
+          : isPrevDay
+            ? new Date(currentdate.getTime() - 86400000)
+            : currentdate
       ); // текущее рабочее время
       const curentDayStartTime = WorkTimeValidator.getTimeFromString(
         <TimeString>currentDayWorkTime.start
@@ -406,7 +413,7 @@ export class WorkTimeValidator {
       return {
         workNow:
           currentTime < curentDayStopTime && currentTime > curentDayStartTime,
-        isNewDay: currentTimeInMinutesWithLocalDelta > 1440,
+        isNewDay: isNextDay,
         currentTime,
         curentDayStartTime,
         curentDayStopTime,
@@ -441,8 +448,21 @@ export class WorkTimeValidator {
 
     // ✔ Если сейчас рабочее время и можем доставить сегодня
     if (checkTime.workNow && isValue(checkTime.currentTime)) {
-      const possibleTime =
+      let possibleTime =
         checkTime.currentTime + (+restriction.minDeliveryTimeInMinutes || 0);
+      let baseDate = currentdate;
+
+      if (
+        isValue(checkTime.curentDayStopTime) &&
+        possibleTime > checkTime.curentDayStopTime
+      ) {
+        const overtime = possibleTime - checkTime.curentDayStopTime;
+        baseDate = new Date(currentdate.getTime() + 86400000);
+        const nextWork = WorkTimeValidator.getCurrentWorkTime(restriction, baseDate);
+        possibleTime =
+          WorkTimeValidator.getTimeFromString(<TimeString>nextWork.start) +
+          overtime;
+      }
 
       const dayShift = Math.floor(possibleTime / 1440);
       const remainder = possibleTime % 1440;
@@ -450,8 +470,8 @@ export class WorkTimeValidator {
       const minutes = remainder % 60;
       const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 
-      const dateWithShift = new Date(currentdate.getTime() + dayShift * 86400000);
-      return formatDate(dateWithShift, `yyyy-MM-dd ${timeStr}`, 'en');
+      const dateWithShift = new Date(baseDate.getTime() + dayShift * 86400000);
+      return formatDate(dateWithShift, `yyyy-MM-dd ${timeStr}`, 'en', restriction.timezone);
     }
 
     // ❌ Сейчас нерабочее время, ищем следующую рабочую дату
@@ -459,7 +479,7 @@ export class WorkTimeValidator {
       isValue(checkTime.currentTime) &&
       isValue(checkTime.curentDayStopTime)
     ) {
-      const baseDate =
+      let baseDate =
         checkTime.isNewDay ||
         checkTime.currentTime > checkTime.curentDayStopTime
           ? new Date(currentdate.getTime() + 86400000)
@@ -469,9 +489,20 @@ export class WorkTimeValidator {
         restriction,
         baseDate
       );
+      let startMinutes = this.getTimeFromString(<TimeString>currentDayWorkTime.start);
+      let totalMinutes = startMinutes + +restriction.minDeliveryTimeInMinutes;
 
-      const startMinutes = this.getTimeFromString(<TimeString>currentDayWorkTime.start);
-      const totalMinutes = startMinutes + +restriction.minDeliveryTimeInMinutes;
+      if (
+        baseDate.getTime() === currentdate.getTime() &&
+        isValue(checkTime.curentDayStopTime) &&
+        totalMinutes > checkTime.curentDayStopTime
+      ) {
+        const overtime = totalMinutes - checkTime.curentDayStopTime;
+        baseDate = new Date(currentdate.getTime() + 86400000);
+        const nextWork = WorkTimeValidator.getCurrentWorkTime(restriction, baseDate);
+        startMinutes = this.getTimeFromString(<TimeString>nextWork.start);
+        totalMinutes = startMinutes + overtime;
+      }
 
       const dayShift = Math.floor(totalMinutes / 1440);
       const remainder = totalMinutes % 1440;
@@ -480,7 +511,7 @@ export class WorkTimeValidator {
       const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 
       const targetDate = new Date(baseDate.getTime() + dayShift * 86400000);
-      return formatDate(targetDate, `yyyy-MM-dd ${timeStr}`, 'en');
+      return formatDate(targetDate, `yyyy-MM-dd ${timeStr}`, 'en', restriction.timezone);
     }
 
     throw new Error('Не удалось рассчитать currentTime и curentDayStopTime.');
@@ -534,7 +565,7 @@ export class WorkTimeValidator {
       if(restriction.worktime[i].dayOfWeek === undefined) {
         throw `dayOfWeek is required`
       }
-      if ((<string[]>restriction.worktime[i].dayOfWeek).includes(formatDate(currentdate, 'EEEE', 'en').toLowerCase())
+      if ((<string[]>restriction.worktime[i].dayOfWeek).includes(formatDate(currentdate, 'EEEE', 'en', restriction.timezone).toLowerCase())
       ) {
         result = restriction.worktime[i];
       }

@@ -591,6 +591,10 @@ export class WorkTimeValidator {
 
   constructor() { }
 
+  /**
+   * Memory больше не нужен так как появились более сложные настройки initCheckout 
+   * И хранить в памяти считаю избыточным
+   */
   private _memory: {
     getMaxOrderDate: Map<string, string>;
     getTimeFromString: Map<string, number>;
@@ -677,6 +681,7 @@ export class WorkTimeValidator {
     }
   }
   /**
+   * @deprecated use getPossibleMinDelieveryOrderDateTime
    * Метод возвращает ближайшую возможную дату-время заказа для способа доставки "Доставка курьером".
    * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
    * @param currentdate - объект Date, представляющий текущие локальные дату и время пользователя
@@ -700,6 +705,33 @@ export class WorkTimeValidator {
       return result;
     }
   }
+
+/**
+   * Метод возвращает ближайшую возможную дату-время заказа для способа доставки "Доставка курьером".
+   * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.
+   * @param currentdate - объект Date, представляющий текущие локальные дату и время пользователя
+   */
+  getPossibleMinDelieveryOrderDateTime(
+    restriction: RestrictionsOrder,
+    minCoockingTimeInMinutes: number,
+    currentdate: Date
+  ): string {
+    const memoryKey = JSON.stringify({ restriction, currentdate, minCoockingTimeInMinutes });
+    const checkMemory =
+      this._memory.getPossibleDelieveryOrderDateTime.get(memoryKey);
+    if (isValue(checkMemory)) {
+      return checkMemory;
+    } else {
+      const result = WorkTimeValidator.getPossibleMinDelieveryOrderDateTime(
+        restriction,
+        minCoockingTimeInMinutes,
+        currentdate
+      );
+      this._memory.getPossibleDelieveryOrderDateTime.set(memoryKey, result);
+      return result;
+    }
+  }
+
   /**
    * Метод возвращает ближайшую возможную дату-время заказа для способа доставки "Самовывоз".
    * @param restriction - объект, содержащий информацию о рабочем времени предприятия и ограничениях даты/времени доставки.

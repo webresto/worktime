@@ -132,6 +132,30 @@ describe('WorkTimeValidator', () => {
         dateAfterStopOneHour
       )
     ).contain('2021-02-18 11:00'));
+  it(`Проверяем ближайшее время для 11:00 `, () =>
+    expect(
+      WorkTimeValidator.getPossibleDelieveryOrderDateTime(
+        caseOne,
+        new Date('2021-02-17 11:00+0500')
+      )
+    ).contain('2021-02-17 12:00'));
+  it(`Проверяем ближайшее время при разнице таймзон`, () =>
+    expect(
+      WorkTimeValidator.getPossibleDelieveryOrderDateTime(
+        caseOne,
+        new Date('2021-02-17 23:00+0000')
+      )
+    ).contain('2021-02-18 11:00'));
+  it('Выбрасывается ошибка при некорректном restriction', () =>
+    expect(() =>
+      WorkTimeValidator.getPossibleDelieveryOrderDateTime(
+        {
+          worktime: [],
+          timezone: 'Asia/Yekaterinburg',
+        } as unknown as RestrictionsOrder,
+        dateEarlyOneHour
+      )
+    ).to.throw('Не передан или передан невалидный объект restrictions'));
 
   ///тесты getPossibleSelfServiceOrderDateTime
 

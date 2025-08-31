@@ -1,4 +1,4 @@
-import { TimeZoneIdentifier, TimeZoneString } from "./tz";
+import { TimeZoneIdentifier } from "./tz";
 import { WorkTime } from "./worktime.validator";
 export type Schedule =  [number, number][]
 export class ScheduleGenerator {
@@ -114,9 +114,9 @@ export class ScheduleGenerator {
      * @param compact Optional: Whether to output time intervals in a compact array format or an array of objects.
      * @returns An array of time intervals between the start and end dates.
      */
-    public generateTimeIntervals(startDate: Date, endDate: Date, timeZone?: TimeZoneString, compact?: true): [number, number][];
-    public generateTimeIntervals(startDate: Date, endDate: Date, timeZone?: TimeZoneString, compact?: false): { start: number, stop: number }[];
-    public generateTimeIntervals(startDate: Date, endDate: Date, timeZone?: TimeZoneString, compact?: true | false): { start: number, stop: number }[] | [number, number][] {
+    public generateTimeIntervals(startDate: Date, endDate: Date, timeZone?: string, compact?: true): [number, number][];
+    public generateTimeIntervals(startDate: Date, endDate: Date, timeZone?: string, compact?: false): { start: number, stop: number }[];
+    public generateTimeIntervals(startDate: Date, endDate: Date, timeZone?: string, compact?: true | false): { start: number, stop: number }[] | [number, number][] {
         const datesInRange = this.getDatesInRange(startDate, endDate);
         const workingDates = this.filterWorkingDates(datesInRange);
         const timeIntervals = this.createTimeIntervals(workingDates);
@@ -198,7 +198,7 @@ export class ScheduleValidator {
      * @param mode Determines whether to find the earliest or latest day limit.
      * @returns The earliest or latest day limit within the schedule, or undefined if no such date exists.
      */
-    findDayLimit(mode: "earliest"|"latest", timezone: TimeZoneString): string | undefined {
+    findDayLimit(mode: "earliest"|"latest", timezone: string): string | undefined {
     
         if (!this.schedule || this.schedule.length === 0) return undefined;
 

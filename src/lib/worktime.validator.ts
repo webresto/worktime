@@ -1,5 +1,5 @@
 import { formatDate, isDate } from './formatDate';
-import { TimeZoneIdentifier , TimeZoneString} from './tz';
+import { TimeZoneIdentifier} from './tz';
 
 /**
  * Базовые данные о времени работы - служебный интерфейс.
@@ -39,7 +39,7 @@ export interface WorkTime extends WorkTimeBase {
  */
 export interface Restrictions {
   /** temporary zone of the enterprise */
-  timezone: TimeZoneString;
+  timezone: string;
   utcOffsetInSeconds: number;
   utcOffset: string;
 
@@ -349,7 +349,7 @@ export class WorkTimeValidator {
       typeof process !== 'undefined'
     ) {
       restriction.timezone =
-        process?.env?.TZ as TimeZoneString ?? Intl.DateTimeFormat().resolvedOptions().timeZone as TimeZoneString;
+        process?.env?.TZ ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
     }
 
     if (!isValue(restriction) || !isValidRestriction(restriction)) {

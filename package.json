@@ -4,7 +4,7 @@
     "type": "git",
     "url": "https://github.com/webresto/worktime.git"
   },
-  "version": "2.0.3",
+  "version": "2.2.0",
   "scripts": {
     "pub": "cd dist && npm publish --access=public",
     "tsc:commonjs": "tsc -p tsconfig.commonjs.json",
@@ -45,5 +45,6 @@
   "description": "Library for working with enterprise working hours restrictions for @webresto",
   "dependencies": {
     "tslib": "^2.5.3"
-  }
+  },
+  "sideEffects": false
 }

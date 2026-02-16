@@ -1,0 +1,33 @@
+name: Publish Package to GitHub Packages
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@webresto'
+
+      - run: npm install 2>&1 || true && TZ=GMT-3 npm run test
+      - run: npm run build
+
+      - name: Publish to GitHub Packages
+        working-directory: ./dist
+        run: |
+          rm -f .npmrc
+          npm publish --registry=https://npm.pkg.github.com
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

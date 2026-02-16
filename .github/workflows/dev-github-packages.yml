@@ -1,30 +1,38 @@
-name: Publish Package to npmjs
+name: Publish Package to GitHub Packages (preview)
+
 on:
   push:
     branches:
       - alpha
       - next
+
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
           node-version: '18.x'
-          registry-url: 'https://registry.npmjs.org'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@webresto'
 
       - run: npm install 2>&1 || true && TZ=GMT-3 npm run test
       - run: npm run build
 
-      - name: Publish preview to npm
+      - name: Publish preview to GitHub Packages
         working-directory: ./dist
         run: |
           set -euo pipefail
           BRANCH=${GITHUB_REF_NAME}
           BASE_VERSION=$(node -p "require('./package.json').version.split('-')[0]")
           npm version "${BASE_VERSION}-${BRANCH}.${GITHUB_RUN_NUMBER}" --no-git-tag-version
-          npm publish --tag "$BRANCH"
+          rm -f .npmrc
+          npm publish --tag "$BRANCH" --registry=https://npm.pkg.github.com
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

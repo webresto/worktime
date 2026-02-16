@@ -1,3 +1,6 @@
+// Kept as an exported alias for backward compatibility with existing type imports.
+export type TimeZoneString = string;
+
 /**
  *Класс, содержащий статический метод, определяющий смещение часового пояса относительно GMT (+00:00) по переданной строке с названием таймзоны.
  *Создавать новый объект этого класса для использования метода не требуется.
@@ -13,7 +16,7 @@ export class TimeZoneIdentifier {
  * const offsetInSeconds = TimeZoneIdentifier.getTimeZoneOffsetInSeconds('+03:00');
  * console.log(offsetInSeconds); // 10800 (3 hours ahead of GMT)
  */
-  static getTimeZoneOffsetInSeconds(zone?: string): number {
+  static getTimeZoneOffsetInSeconds(zone?: TimeZoneString): number {
     const offset = TimeZoneIdentifier.getTimeZoneGMTOffset(zone)
     const [hoursStr, minutesStr] = offset.substring(1).split(':'); // Remove the '+' or '-' sign
     const hours = parseInt(hoursStr, 10);
@@ -25,7 +28,7 @@ export class TimeZoneIdentifier {
   /**
    * @deprecated please use `getTimeZoneGMTOffset` or `getTimeZoneOffsetInSeconds`
    */
-  static getTimeZoneGMTOffsetfromNameZone(zone?: string): string {
+  static getTimeZoneGMTOffsetfromNameZone(zone?: TimeZoneString): string {
     return TimeZoneIdentifier.getTimeZoneGMTOffset(zone)
   }
 
@@ -39,7 +42,7 @@ export class TimeZoneIdentifier {
  *console.log(offset) /// "+03:00"
  *
  * */
-  static getTimeZoneGMTOffset(zone?: string): string {
+  static getTimeZoneGMTOffset(zone?: TimeZoneString): string {
     if (!zone) {
       if (typeof process !== 'undefined' && process.env?.TZ) {
         zone = process.env.TZ;

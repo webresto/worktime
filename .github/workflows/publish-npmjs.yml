@@ -33,8 +33,12 @@ jobs:
         run: |
           set -euo pipefail
           REPO_URL=$(jq -r '.repository.url // empty' package.json)
+          NORMALIZED_REPO_URL="${REPO_URL#git+}"
+          NORMALIZED_REPO_URL="${NORMALIZED_REPO_URL%.git}"
+          EXPECTED_REPO_URL="https://github.com/${GITHUB_REPOSITORY}"
           echo "dist package repository.url: $REPO_URL"
-          test "$REPO_URL" = "https://github.com/webresto/ng-gql"
+          echo "expected repository.url: $EXPECTED_REPO_URL (normalized)"
+          test "$NORMALIZED_REPO_URL" = "$EXPECTED_REPO_URL"
 
       - name: Publish to npm (master)
         if: github.ref_name == 'master'

@@ -1,30 +1,45 @@
 name: Publish Package to npmjs
+
 on:
   push:
     branches:
+      - master
       - alpha
       - next
+
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
+    environment: npm
+
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
+          node-version: '24.x'
           registry-url: 'https://registry.npmjs.org'
 
-      - run: npm install 2>&1 || true && TZ=GMT-3 npm run test
+      - run: node -v && npm -v
+      - run: npm install --legacy-peer-deps
+      - run: TZ=GMT-3 npm run test --if-present
       - run: npm run build
 
-      - name: Publish preview to npm
+      - name: Publish to npm (master)
+        if: github.ref_name == 'master'
+        run: npm publish --provenance --access public
+        working-directory: ./dist
+
+      - name: Publish preview to npm (alpha/next)
+        if: github.ref_name != 'master'
         working-directory: ./dist
         run: |
           set -euo pipefail
           BRANCH=${GITHUB_REF_NAME}
           BASE_VERSION=$(node -p "require('./package.json').version.split('-')[0]")
           npm version "${BASE_VERSION}-${BRANCH}.${GITHUB_RUN_NUMBER}" --no-git-tag-version
-          npm publish --tag "$BRANCH"
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          npm publish --provenance --access public --tag "$BRANCH"

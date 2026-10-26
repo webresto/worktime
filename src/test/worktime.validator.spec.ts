@@ -106,6 +106,18 @@ describe('WorkTimeValidator', () => {
     });
   });
 
+  // caseOne: 10:00-20:00 in Asia/Yekaterinburg (UTC+5) - the opening minute is open, the closing one is not
+  [
+    ['2026-10-26T04:59:00Z', false],
+    ['2026-10-26T05:00:00Z', true],
+    ['2026-10-26T14:59:00Z', true],
+    ['2026-10-26T15:00:00Z', false],
+  ].forEach(([iso, open]) => {
+    it(`Открыто ли в ${iso} при 10:00-20:00 по Екатеринбургу - ${open}`, () => {
+      expect(WorkTimeValidator.isWorkNow(caseOne, new Date(iso as string)).workNow).equal(open);
+    });
+  });
+
   it('Проверяем на ошибку, не передадим restriction', () =>
     expect(() =>
       WorkTimeValidator.isWorkNow(

@@ -412,7 +412,7 @@ export class WorkTimeValidator {
       ); // текущее время окончания рабочего дня в минутах
       return {
         workNow:
-          currentTime < curentDayStopTime && currentTime > curentDayStartTime,
+          currentTime < curentDayStopTime && currentTime >= curentDayStartTime,
         isNewDay: isNextDay,
         currentTime,
         curentDayStartTime,

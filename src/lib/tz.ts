@@ -515,30 +515,53 @@ export class TimeZoneIdentifier {
       case 'Etc/GMT-14': return '+14:00';
       case 'Pacific/Kiritimati': return '+14:00';
       default:
-        // Treat any non-Node runtime (browsers, web workers) as eligible
-        // to use Intl for dynamic offset calculation.
-        const isNode = typeof process !== 'undefined' && !!(process.versions && process.versions.node);
-        if (!isNode) {
-          try {
-            const offsetMinutes = TimeZoneIdentifier.getTimezoneOffsetInBrowser(zone);
-            const sign = offsetMinutes >= 0 ? '+' : '-';
-            const hours = Math.floor(Math.abs(offsetMinutes) / 60);
-            const minutes = Math.abs(offsetMinutes) % 60;
-            return `${sign}${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-          } catch (e) {
-            const reason = e instanceof Error ? `: ${e.message}` : '';
-            throw Error(`Unknown or unsupported timezone \`${zone}\`${reason}`);
-          }
+        // Any IANA name the table above does not list — legacy links (Asia/Saigon,
+        // Asia/Calcutta, Europe/Kiev's new name Europe/Kyiv, US/Eastern...) and zones added
+        // after the table was written — is resolved through Intl, on every runtime.
+        // Browsers (Chrome/ICU) report exactly such legacy names, and Node ships full ICU
+        // since v13, so refusing Intl on the backend only broke valid configurations.
+        try {
+          const offsetMinutes = TimeZoneIdentifier.getOffsetMinutesViaIntl(zone);
+          const sign = offsetMinutes >= 0 ? '+' : '-';
+          const hours = Math.floor(Math.abs(offsetMinutes) / 60);
+          const minutes = Math.abs(offsetMinutes) % 60;
+          return `${sign}${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        } catch (e) {
+          const reason = e instanceof Error ? `: ${e.message}` : '';
+          throw Error(`Unknown timezone \`${zone}\`${reason}`);
         }
-        // Backend: do not attempt to resolve via Intl
-        throw Error(`Unknown timezone \`${zone}\``);
     }
   }
 
-  private static getTimezoneOffsetInBrowser(zone: string): number {
-    const date = new Date();
-    const utcDate = new Date(date.toLocaleString('en-US', { timeZone: 'UTC' }));
-    const tzDate = new Date(date.toLocaleString('en-US', { timeZone: zone }));
-    return (tzDate.getTime() - utcDate.getTime()) / 60000;
+  /**
+   * Whether `zone` can be resolved by getTimeZoneGMTOffset (table, "+HH:MM" or Intl).
+   * Lets callers validate a configured timezone up front instead of catching later.
+   */
+  static isSupported(zone?: string): boolean {
+    if (typeof zone !== 'string' || zone.trim() === '') return false;
+    try {
+      TimeZoneIdentifier.getTimeZoneGMTOffset(zone);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Current UTC offset of an IANA zone in minutes, via Intl. Independent of the runtime's
+   * own TZ (unlike parsing toLocaleString back into a Date). Throws RangeError on an
+   * unknown zone.
+   */
+  private static getOffsetMinutesViaIntl(zone: string, at: Date = new Date()): number {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: zone,
+      hourCycle: 'h23',
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit',
+    }).formatToParts(at);
+    const get = (type: string) => Number(parts.find((p) => p.type === type)?.value);
+    const wallAsUtc = Date.UTC(get('year'), get('month') - 1, get('day'), get('hour') % 24, get('minute'), get('second'));
+    const instant = Math.floor(at.getTime() / 1000) * 1000;
+    return Math.round((wallAsUtc - instant) / 60000);
   }
 }
